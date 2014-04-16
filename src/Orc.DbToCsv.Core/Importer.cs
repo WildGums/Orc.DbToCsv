@@ -130,11 +130,20 @@
                         string stringColumnType = schemaReader.GetString(1);
                         switch (stringColumnType)
                         {
+                            case "bit":
+                                result.Add(new Tuple<string, string>(name, "boolean"));
+                                break;
                             case "varchar":
                             case "nvarchar":
                             case "nchar":
                             case "char":
                                 result.Add(new Tuple<string, string>(name, "string"));
+                                break;
+                            case "int":
+                            case "smallint":
+                            case "tinyint":
+                            case "bigint":
+                                result.Add(new Tuple<string, string>(name, "int"));
                                 break;
                             case "float":
                             case "decimal":

@@ -1,4 +1,4 @@
-﻿namespace Orc.DbToCsv.Console
+﻿namespace DbToCsv
 {
     using CommandLine;
 

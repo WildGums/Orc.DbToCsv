@@ -1,4 +1,4 @@
-﻿namespace Orc.DbToCsv.Core
+﻿namespace Orc.DbToCsv
 {
     using System;
     using System.Collections.Generic;
@@ -9,7 +9,7 @@
 
     using CsvHelper;
 
-    using Orc.DbToCsv.Core.Interfaces;
+    using Orc.DbToCsv.Interfaces;
 
     public static class Importer
     {

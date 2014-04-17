@@ -7,8 +7,8 @@
     <ProjectGuid>{E6BDF145-03AC-475F-844B-556F5BD235EA}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Orc.DbToCsv.Console</RootNamespace>
-    <AssemblyName>Orc.DbToCsv.Console</AssemblyName>
+    <RootNamespace>DbToCsv</RootNamespace>
+    <AssemblyName>DbToCsv</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -17,7 +17,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\output\Debug\Orc.DbToCsv.Console\</OutputPath>
+    <OutputPath>..\..\output\Debug\DbToCsv\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -26,7 +26,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\..\output\Release\Orc.DbToCsv.Console\</OutputPath>
+    <OutputPath>..\..\output\Release\DbToCsv\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -53,9 +53,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Orc.DbToCsv.Core\Orc.DbToCsv.Core.csproj">
+    <ProjectReference Include="..\Orc.DbToCsv.Core\Orc.DbToCsv.csproj">
       <Project>{0e21221e-89ef-4401-b7e5-dd7bd4609cd9}</Project>
-      <Name>Orc.DbToCsv.Core</Name>
+      <Name>Orc.DbToCsv</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

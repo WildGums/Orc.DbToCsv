@@ -1,4 +1,4 @@
-﻿namespace Orc.DbToCsv.Core.Interfaces
+﻿namespace Orc.DbToCsv.Interfaces
 {
     public interface ILogWriter
     {

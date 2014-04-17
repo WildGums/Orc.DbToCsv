@@ -1,4 +1,4 @@
-﻿namespace Orc.DbToCsv.Core
+﻿namespace Orc.DbToCsv
 {
     using System.Collections.Generic;
     using System.IO;
@@ -14,7 +14,7 @@
 
         public Project()
         {
-            Tables = new List<string>();
+            this.Tables = new List<string>();
         }
 
         /// <summary>

@@ -1,6 +1,6 @@
-﻿namespace Orc.DbToCsv.Console.Implementations
+﻿namespace DbToCsv.Implementations
 {
-    using Orc.DbToCsv.Core.Interfaces;
+    using Orc.DbToCsv.Interfaces;
 
     public class ConsoleWriter : ILogWriter
     {

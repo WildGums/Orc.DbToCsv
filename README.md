@@ -16,7 +16,7 @@ Tables - list of tables to import. If the list is empty utilty attempts to read 
 ## Orc.DbToCsv.Console
 Orc.DbToCsv.Console is a command line tool that helps to process some project and save results to some folder. 
 There are two possible command line options:
--p or -project required path to the xml file defining import project
+-p or -project path to the xml file defining import project. If option is not defined utility tries to find first valid in the current folder
 -o or -output path to the output folder
 
 Here is the sample:

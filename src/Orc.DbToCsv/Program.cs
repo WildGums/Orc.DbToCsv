@@ -36,11 +36,12 @@
                 Console.WriteLine("Unable to locate the project to process.");
                 Environment.Exit(1);
             }
+            else
+            {
+                options.OutputFolder = project.OutputFolder;
+            }
             
-
-            string outputFolder = string.IsNullOrEmpty(options.OutputFolder) ?
-                Directory.GetCurrentDirectory() :
-                options.OutputFolder;
+            string outputFolder = string.IsNullOrEmpty(options.OutputFolder) ? Directory.GetCurrentDirectory() : options.OutputFolder;
 
             Importer.ProcessProject(project, outputFolder, new ConsoleWriter());
         }
@@ -48,7 +49,9 @@
         private static Project TryGetProjectAutomatically()
         {
             DirectoryInfo directoryInfo = new DirectoryInfo(Directory.GetCurrentDirectory());
+
             FileInfo[] candidates = directoryInfo.GetFiles("*.iprj");
+
             foreach (FileInfo candidate in candidates)
             {
                 try

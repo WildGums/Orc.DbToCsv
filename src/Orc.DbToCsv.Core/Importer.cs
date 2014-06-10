@@ -55,6 +55,12 @@
                     logWriter.WriteLine(string.Format("No columns has found in {0} table to import into csv format", tableName));
                     return;
                 }
+
+                if (File.Exists(fullFileName))
+                {
+                    File.Delete(fullFileName);
+                }
+
                 using (StreamWriter streamWriter = new StreamWriter(new FileStream(fullFileName, FileMode.OpenOrCreate)))
                 {
                     CsvWriter csvWriter = new CsvWriter(streamWriter);
@@ -82,11 +88,10 @@
                                 records++;
                                 csvWriter.NextRecord();
                             }
-
-                            
                         }
                     }
                 }
+
                 string okResult = string.Format(
                 "{0} records of {1} table succesfully imported to {2}.",
                 records,
@@ -103,10 +108,10 @@
 
         private static string ConstructRecordQuery(string tableName, List<Tuple<string, string>> schema, int maximumRowsInTable)
         {
-            string columns = string.Join(", ", schema.Select(t => t.Item1));
+            string columns = string.Join("], [", schema.Select(t => t.Item1));
             string top = maximumRowsInTable > 0 ? string.Format("TOP {0}", maximumRowsInTable) : string.Empty;
 
-            return string.Format("SELECT {0} {1} FROM {2}", top, columns, tableName);
+            return string.Format("SELECT {0} [{1}] FROM {2}", top, columns, tableName);
 
         }
 
@@ -173,8 +178,7 @@
 
             var result = new List<string>();
 
-            using (SqlCommand schemaCommand = new SqlCommand(CommandText) { Connection = sqlConnection, 
-                CommandTimeout = 300 })
+            using (SqlCommand schemaCommand = new SqlCommand(CommandText) { Connection = sqlConnection, CommandTimeout = 300 })
             {
                 using (SqlDataReader schemaReader = schemaCommand.ExecuteReader())
                 {

@@ -8,6 +8,8 @@
     {
         public string ConnectionString { get; set; }
 
+        public string OutputFolder { get; set; }
+
         public int MaximumRowsInTable { get; set; } 
 
         public List<string> Tables { get; set; }

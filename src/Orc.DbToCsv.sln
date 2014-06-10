@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orc.DbToCsv", "Orc.DbToCsv.Core\Orc.DbToCsv.csproj", "{0E21221E-89EF-4401-B7E5-DD7BD4609CD9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DbToCsv", "Orc.DbToCsv.Console\DbToCsv.csproj", "{E6BDF145-03AC-475F-844B-556F5BD235EA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DbToCsv", "Orc.DbToCsv\DbToCsv.csproj", "{E6BDF145-03AC-475F-844B-556F5BD235EA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

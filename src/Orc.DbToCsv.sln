@@ -1,9 +1,27 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orc.DbToCsv", "Orc.DbToCsv.Core\Orc.DbToCsv.csproj", "{0E21221E-89EF-4401-B7E5-DD7BD4609CD9}"
+# Visual Studio 2013
+VisualStudioVersion = 12.0.30723.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A5CFD383-2AA9-4F9B-97AE-BEE59DFE2142}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DbToCsv", "Orc.DbToCsv\DbToCsv.csproj", "{E6BDF145-03AC-475F-844B-556F5BD235EA}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "lib", "lib", "{11E031DF-29E7-4AD0-A729-8176A2DB712B}"
+	ProjectSection(SolutionItems) = preProject
+		..\lib\repositories.config = ..\lib\repositories.config
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "misc", "misc", "{0C4D14F6-EDF8-415A-AAD8-C3479F6757F0}"
+	ProjectSection(SolutionItems) = preProject
+		nuget.config = nuget.config
+		Orc.DbToCsv.sln.DotSettings = Orc.DbToCsv.sln.DotSettings
+		SolutionAssemblyInfo.cs = SolutionAssemblyInfo.cs
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orc.DbToCsv", "Orc.DbToCsv\Orc.DbToCsv.csproj", "{0E21221E-89EF-4401-B7E5-DD7BD4609CD9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orc.DbToCsv.Console", "Orc.DbToCsv.Console\Orc.DbToCsv.Console.csproj", "{E6BDF145-03AC-475F-844B-556F5BD235EA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orc.DbToCsv.Test", "Orc.DbToCsv.Test\Orc.DbToCsv.Test.csproj", "{6358053D-4551-45D1-859F-A3C7BD6275C7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,8 +37,17 @@ Global
 		{E6BDF145-03AC-475F-844B-556F5BD235EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E6BDF145-03AC-475F-844B-556F5BD235EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E6BDF145-03AC-475F-844B-556F5BD235EA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6358053D-4551-45D1-859F-A3C7BD6275C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6358053D-4551-45D1-859F-A3C7BD6275C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6358053D-4551-45D1-859F-A3C7BD6275C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6358053D-4551-45D1-859F-A3C7BD6275C7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{0E21221E-89EF-4401-B7E5-DD7BD4609CD9} = {A5CFD383-2AA9-4F9B-97AE-BEE59DFE2142}
+		{E6BDF145-03AC-475F-844B-556F5BD235EA} = {A5CFD383-2AA9-4F9B-97AE-BEE59DFE2142}
+		{6358053D-4551-45D1-859F-A3C7BD6275C7} = {A5CFD383-2AA9-4F9B-97AE-BEE59DFE2142}
 	EndGlobalSection
 EndGlobal

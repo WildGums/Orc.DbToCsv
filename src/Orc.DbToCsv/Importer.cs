@@ -9,8 +9,6 @@
 
     using CsvHelper;
 
-    using Orc.DbToCsv.Interfaces;
-
     public static class Importer
     {
         public static void ProcessProject(Project project, string outputFolder, ILogWriter logWriter)

@@ -1,10 +1,8 @@
-﻿namespace DbToCsv
+﻿namespace Orc.DbToCsv.Console
 {
     using System;
     using System.IO;
-
-    using DbToCsv.Implementations;
-
+    using Implementations;
     using Orc.DbToCsv;
 
     class Program

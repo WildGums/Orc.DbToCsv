@@ -5,7 +5,12 @@
 *.suo
 *.user
 *.sln.docstates
-*.g.cs
+
+.nuget/
+tools/FAKE/
+build-log.xml
+Nuget.key
+TestResult.xml
 
 # Build results
 [Bb]in/
@@ -17,12 +22,10 @@
 bin
 obj
 [Ll]ib/
+*.ide/
 *_i.c
 *_p.c
-*.chk
-*.ide
 *.ilk
-*.jrs
 *.meta
 *.obj
 *.orig
@@ -119,4 +122,3 @@ Desktop.ini
 
 # mstest test results
 TestResults
-src/UpgradeLog.htm

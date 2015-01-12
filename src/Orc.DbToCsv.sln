@@ -21,7 +21,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orc.DbToCsv", "Orc.DbToCsv\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orc.DbToCsv.Console", "Orc.DbToCsv.Console\Orc.DbToCsv.Console.csproj", "{E6BDF145-03AC-475F-844B-556F5BD235EA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orc.DbToCsv.Test", "Orc.DbToCsv.Test\Orc.DbToCsv.Test.csproj", "{6358053D-4551-45D1-859F-A3C7BD6275C7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orc.DbToCsv.Tests", "Orc.DbToCsv.Tests\Orc.DbToCsv.Tests.csproj", "{6358053D-4551-45D1-859F-A3C7BD6275C7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

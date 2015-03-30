@@ -1,13 +1,19 @@
-﻿namespace Orc.DbToCsv.Console
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="Program.cs" company="Orcomp development team">
+//   Copyright (c) 2008 - 2015 Orcomp development team. All rights reserved.
+// </copyright>
+// --------------------------------------------------------------------------------------------------------------------
+
+
+namespace Orc.DbToCsv
 {
     using System;
     using System.IO;
-    using Implementations;
-    using Orc.DbToCsv;
 
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        #region Methods
+        private static void Main(string[] args)
         {
             var options = new Options();
             CommandLine.Parser.Default.ParseArgumentsStrict(
@@ -38,7 +44,7 @@
             {
                 options.OutputFolder = project.OutputFolder;
             }
-            
+
             string outputFolder = string.IsNullOrEmpty(options.OutputFolder) ? Directory.GetCurrentDirectory() : options.OutputFolder;
 
             Importer.ProcessProject(project, outputFolder, new ConsoleWriter());
@@ -57,7 +63,7 @@
                     var project = Project.Load(candidate.FullName);
                     return project;
                 }
-                catch 
+                catch
                 {
                     continue;
                 }
@@ -65,5 +71,6 @@
 
             return null;
         }
+        #endregion
     }
 }

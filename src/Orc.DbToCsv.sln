@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30723.0
+VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A5CFD383-2AA9-4F9B-97AE-BEE59DFE2142}"
 EndProject
@@ -17,13 +17,42 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "misc", "misc", "{0C4D14F6-E
 		SolutionAssemblyInfo.cs = SolutionAssemblyInfo.cs
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orc.DbToCsv", "Orc.DbToCsv\Orc.DbToCsv.csproj", "{0E21221E-89EF-4401-B7E5-DD7BD4609CD9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orc.DbToCsv.NET40", "Orc.DbToCsv\Orc.DbToCsv.NET40\Orc.DbToCsv.NET40.csproj", "{0E21221E-89EF-4401-B7E5-DD7BD4609CD9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orc.DbToCsv.Console", "Orc.DbToCsv.Console\Orc.DbToCsv.Console.csproj", "{E6BDF145-03AC-475F-844B-556F5BD235EA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orc.DbToCsv.Console.NET40", "Orc.DbToCsv.Console\Orc.DbToCsv.Console.NET40\Orc.DbToCsv.Console.NET40.csproj", "{E6BDF145-03AC-475F-844B-556F5BD235EA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orc.DbToCsv.Tests", "Orc.DbToCsv.Tests\Orc.DbToCsv.Tests.csproj", "{6358053D-4551-45D1-859F-A3C7BD6275C7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orc.DbToCsv.Tests.NET40", "Orc.DbToCsv.Tests\Orc.DbToCsv.Tests.NET40\Orc.DbToCsv.Tests.NET40.csproj", "{6358053D-4551-45D1-859F-A3C7BD6275C7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{2A428319-95F2-4B81-9418-B4F2B9098246}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Console", "Console", "{B38FD068-C51A-4BA8-819B-9F8BB239CCCE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{1A6DC5E2-4FA5-4F8E-A536-21BD22EB60D5}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Orc.DbToCsv.Shared", "Orc.DbToCsv\Orc.DbToCsv.Shared\Orc.DbToCsv.Shared.shproj", "{940B15C8-D1BA-4A4F-A91C-D4B096553910}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Orc.DbToCsv.Console.Shared", "Orc.DbToCsv.Console\Orc.DbToCsv.Console.Shared\Orc.DbToCsv.Console.Shared.shproj", "{80E97094-B4A5-42E2-AE3A-8F7A6A0CD065}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Orc.DbToCsv.Tests.Shared", "Orc.DbToCsv.Tests\Orc.DbToCsv.Tests.Shared\Orc.DbToCsv.Tests.Shared.shproj", "{2821538A-646E-49EE-9A74-614F3AE02633}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orc.DbToCsv.Console.NET45", "Orc.DbToCsv.Console\Orc.DbToCsv.Console.NET45\Orc.DbToCsv.Console.NET45.csproj", "{5764A548-4975-45C1-9A9D-B4702C337501}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orc.DbToCsv.NET45", "Orc.DbToCsv\Orc.DbToCsv.NET45\Orc.DbToCsv.NET45.csproj", "{00AFF543-24E4-44A4-B1AD-490BBE47C754}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orc.DbToCsv.Tests.NET45", "Orc.DbToCsv.Tests\Orc.DbToCsv.Tests.NET45\Orc.DbToCsv.Tests.NET45.csproj", "{962331C1-90D2-43E8-B235-20B107408C1D}"
 EndProject
 Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		Orc.DbToCsv.Tests\Orc.DbToCsv.Tests.Shared\Orc.DbToCsv.Tests.Shared.projitems*{6358053d-4551-45d1-859f-a3c7bd6275c7}*SharedItemsImports = 4
+		Orc.DbToCsv\Orc.DbToCsv.Shared\Orc.DbToCsv.Shared.projitems*{940b15c8-d1ba-4a4f-a91c-d4b096553910}*SharedItemsImports = 13
+		Orc.DbToCsv.Console\Orc.DbToCsv.Console.Shared\Orc.DbToCsv.Console.Shared.projitems*{5764a548-4975-45c1-9a9d-b4702c337501}*SharedItemsImports = 4
+		Orc.DbToCsv.Console\Orc.DbToCsv.Console.Shared\Orc.DbToCsv.Console.Shared.projitems*{e6bdf145-03ac-475f-844b-556f5bd235ea}*SharedItemsImports = 4
+		Orc.DbToCsv.Console\Orc.DbToCsv.Console.Shared\Orc.DbToCsv.Console.Shared.projitems*{80e97094-b4a5-42e2-ae3a-8f7a6a0cd065}*SharedItemsImports = 13
+		Orc.DbToCsv.Tests\Orc.DbToCsv.Tests.Shared\Orc.DbToCsv.Tests.Shared.projitems*{962331c1-90d2-43e8-b235-20b107408c1d}*SharedItemsImports = 4
+		Orc.DbToCsv.Tests\Orc.DbToCsv.Tests.Shared\Orc.DbToCsv.Tests.Shared.projitems*{2821538a-646e-49ee-9a74-614f3ae02633}*SharedItemsImports = 13
+		Orc.DbToCsv\Orc.DbToCsv.Shared\Orc.DbToCsv.Shared.projitems*{0e21221e-89ef-4401-b7e5-dd7bd4609cd9}*SharedItemsImports = 4
+		Orc.DbToCsv\Orc.DbToCsv.Shared\Orc.DbToCsv.Shared.projitems*{00aff543-24e4-44a4-b1ad-490bbe47c754}*SharedItemsImports = 4
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
@@ -41,13 +70,34 @@ Global
 		{6358053D-4551-45D1-859F-A3C7BD6275C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6358053D-4551-45D1-859F-A3C7BD6275C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6358053D-4551-45D1-859F-A3C7BD6275C7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5764A548-4975-45C1-9A9D-B4702C337501}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5764A548-4975-45C1-9A9D-B4702C337501}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5764A548-4975-45C1-9A9D-B4702C337501}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5764A548-4975-45C1-9A9D-B4702C337501}.Release|Any CPU.Build.0 = Release|Any CPU
+		{00AFF543-24E4-44A4-B1AD-490BBE47C754}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{00AFF543-24E4-44A4-B1AD-490BBE47C754}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{00AFF543-24E4-44A4-B1AD-490BBE47C754}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{00AFF543-24E4-44A4-B1AD-490BBE47C754}.Release|Any CPU.Build.0 = Release|Any CPU
+		{962331C1-90D2-43E8-B235-20B107408C1D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{962331C1-90D2-43E8-B235-20B107408C1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{962331C1-90D2-43E8-B235-20B107408C1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{962331C1-90D2-43E8-B235-20B107408C1D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{0E21221E-89EF-4401-B7E5-DD7BD4609CD9} = {A5CFD383-2AA9-4F9B-97AE-BEE59DFE2142}
-		{E6BDF145-03AC-475F-844B-556F5BD235EA} = {A5CFD383-2AA9-4F9B-97AE-BEE59DFE2142}
-		{6358053D-4551-45D1-859F-A3C7BD6275C7} = {A5CFD383-2AA9-4F9B-97AE-BEE59DFE2142}
+		{0E21221E-89EF-4401-B7E5-DD7BD4609CD9} = {2A428319-95F2-4B81-9418-B4F2B9098246}
+		{E6BDF145-03AC-475F-844B-556F5BD235EA} = {B38FD068-C51A-4BA8-819B-9F8BB239CCCE}
+		{6358053D-4551-45D1-859F-A3C7BD6275C7} = {1A6DC5E2-4FA5-4F8E-A536-21BD22EB60D5}
+		{2A428319-95F2-4B81-9418-B4F2B9098246} = {A5CFD383-2AA9-4F9B-97AE-BEE59DFE2142}
+		{B38FD068-C51A-4BA8-819B-9F8BB239CCCE} = {A5CFD383-2AA9-4F9B-97AE-BEE59DFE2142}
+		{1A6DC5E2-4FA5-4F8E-A536-21BD22EB60D5} = {A5CFD383-2AA9-4F9B-97AE-BEE59DFE2142}
+		{940B15C8-D1BA-4A4F-A91C-D4B096553910} = {2A428319-95F2-4B81-9418-B4F2B9098246}
+		{80E97094-B4A5-42E2-AE3A-8F7A6A0CD065} = {B38FD068-C51A-4BA8-819B-9F8BB239CCCE}
+		{2821538A-646E-49EE-9A74-614F3AE02633} = {1A6DC5E2-4FA5-4F8E-A536-21BD22EB60D5}
+		{5764A548-4975-45C1-9A9D-B4702C337501} = {B38FD068-C51A-4BA8-819B-9F8BB239CCCE}
+		{00AFF543-24E4-44A4-B1AD-490BBE47C754} = {2A428319-95F2-4B81-9418-B4F2B9098246}
+		{962331C1-90D2-43E8-B235-20B107408C1D} = {1A6DC5E2-4FA5-4F8E-A536-21BD22EB60D5}
 	EndGlobalSection
 EndGlobal

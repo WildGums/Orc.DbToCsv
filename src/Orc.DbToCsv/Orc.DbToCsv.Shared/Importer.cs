@@ -1,4 +1,11 @@
-﻿namespace Orc.DbToCsv
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="Importer.cs" company="Orcomp development team">
+//   Copyright (c) 2008 - 2015 Orcomp development team. All rights reserved.
+// </copyright>
+// --------------------------------------------------------------------------------------------------------------------
+
+
+namespace Orc.DbToCsv
 {
     using System;
     using System.Collections.Generic;
@@ -6,15 +13,16 @@
     using System.IO;
     using System.Linq;
     using System.Text;
-
     using CsvHelper;
 
     public static class Importer
     {
+        #region Methods
         public static void ProcessProject(Project project, string outputFolder, ILogWriter logWriter)
         {
             logWriter.WriteLine("Project processing started ...");
-            using (SqlConnection sqlConnection = new SqlConnection(project.ConnectionString))
+
+            using (var sqlConnection = new SqlConnection(project.ConnectionString))
             {
                 sqlConnection.Open();
                 var tables = project.Tables;
@@ -33,10 +41,10 @@
 
         private static void ProcessTable(SqlConnection sqlConnection, string tableName, Project project, string outputFolder, ILogWriter logWriter)
         {
-            string pureName = ExtractTableName(tableName);
-            string fileName = pureName + ".csv";
-            string postfix = (outputFolder[outputFolder.Length - 1] == '\\') ? string.Empty : "\\";
-            
+            var pureName = ExtractTableName(tableName);
+            var fileName = pureName + ".csv";
+            var postfix = (outputFolder[outputFolder.Length - 1] == '\\') ? string.Empty : "\\";
+
             if (!Directory.Exists(outputFolder))
             {
                 Directory.CreateDirectory(outputFolder);
@@ -59,9 +67,9 @@
                     File.Delete(fullFileName);
                 }
 
-                using (StreamWriter streamWriter = new StreamWriter(new FileStream(fullFileName, FileMode.OpenOrCreate)))
+                using (var streamWriter = new StreamWriter(new FileStream(fullFileName, FileMode.OpenOrCreate)))
                 {
-                    CsvWriter csvWriter = new CsvWriter(streamWriter);
+                    var csvWriter = new CsvWriter(streamWriter);
                     // Write Header
                     foreach (var tuple in schema)
                     {
@@ -70,8 +78,8 @@
                     csvWriter.NextRecord();
 
                     // Write records
-                    string query = ConstructRecordQuery(tableName, schema, project.MaximumRowsInTable);
-                    using (var command = new SqlCommand(query) {Connection = sqlConnection })
+                    var query = ConstructRecordQuery(tableName, schema, project.MaximumRowsInTable);
+                    using (var command = new SqlCommand(query) {Connection = sqlConnection})
                     {
                         using (var dataReader = command.ExecuteReader())
                         {
@@ -90,11 +98,11 @@
                     }
                 }
 
-                string okResult = string.Format(
-                "{0} records of {1} table succesfully imported to {2}.",
-                records,
-                tableName,
-                fileName);
+                var okResult = string.Format(
+                    "{0} records of {1} table succesfully imported to {2}.",
+                    records,
+                    tableName,
+                    fileName);
 
                 logWriter.WriteLine(okResult);
             }
@@ -110,7 +118,6 @@
             string top = maximumRowsInTable > 0 ? string.Format("TOP {0}", maximumRowsInTable) : string.Empty;
 
             return string.Format("SELECT {0} [{1}] FROM {2}", top, columns, tableName);
-
         }
 
         private static List<Tuple<string, string>> GetTableSchema(SqlConnection sqlConnection, string tableName)
@@ -124,7 +131,7 @@
                 tableName);
 
             string commandText = stringBuilder.ToString();
-            using (SqlCommand schemaCommand = new SqlCommand(commandText) { Connection = sqlConnection })
+            using (SqlCommand schemaCommand = new SqlCommand(commandText) {Connection = sqlConnection})
             {
                 using (SqlDataReader schemaReader = schemaCommand.ExecuteReader())
                 {
@@ -137,22 +144,26 @@
                             case "bit":
                                 result.Add(new Tuple<string, string>(name, "boolean"));
                                 break;
+
                             case "varchar":
                             case "nvarchar":
                             case "nchar":
                             case "char":
                                 result.Add(new Tuple<string, string>(name, "string"));
                                 break;
+
                             case "int":
                             case "smallint":
                             case "tinyint":
                             case "bigint":
                                 result.Add(new Tuple<string, string>(name, "int"));
                                 break;
+
                             case "float":
                             case "decimal":
                                 result.Add(new Tuple<string, string>(name, "float"));
                                 break;
+
                             case "datetime":
                                 result.Add(new Tuple<string, string>(name, "datetime"));
                                 break;
@@ -176,9 +187,9 @@
 
             var result = new List<string>();
 
-            using (SqlCommand schemaCommand = new SqlCommand(CommandText) { Connection = sqlConnection, CommandTimeout = 300 })
+            using (var schemaCommand = new SqlCommand(CommandText) {Connection = sqlConnection, CommandTimeout = 300})
             {
-                using (SqlDataReader schemaReader = schemaCommand.ExecuteReader())
+                using (var schemaReader = schemaCommand.ExecuteReader())
                 {
                     while (schemaReader.Read())
                     {
@@ -189,5 +200,6 @@
 
             return result;
         }
+        #endregion
     }
 }

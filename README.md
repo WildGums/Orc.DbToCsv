@@ -31,7 +31,7 @@ There are three important tags:
 - MaximumRowsInTable: Will specify the number of rows to retrieve from each table. If the tag is missing or the value is 0 or less, then all rows will be retrieved.
 - Tables: Specify the name of each table (or view) you want to extract. If left emtpy, all tables will be extracted.
 
-Note: The csv files will have the same name as the table names (except white spaces will be replaced with an underscore.)
+**Note**: The csv files will have the same name as the table names (except white spaces will be replaced with an underscore.)
 
 Once the project file is setup you can create the csv files using the following command:
 
@@ -59,8 +59,8 @@ Orc.DbToCsv.Console is a simple command line utility.
 
 There are two possible command line options:
 
--p or -project path to .iprj file. If the option is not defined the utility will try and find a valid project file in the current folder.
--o or -output path to the output directory where the csv files will be saved to.
+* -p or -project path to .iprj file. If the option is not defined the utility will try and find a valid project file in the current folder.
+* -o or -output path to the output directory where the csv files will be saved to.
 
 Example:
 

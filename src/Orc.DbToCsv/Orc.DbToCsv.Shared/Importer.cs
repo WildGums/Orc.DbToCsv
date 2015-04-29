@@ -18,7 +18,15 @@ namespace Orc.DbToCsv
     public static class Importer
     {
         #region Methods
-        public static void ProcessProject(Project project, string outputFolder, ILogWriter logWriter)
+
+        public static void ProcessProject(string projectFilePath, string outputFolderPath, ILogWriter logWriter)
+        {
+            var project = Project.Load(projectFilePath);
+
+            ProcessProject	();
+        }
+
+        public static void ProcessProject(Project project, string outputFolderPath, ILogWriter logWriter)
         {
             logWriter.WriteLine("Project processing started ...");
 
@@ -34,23 +42,23 @@ namespace Orc.DbToCsv
                 logWriter.WriteLine(string.Format("{0} tables to process", tables.Count));
                 foreach (var tableName in tables)
                 {
-                    ProcessTable(sqlConnection, tableName, project, outputFolder, logWriter);
+                    ProcessTable(sqlConnection, tableName, project, outputFolderPath, logWriter);
                 }
             }
         }
 
-        private static void ProcessTable(SqlConnection sqlConnection, string tableName, Project project, string outputFolder, ILogWriter logWriter)
+        private static void ProcessTable(SqlConnection sqlConnection, string tableName, Project project, string outputFolderPath, ILogWriter logWriter)
         {
             var pureName = ExtractTableName(tableName);
             var fileName = pureName + ".csv";
-            var postfix = (outputFolder[outputFolder.Length - 1] == '\\') ? string.Empty : "\\";
+            var postfix = (outputFolderPath[outputFolderPath.Length - 1] == '\\') ? string.Empty : "\\";
 
-            if (!Directory.Exists(outputFolder))
+            if (!Directory.Exists(outputFolderPath))
             {
-                Directory.CreateDirectory(outputFolder);
+                Directory.CreateDirectory(outputFolderPath);
             }
 
-            string fullFileName = outputFolder + postfix + fileName;
+            string fullFileName = outputFolderPath + postfix + fileName;
             int records = 0;
 
             try

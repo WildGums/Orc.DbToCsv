@@ -23,7 +23,7 @@ namespace Orc.DbToCsv
         {
             var project = Project.Load(projectFilePath);
 
-            ProcessProject	();
+            ProcessProject(project, outputFolderPath, logWriter);
         }
 
         public static void ProcessProject(Project project, string outputFolderPath, ILogWriter logWriter)

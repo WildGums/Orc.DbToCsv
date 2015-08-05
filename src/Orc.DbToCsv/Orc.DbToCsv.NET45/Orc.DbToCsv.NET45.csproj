@@ -36,6 +36,9 @@
     <DocumentationFile>..\..\..\output\release\NET45\Orc.DbToCsv\Orc.DbToCsv.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Catel.Core">
+      <HintPath>..\..\..\lib\Catel.Core.4.2.0-unstable0270\lib\net45\Catel.Core.dll</HintPath>
+    </Reference>
     <Reference Include="CsvHelper">
       <HintPath>..\..\..\lib\CsvHelper.2.13.2.0\lib\net40-client\CsvHelper.dll</HintPath>
       <Private>True</Private>

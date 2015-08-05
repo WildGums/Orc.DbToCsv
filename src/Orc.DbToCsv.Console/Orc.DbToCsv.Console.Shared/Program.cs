@@ -9,21 +9,37 @@ namespace Orc.DbToCsv
 {
     using System;
     using System.IO;
+    using System.Linq;
+    using Catel.IoC;
+    using CommandLine;
 
     internal class Program
     {
         #region Methods
         private static void Main(string[] args)
         {
+            var commandLine = Environment.CommandLine.GetCommandLine(true);
             var options = new Options();
-            CommandLine.Parser.Default.ParseArgumentsStrict(
-                args,
-                options,
-                () =>
+            
+            var serviceLocator = ServiceLocator.Default;
+            var commandLineParser = serviceLocator.ResolveType<ICommandLineParser>();
+            var validationContext = commandLineParser.Parse(commandLine, options);
+            if (validationContext.HasErrors)
+            {
+                Console.WriteLine(validationContext.GetErrors().First().Message);
+                Environment.Exit(1);
+            }
+
+            if (options.IsHelp)
+            {
+                var helpWriterService = serviceLocator.ResolveType<IHelpWriterService>();
+                foreach (var helpContent in helpWriterService.GetHelp(options))
                 {
-                    Console.WriteLine("Arguments are not valid. Use -help flag to start app correctly.");
-                    Environment.Exit(1);
-                });
+                    Console.WriteLine(helpContent);
+                }
+
+                return;
+            }
 
             Project project = null;
             if (!string.IsNullOrEmpty(options.Project))

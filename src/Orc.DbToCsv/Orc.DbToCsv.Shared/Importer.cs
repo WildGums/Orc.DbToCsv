@@ -32,13 +32,13 @@ namespace Orc.DbToCsv
         {
             Log.Info("Project processing started ...");
 
-            using (var sqlConnection = new SqlConnection(project.ConnectionString))
+            using (var sqlConnection = new SqlConnection(project.ConnectionString.Value))
             {
                 sqlConnection.Open();
                 var tables = project.Tables;
                 if (project.Tables == null || project.Tables.Count == 0)
                 {
-                    tables = GetAvailableTables(sqlConnection, project.OutputFolder);
+                    tables = GetAvailableTables(sqlConnection, project.OutputFolder.Value);
                 }
 
                 Log.Info("{0} tables to process", tables.Count.ToString());
@@ -51,7 +51,7 @@ namespace Orc.DbToCsv
 
         private static void ProcessTable(SqlConnection sqlConnection, Table table, Project project)
         {
-            var outputFolderPath = string.IsNullOrEmpty(table.Output) ? project.OutputFolder : table.Output;
+            var outputFolderPath = string.IsNullOrEmpty(table.Output) ? project.OutputFolder.Value : table.Output;
 
             if (!Directory.Exists(outputFolderPath))
             {
@@ -86,7 +86,7 @@ namespace Orc.DbToCsv
                     csvWriter.NextRecord();
 
                     // Write records
-                    var query = ConstructRecordQuery(table.Name, schema, project.MaximumRowsInTable);
+                    var query = ConstructRecordQuery(table.Name, schema, project.MaximumRowsInTable.Value);
                     using (var command = new SqlCommand(query) {Connection = sqlConnection})
                     {
                         using (var dataReader = command.ExecuteReader())

@@ -18,9 +18,9 @@ namespace Orc.DbToCsv.Test
         {
             var xaml = @"
 <Project xmlns='http://wildgums/2015'>
-  <Project.ConnectionString>Data Source=.\SQLExpress;Initial Catalog=RanttSaaS;Integrated Security=True;Pooling=False</Project.ConnectionString>
-  <Project.MaximumRowsInTable>500</Project.MaximumRowsInTable>
-  <Project.OutputFolder>C:\Temp\CustomPath</Project.OutputFolder>
+  <ConnectionString>Data Source=.\SQLExpress;Initial Catalog=RanttSaaS;Integrated Security=True;Pooling=False</ConnectionString>
+  <MaximumRowsInTable>500</MaximumRowsInTable>
+  <OutputFolder>C:\Temp\CustomPath</OutputFolder>
   <Project.Tables>
     <Table Name='MyTable1' Csv='Table.csv'/>
     <Table Name='MyTable1' Csv='Table1.csv' Output='C:\Temp\Xa'/>
@@ -28,9 +28,9 @@ namespace Orc.DbToCsv.Test
 </Project>".Replace('\'', '\"');
 
             var project = Project.Parse(xaml);
-            Assert.AreEqual("Data Source=.\\SQLExpress;Initial Catalog=RanttSaaS;Integrated Security=True;Pooling=False", project.ConnectionString);
-            Assert.AreEqual(500, project.MaximumRowsInTable);
-            Assert.AreEqual("C:\\Temp\\CustomPath", project.OutputFolder);
+            Assert.AreEqual("Data Source=.\\SQLExpress;Initial Catalog=RanttSaaS;Integrated Security=True;Pooling=False", project.ConnectionString.Value);
+            Assert.AreEqual(500, project.MaximumRowsInTable.Value);
+            Assert.AreEqual("C:\\Temp\\CustomPath", project.OutputFolder.Value);
             Assert.AreEqual(2, project.Tables.Count);
             Assert.AreEqual("MyTable1", project.Tables[0].Name);
             Assert.AreEqual("Table.csv", project.Tables[0].Csv);

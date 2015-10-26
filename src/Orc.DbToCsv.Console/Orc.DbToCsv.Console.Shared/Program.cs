@@ -61,7 +61,7 @@ namespace Orc.DbToCsv
             }
             else
             {
-                options.OutputFolder = project.OutputFolder;
+                options.OutputFolder = project.OutputFolder.Value;
             }
 
             string outputFolder = string.IsNullOrEmpty(options.OutputFolder) ? Directory.GetCurrentDirectory() : options.OutputFolder;

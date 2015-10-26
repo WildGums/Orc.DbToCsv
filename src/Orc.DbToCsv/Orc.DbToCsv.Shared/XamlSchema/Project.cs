@@ -10,9 +10,11 @@ namespace Orc.DbToCsv
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Windows.Markup;
     using System.Xaml;
     using Catel.Logging;
 
+    [ContentProperty("Properties")]
     public class Project
     {
         private static readonly ILog Log = LogManager.GetCurrentClassLogger();
@@ -20,16 +22,33 @@ namespace Orc.DbToCsv
         public Project()
         {
             Tables = new List<Table>(4);
+            Properties = new List<ProjectProperty>(4);
         }
 
-        public string ConnectionString { get; set; }
-        public int MaximumRowsInTable { get; set; }
-        public string OutputFolder { get; set; }
+        private ConnectionString _connectionString;
+        public ConnectionString ConnectionString
+        {
+            get { return _connectionString ?? (_connectionString = Properties.FindTypeOrCreateNew(() => new ConnectionString())); }
+        }
+
+        private MaximumRowsInTable _maximumRowsInTable;
+        public MaximumRowsInTable MaximumRowsInTable
+        {
+            get { return _maximumRowsInTable ?? (_maximumRowsInTable = Properties.FindTypeOrCreateNew(() => new MaximumRowsInTable())); }
+        }
+
+        private OutputFolder _outputFolder;
+        public OutputFolder OutputFolder
+        {
+            get { return _outputFolder ?? (_outputFolder = Properties.FindTypeOrCreateNew(() => new OutputFolder())); }
+        }
+
         public List<Table> Tables { get; set; }
+        public List<ProjectProperty> Properties { get; set; }
 
         public void Validate()
         {
-            if (string.IsNullOrEmpty(ConnectionString))
+            if (string.IsNullOrEmpty(ConnectionString.Value))
             {
                 throw Log.ErrorAndCreateException<InvalidOperationException>("Connection string cannot be empty");
             }
@@ -60,16 +79,16 @@ namespace Orc.DbToCsv
                 Log.Info("Maximum rows in table: '{0}'", result.MaximumRowsInTable);
                 Log.Info("Tables to convert '{0}':", result.Tables.Count);
                 Log.IndentLevel += 2;
-                if (string.IsNullOrEmpty(result.OutputFolder))
+                if (string.IsNullOrEmpty(result.OutputFolder.Value))
                 {
-                    result.OutputFolder = Directory.GetParent(path).FullName;
+                    result.OutputFolder.Value = Directory.GetParent(path).FullName;
                 }
                 foreach (var table in result.Tables)
                 {
                     var folder = table.Output;
                     if (string.IsNullOrEmpty(folder))
                     {
-                        folder = result.OutputFolder;
+                        folder = result.OutputFolder.Value;
                     }
                     Log.Info("'{0}' to '{1}'", table.Name, Path.Combine(folder, table.Csv));
                 }

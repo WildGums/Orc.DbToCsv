@@ -38,37 +38,35 @@ namespace Orc.DbToCsv
                 var tables = project.Tables;
                 if (project.Tables == null || project.Tables.Count == 0)
                 {
-                    tables = GetAvailableTables(sqlConnection);
+                    tables = GetAvailableTables(sqlConnection, project.OutputFolder);
                 }
 
                 Log.Info("{0} tables to process", tables.Count.ToString());
-                foreach (var tableName in tables)
+                foreach (var table in tables)
                 {
-                    ProcessTable(sqlConnection, tableName, project, outputFolderPath);
+                    ProcessTable(sqlConnection, table, project);
                 }
             }
         }
 
-        private static void ProcessTable(SqlConnection sqlConnection, string tableName, Project project, string outputFolderPath)
+        private static void ProcessTable(SqlConnection sqlConnection, Table table, Project project)
         {
-            var pureName = ExtractTableName(tableName);
-            var fileName = pureName + ".csv";
-            var postfix = (outputFolderPath[outputFolderPath.Length - 1] == '\\') ? string.Empty : "\\";
+            var outputFolderPath = string.IsNullOrEmpty(table.Output) ? project.OutputFolder : table.Output;
 
             if (!Directory.Exists(outputFolderPath))
             {
                 Directory.CreateDirectory(outputFolderPath);
             }
 
-            string fullFileName = outputFolderPath + postfix + fileName;
+            string fullFileName = Path.Combine(outputFolderPath, table.Csv);
             int records = 0;
 
             try
             {
-                List<Tuple<string, string>> schema = GetTableSchema(sqlConnection, tableName);
+                List<Tuple<string, string>> schema = GetTableSchema(sqlConnection, table.Name);
                 if (schema.Count == 0)
                 {
-                    Log.Info("No columns was found in the '{0}' table to export into a csv file.", tableName);
+                    Log.Warning("No columns was found in the '{0}' table to export into a csv file.", table.Name);
                     return;
                 }
 
@@ -88,7 +86,7 @@ namespace Orc.DbToCsv
                     csvWriter.NextRecord();
 
                     // Write records
-                    var query = ConstructRecordQuery(tableName, schema, project.MaximumRowsInTable);
+                    var query = ConstructRecordQuery(table.Name, schema, project.MaximumRowsInTable);
                     using (var command = new SqlCommand(query) {Connection = sqlConnection})
                     {
                         using (var dataReader = command.ExecuteReader())
@@ -108,11 +106,11 @@ namespace Orc.DbToCsv
                     }
                 }
 
-                Log.Info("'{0}' records of '{1}' table succesfully exported to {2}.", records, tableName, fileName);
+                Log.Info("{0} records of '{1}' table succesfully exported to {2}.", records, table.Name, table.Csv);
             }
             catch (Exception ex)
             {
-                Log.Error("{0} export failed because of exception: {1}", tableName, ex.Message);
+                Log.Error("{0} export failed because of exception: {1}", table.Name, ex.Message);
             }
         }
 
@@ -221,11 +219,11 @@ namespace Orc.DbToCsv
             return tableName.Substring(ndx + 1).Replace("[", string.Empty).Replace("]", string.Empty);
         }
 
-        private static List<string> GetAvailableTables(SqlConnection sqlConnection)
+        private static List<Table> GetAvailableTables(SqlConnection sqlConnection, string outputFolder)
         {
             const string CommandText = "SELECT '['+TABLE_SCHEMA+'].['+ TABLE_NAME + ']' FROM INFORMATION_SCHEMA.TABLES ORDER BY TABLE_SCHEMA, TABLE_NAME";
 
-            var result = new List<string>();
+            var result = new List<Table>();
 
             using (var schemaCommand = new SqlCommand(CommandText) {Connection = sqlConnection, CommandTimeout = 300})
             {
@@ -233,7 +231,11 @@ namespace Orc.DbToCsv
                 {
                     while (schemaReader.Read())
                     {
-                        result.Add(schemaReader.GetString(0));
+                        var table = new Table();
+                        table.Name = schemaReader.GetString(0);
+                        table.Csv = ExtractTableName(table.Name) + ".csv";
+                        table.Output = outputFolder;
+                        result.Add(table);
                     }
                 }
             }

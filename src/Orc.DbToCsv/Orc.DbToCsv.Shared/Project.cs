@@ -7,62 +7,81 @@
 
 namespace Orc.DbToCsv
 {
+    using System;
     using System.Collections.Generic;
     using System.IO;
-    using System.Xml.Serialization;
+    using System.Xaml;
+    using Catel.Logging;
 
     public class Project
     {
-        #region Constructors
+        private static readonly ILog Log = LogManager.GetCurrentClassLogger();
+
         public Project()
         {
-            Tables = new List<string>();
+            Tables = new List<Table>(4);
         }
-        #endregion
 
-        #region Properties
         public string ConnectionString { get; set; }
-        public string OutputFolder { get; set; }
         public int MaximumRowsInTable { get; set; }
-        public List<string> Tables { get; set; }
-        #endregion
+        public string OutputFolder { get; set; }
+        public List<Table> Tables { get; set; }
 
-        #region Methods
-        /// <summary>
-        /// The save.
-        /// </summary>
-        /// <param name="filePath">The file path.</param>
-        public void Save(string filePath)
+        public void Validate()
         {
-            var xmlSerializer = GetSerializer();
-
-            using (var sw = new StreamWriter(filePath))
+            if (string.IsNullOrEmpty(ConnectionString))
             {
-                xmlSerializer.Serialize(sw, this);
+                throw Log.ErrorAndCreateException<InvalidOperationException>("Connection string cannot be empty");
+            }
+            foreach (var table in Tables)
+            {
+                if (string.IsNullOrEmpty(table.Name))
+                {
+                    throw Log.ErrorAndCreateException<InvalidOperationException>("Table name cannot be empty");
+                }
             }
         }
 
-        /// <summary>
-        /// The load.
-        /// </summary>
-        /// <param name="filePath">The file path.</param>
-        /// <returns>The <see cref="object" />.</returns>
-        public static Project Load(string filePath)
+        public static Project Parse(string xaml)
         {
-            var xmlSerializer = GetSerializer();
+            var result = (Project)XamlServices.Parse(xaml);
+            return result;
+        }
 
-            using (var sr = new StreamReader(filePath))
+        public static Project Load(string path = "project.iprj")
+        {
+            try
             {
-                var project = (Project) xmlSerializer.Deserialize(sr);
-
-                return project;
+                var xaml = File.ReadAllText(path);
+                var result = Parse(xaml);
+                result.Validate();
+                Log.Info("Loaded project from '{0}'", Path.GetFullPath(path));
+                Log.Info("Connection string: '{0}'", result.ConnectionString);
+                Log.Info("Maximum rows in table: '{0}'", result.MaximumRowsInTable);
+                Log.Info("Tables to convert '{0}':", result.Tables.Count);
+                Log.IndentLevel += 2;
+                if (string.IsNullOrEmpty(result.OutputFolder))
+                {
+                    result.OutputFolder = Directory.GetParent(path).FullName;
+                }
+                foreach (var table in result.Tables)
+                {
+                    var folder = table.Output;
+                    if (string.IsNullOrEmpty(folder))
+                    {
+                        folder = result.OutputFolder;
+                    }
+                    Log.Info("'{0}' to '{1}'", table.Name, Path.Combine(folder, table.Csv));
+                }
+                Log.IndentLevel -= 2;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex);
+                return null;
             }
         }
 
-        private static XmlSerializer GetSerializer()
-        {
-            return new XmlSerializer(typeof (Project),new[] {typeof (List<string>)});
-        }
-        #endregion
     }
 }

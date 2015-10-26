@@ -1,0 +1,9 @@
+﻿<Project xmlns="http://wildgums/2015">
+  <Project.ConnectionString>Data Source=.\SQLExpress;Initial Catalog=RanttSaaS;Integrated Security=True;Pooling=False</Project.ConnectionString>
+  <Project.MaximumRowsInTable>500</Project.MaximumRowsInTable>
+  <Project.OutputFolder>C:\Temp\CustomPath</Project.OutputFolder>
+  <Project.Tables>
+    <Table Name="MyTable1" Csv="Table.csv"/>
+    <Table Name="MyTable1" Csv="Table1.csv" Output="C:\Temp\Xa"/>
+  </Project.Tables>
+</Project>

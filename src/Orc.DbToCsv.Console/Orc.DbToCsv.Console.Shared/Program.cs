@@ -11,13 +11,16 @@ namespace Orc.DbToCsv
     using System.IO;
     using System.Linq;
     using Catel.IoC;
+    using Catel.Logging;
     using CommandLine;
 
     internal class Program
     {
+        private static ILog Log = LogManager.GetCurrentClassLogger();
         #region Methods
         private static void Main(string[] args)
         {
+            InitializeLogManager();
             var commandLine = Environment.CommandLine.GetCommandLine(true);
             var options = new Options();
             
@@ -53,7 +56,7 @@ namespace Orc.DbToCsv
 
             if (project == null)
             {
-                Console.WriteLine("Unable to locate the project to process.");
+                Log.Warning("Unable to locate the project to process.");
                 Environment.Exit(1);
             }
             else
@@ -63,7 +66,7 @@ namespace Orc.DbToCsv
 
             string outputFolder = string.IsNullOrEmpty(options.OutputFolder) ? Directory.GetCurrentDirectory() : options.OutputFolder;
 
-            Importer.ProcessProject(project, outputFolder, new ConsoleWriter());
+            Importer.ProcessProject(project, outputFolder);
         }
 
         private static Project TryGetProjectAutomatically()
@@ -87,6 +90,12 @@ namespace Orc.DbToCsv
 
             return null;
         }
+        private static void InitializeLogManager()
+        {
+            LogManager.IgnoreCatelLogging = true;
+            LogManager.AddListener(new BriefConsoleLogger());
+        }
+
         #endregion
     }
 }

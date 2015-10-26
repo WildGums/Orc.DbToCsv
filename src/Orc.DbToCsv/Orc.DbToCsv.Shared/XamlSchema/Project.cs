@@ -85,10 +85,15 @@ namespace Orc.DbToCsv
                 }
                 foreach (var table in result.Tables)
                 {
+                    if (string.IsNullOrEmpty(table.Csv))
+                    {
+                        table.Csv = ExtractTableName(table.Name);
+                    }
                     var folder = table.Output;
                     if (string.IsNullOrEmpty(folder))
                     {
                         folder = result.OutputFolder.Value;
+
                     }
                     Log.Info("'{0}' to '{1}'", table.Name, Path.Combine(folder, table.Csv));
                 }
@@ -100,6 +105,11 @@ namespace Orc.DbToCsv
                 Log.Error(ex);
                 return null;
             }
+        }
+        private static string ExtractTableName(string tableName)
+        {
+            int ndx = tableName.LastIndexOf('.');
+            return tableName.Substring(ndx + 1).Replace("[", string.Empty).Replace("]", string.Empty);
         }
 
     }

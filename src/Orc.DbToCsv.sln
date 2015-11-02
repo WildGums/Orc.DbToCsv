@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A5CFD383-2AA9-4F9B-97AE-BEE59DFE2142}"
 EndProject
@@ -40,6 +40,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orc.DbToCsv.NET45", "Orc.DbToCsv\Orc.DbToCsv.NET45\Orc.DbToCsv.NET45.csproj", "{00AFF543-24E4-44A4-B1AD-490BBE47C754}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orc.DbToCsv.Tests.NET45", "Orc.DbToCsv.Tests\Orc.DbToCsv.Tests.NET45\Orc.DbToCsv.Tests.NET45.csproj", "{962331C1-90D2-43E8-B235-20B107408C1D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orc.DbToCsv.TaskRunner", "Orc.DbToCsv.TaskRunner\Orc.DbToCsv.TaskRunner.csproj", "{37C0B2A5-C4F1-472A-9FBA-77EFBF19A98E}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
@@ -82,6 +84,10 @@ Global
 		{962331C1-90D2-43E8-B235-20B107408C1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{962331C1-90D2-43E8-B235-20B107408C1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{962331C1-90D2-43E8-B235-20B107408C1D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{37C0B2A5-C4F1-472A-9FBA-77EFBF19A98E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{37C0B2A5-C4F1-472A-9FBA-77EFBF19A98E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{37C0B2A5-C4F1-472A-9FBA-77EFBF19A98E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{37C0B2A5-C4F1-472A-9FBA-77EFBF19A98E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -99,5 +105,6 @@ Global
 		{5764A548-4975-45C1-9A9D-B4702C337501} = {B38FD068-C51A-4BA8-819B-9F8BB239CCCE}
 		{00AFF543-24E4-44A4-B1AD-490BBE47C754} = {2A428319-95F2-4B81-9418-B4F2B9098246}
 		{962331C1-90D2-43E8-B235-20B107408C1D} = {1A6DC5E2-4FA5-4F8E-A536-21BD22EB60D5}
+		{37C0B2A5-C4F1-472A-9FBA-77EFBF19A98E} = {B38FD068-C51A-4BA8-819B-9F8BB239CCCE}
 	EndGlobalSection
 EndGlobal

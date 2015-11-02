@@ -24,10 +24,13 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <Label Grid.Row="0" Grid.Column="0" Content="Connection string" />
-            <TextBox Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding ConnectionString}" AcceptsReturn="True" TextWrapping="Wrap" Height="50"/>
-            <Label Grid.Row="1" Grid.Column="0" Content="Max rows in table" />
-            <TextBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" TextAlignment="Right">
+            <orc:OpenFilePickerView Grid.Row="0" Grid.ColumnSpan="3" Margin="0,0,6,0" LabelText="Project file"
+                                     SelectedFile="{Binding ProjectFile, ValidatesOnDataErrors=True, NotifyOnValidationError=True}" />
+
+            <Label Grid.Row="1" Grid.Column="0" Content="Connection string" />
+            <TextBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding ConnectionString}" AcceptsReturn="True" TextWrapping="Wrap" Height="50"/>
+            <Label Grid.Row="2" Grid.Column="0" Content="Max rows in table" />
+            <TextBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" TextAlignment="Right">
                 <TextBox.Text>
                     <Binding Path="MaximumRowsInTable">
                         <Binding.ValidationRules>
@@ -37,7 +40,7 @@
                 </TextBox.Text>
 
             </TextBox>
-            <orc:DirectoryPickerView Grid.Row="2" Grid.ColumnSpan="3" Margin="0,0,6,0" LabelText="Output directory"
+            <orc:DirectoryPickerView Grid.Row="3" Grid.ColumnSpan="3" Margin="0,0,6,0" LabelText="Output directory"
                                      SelectedDirectory="{Binding OutputDirectory, ValidatesOnDataErrors=True, NotifyOnValidationError=True}" />
 
         </Grid>

@@ -32,20 +32,31 @@ namespace Orc.DbToCsv
         {
             Log.Info("Project processing started ...");
 
-            using (var sqlConnection = new SqlConnection(project.ConnectionString.Value))
+            try
             {
-                sqlConnection.Open();
-                var tables = project.Tables;
-                if (project.Tables == null || project.Tables.Count == 0)
+                using (var sqlConnection = new SqlConnection(project.ConnectionString.Value))
                 {
-                    tables = GetAvailableTables(sqlConnection, project.OutputFolder.Value);
-                }
+                    sqlConnection.Open();
+                    var tables = project.Tables;
+                    if (project.Tables == null || project.Tables.Count == 0)
+                    {
+                        tables = GetAvailableTables(sqlConnection, project.OutputFolder.Value);
+                    }
 
-                Log.Info("{0} tables to process", tables.Count.ToString());
-                foreach (var table in tables)
-                {
-                    ProcessTable(sqlConnection, table, project);
+                    Log.Info("{0} tables to process", tables.Count.ToString());
+                    foreach (var table in tables)
+                    {
+                        ProcessTable(sqlConnection, table, project);
+                    }
                 }
+            }
+            catch (SqlException ex)
+            {
+                Log.Error(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex);
             }
         }
 

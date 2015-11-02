@@ -66,7 +66,7 @@ namespace Orc.DbToCsv
 
             string outputFolder = string.IsNullOrEmpty(options.OutputFolder) ? Directory.GetCurrentDirectory() : options.OutputFolder;
 
-            Importer.ProcessProject(project, outputFolder);
+            Importer.ProcessProject(project);
         }
 
         private static Project TryGetProjectAutomatically()

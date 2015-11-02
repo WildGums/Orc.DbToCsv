@@ -25,10 +25,10 @@ namespace Orc.DbToCsv
         {
             var project = Project.Load(projectFilePath);
 
-            ProcessProject(project, outputFolderPath);
+            ProcessProject(project);
         }
 
-        public static void ProcessProject(Project project, string outputFolderPath)
+        public static void ProcessProject(Project project)
         {
             Log.Info("Project processing started ...");
 

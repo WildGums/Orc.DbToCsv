@@ -1,5 +1,6 @@
 namespace Orc.DbToCsv.TaskRunner.Models
 {
+    using System.Collections.Generic;
     using Catel.Data;
 
     public class Settings : ModelBase
@@ -11,6 +12,7 @@ namespace Orc.DbToCsv.TaskRunner.Models
             ConnectionString = @"Data Source=localhost;Initial Catalog=RanttSaaS;Integrated Security=True";
             MaximumRowsInTable = 1000;
             OutputDirectory = "./Output";
+            Tables = new List<Table>();
         }
 
         public string ProjectFile
@@ -23,8 +25,11 @@ namespace Orc.DbToCsv.TaskRunner.Models
                 ConnectionString = project.ConnectionString.Value;
                 MaximumRowsInTable = project.MaximumRowsInTable.Value;
                 OutputDirectory = project.OutputFolder.Value;
+                Tables = project.Tables;
             }
         }
+
+        public List<Table> Tables { get; set; }
 
         public string ConnectionString { get; set; }
 

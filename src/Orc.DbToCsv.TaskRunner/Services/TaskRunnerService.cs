@@ -36,6 +36,7 @@
             project.ConnectionString.Value = settings.ConnectionString;
             project.MaximumRowsInTable.Value = settings.MaximumRowsInTable;
             project.OutputFolder.Value = settings.OutputDirectory;
+            project.Tables = settings.Tables;
             Importer.ProcessProject(project);
         }
 

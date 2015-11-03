@@ -1,9 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <ConnectionString>Data Source=localhost;Initial Catalog=RanttSaaS;Integrated Security=True</ConnectionString>
+﻿<Project xmlns="http://wildgums/2015">
+  <ConnectionString>Data Source=.\SQLExpress;Initial Catalog=RanttSaaS;Integrated Security=True;Pooling=False</ConnectionString>
   <MaximumRowsInTable>500</MaximumRowsInTable>
-  <Tables>
-    <string>Company</string>
-    <string>UserProfile</string>
-  </Tables>
+  <OutputFolder>C:\Temp\CustomPath</OutputFolder>
+  
+  <Project.Tables>
+    <Table Name="MyTable1" Csv="Table.csv"/>
+    <Table Name="MyTable1" Csv="Table1.csv" Output="C:\Temp\Xa"/>
+  </Project.Tables>
 </Project>

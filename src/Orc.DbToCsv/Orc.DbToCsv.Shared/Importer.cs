@@ -107,6 +107,12 @@ namespace Orc.DbToCsv
                                 for (int i = 0; i < schema.Count; i++)
                                 {
                                     object value = dataReader.GetValue(i);
+
+                                    if (value is string)
+                                    {
+                                        value = ((string) value).Trim(); // Remove all white spaces
+                                    }
+
                                     csvWriter.WriteField(value);
                                 }
 
@@ -117,7 +123,7 @@ namespace Orc.DbToCsv
                     }
                 }
 
-                Log.Info("{0} records of '{1}' table succesfully exported to {2}.", records, table.Name, table.Csv);
+                Log.Info("{0} records of '{1}' table successfully exported to {2}.", records, table.Name, fullFileName);
             }
             catch (Exception ex)
             {
@@ -201,7 +207,6 @@ namespace Orc.DbToCsv
                                 break;
 
                             case "datetime":
-                            case "timestamp":
                             case "smalldatetime":
                             case "datetime2":
                             case "date":
@@ -211,6 +216,10 @@ namespace Orc.DbToCsv
                             case "time":
                                 result.Add(new Tuple<string, string>(name, "time"));
                                 Log.Info("    Field name '{0}' is a '{1}' type.", name, "time");
+                                break;
+
+                            case "timestamp":
+                                // Ignore for now
                                 break;
                             default:
                                 result.Add(new Tuple<string, string>(name, "string"));

@@ -9,7 +9,7 @@ namespace Orc.DbToCsv.TaskRunner.Models
 
         public Settings()
         {
-            ConnectionString = @"Data Source=localhost;Initial Catalog=RanttSaaS;Integrated Security=True";
+            ConnectionString = @"Data Source=localhost;Initial Catalog=MyDbBName;Integrated Security=True";
             MaximumRowsInTable = 1000;
             OutputDirectory = "./Output";
             Tables = new List<Table>();

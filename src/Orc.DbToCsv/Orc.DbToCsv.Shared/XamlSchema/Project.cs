@@ -21,8 +21,8 @@ namespace Orc.DbToCsv
 
         public Project()
         {
-            Tables = new List<Table>(4);
-            Properties = new List<ProjectProperty>(4);
+            Tables = new List<Table>();
+            Properties = new List<ProjectProperty>();
         }
 
         private ConnectionString _connectionString;
@@ -73,31 +73,43 @@ namespace Orc.DbToCsv
             {
                 var xaml = File.ReadAllText(path);
                 var result = Parse(xaml);
+
                 result.Validate();
                 Log.Info("Loaded project from '{0}'", Path.GetFullPath(path));
-                Log.Info("Connection string: '{0}'", result.ConnectionString);
-                Log.Info("Maximum rows in table: '{0}'", result.MaximumRowsInTable);
+                Log.Info("Connection string: '{0}'", result.ConnectionString.Value);
+                Log.Info("Maximum rows in table: '{0}'", result.MaximumRowsInTable.Value);
                 Log.Info("Tables to convert '{0}':", result.Tables.Count);
                 Log.IndentLevel += 2;
+
                 if (string.IsNullOrEmpty(result.OutputFolder.Value))
                 {
                     result.OutputFolder.Value = Directory.GetParent(path).FullName;
                 }
+
                 foreach (var table in result.Tables)
                 {
                     if (string.IsNullOrEmpty(table.Csv))
                     {
-                        table.Csv = ExtractTableName(table.Name);
+                        table.Csv = ExtractTableName(table.Name) + ".csv";
                     }
-                    var folder = table.Output;
-                    if (string.IsNullOrEmpty(folder))
-                    {
-                        folder = result.OutputFolder.Value;
 
+                    if (table.Output == null)
+                    {
+                        table.Output = string.Empty;
                     }
-                    Log.Info("'{0}' to '{1}'", table.Name, Path.Combine(folder, table.Csv));
+
+                    if (!Path.IsPathRooted(table.Output))
+                    {
+                        table.Output = Path.Combine(result.OutputFolder.Value, table.Output);
+                    }
+
+                    Log.Info("'{0}' to '{1}'", table.Name, Path.Combine(table.Output, table.Csv));
                 }
+
                 Log.IndentLevel -= 2;
+
+                Log.Info("");
+                Log.Info("Please click the run button to start the conversion.");
                 return result;
             }
             catch (Exception ex)

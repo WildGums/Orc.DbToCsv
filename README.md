@@ -10,7 +10,7 @@ Orc.DbToCsv
 
 This library's sole purpose is to extract data from a MS SQL database into csv files. Each table or view will have a corresponding csv file.
 
-The repository contains a library as well as a command line utility.
+The repository contains a library, a command line utility and a task runner
 
 Usage
 -------
@@ -19,24 +19,30 @@ In order to extract the data the library needs a project file.
 A project file is simply an xml file with an ".iprj" extension, and looks like:
 
 ```xml
-<?xml version="1.0" encoding="utf-8"?>
-<Project xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <ConnectionString>Data Source=localhost;Initial Catalog=Test;Integrated Security=True</ConnectionString>
+<Project xmlns="http://wildgums/2015">
+  <ConnectionString>Data Source=.\SQLExpress;Initial Catalog=MyDbName;Integrated Security=True;Pooling=False</ConnectionString>
   <MaximumRowsInTable>500</MaximumRowsInTable>
-  <Tables>
-    <string>Company</string>
-    <string>UserProfile</string>
-  </Tables>
+  <OutputFolder>C:\Temp\CustomPath</OutputFolder>
+  
+  <Project.Tables>
+    <Table Name="MyTable1"/>
+    <Table Name="MyTable2" Csv="Table2.csv"/>
+    <Table Name="MyTable3" Csv="Table3.csv" Output="C:\Temp"/>
+  </Project.Tables>
 </Project>
 ```
 
-There are three important tags:
+There are four important tags:
 
 - ConnectionString: Standard connection string to connect to the database table.
-- MaximumRowsInTable: Will specify the number of rows to retrieve from each table. If the tag is missing or the value is 0 or less, then all rows will be retrieved.
+- MaximumRowsInTable: Will specify the number of rows to retrieve from each table. **If the tag is missing or the value is 0 or less, then all rows will be retrieved.**
+- OutputFolder: Specify the folder the files will be saved to. If left blank the files will be created in the direcotry the console or task runner were executed from.
 - Tables: Specify the name of each table (or view) you want to extract. If left emtpy, all tables will be extracted.
 
-**Note**: The csv files will have the same name as the table names (except white spaces will be replaced with an underscore.)
+**Note**: 
+- You can specify the csv file name for each table/view using the Csv attribute.
+- If the Csv attribute is left blank or does not exist the default file name will be the table name (except white spaces will be replaced with an underscore.)
+- You can specify a different output directory for each file. If left blank or does not exist the file will be saved in the "OutputFolder".
 
 Once the project file is setup you can create the csv files using the following command:
 
@@ -73,3 +79,6 @@ Example:
 Orc.DbToCsv.Console.exe -p E:\sample1.iprj -o D:\output
 ```
 
+Task Runner
+-------------
+![TaskRunner](img/TaskRunner.png)

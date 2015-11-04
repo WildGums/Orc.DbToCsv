@@ -4,7 +4,8 @@
   <OutputFolder>C:\Temp\CustomPath</OutputFolder>
   
   <Project.Tables>
-    <Table Name="MyTable1" Csv="Table.csv"/>
-    <Table Name="MyTable1" Csv="Table1.csv" Output="C:\Temp\Xa"/>
+	<Table Name="MyTable1"/>
+    <Table Name="MyTable2" Csv="Table2.csv"/>
+    <Table Name="MyTable3" Csv="Table3.csv" Output="C:\Temp"/>
   </Project.Tables>
 </Project>

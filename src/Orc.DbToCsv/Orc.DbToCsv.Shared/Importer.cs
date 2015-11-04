@@ -13,60 +13,71 @@ namespace Orc.DbToCsv
     using System.IO;
     using System.Linq;
     using System.Text;
+    using Catel.Logging;
     using CsvHelper;
 
     public static class Importer
     {
+        private static ILog Log = LogManager.GetCurrentClassLogger();
         #region Methods
 
-        public static void ProcessProject(string projectFilePath, string outputFolderPath, ILogWriter logWriter)
+        public static void ProcessProject(string projectFilePath, string outputFolderPath)
         {
             var project = Project.Load(projectFilePath);
 
-            ProcessProject(project, outputFolderPath, logWriter);
+            ProcessProject(project);
         }
 
-        public static void ProcessProject(Project project, string outputFolderPath, ILogWriter logWriter)
+        public static void ProcessProject(Project project)
         {
-            logWriter.WriteLine("Project processing started ...");
+            Log.Info("Project processing started ...");
 
-            using (var sqlConnection = new SqlConnection(project.ConnectionString))
+            try
             {
-                sqlConnection.Open();
-                var tables = project.Tables;
-                if (project.Tables == null || project.Tables.Count == 0)
+                using (var sqlConnection = new SqlConnection(project.ConnectionString.Value))
                 {
-                    tables = GetAvailableTables(sqlConnection);
-                }
+                    sqlConnection.Open();
+                    var tables = project.Tables;
+                    if (project.Tables == null || project.Tables.Count == 0)
+                    {
+                        tables = GetAvailableTables(sqlConnection, project.OutputFolder.Value);
+                    }
 
-                logWriter.WriteLine(string.Format("{0} tables to process", tables.Count));
-                foreach (var tableName in tables)
-                {
-                    ProcessTable(sqlConnection, tableName, project, outputFolderPath, logWriter);
+                    Log.Info("{0} tables to process", tables.Count.ToString());
+                    foreach (var table in tables)
+                    {
+                        ProcessTable(sqlConnection, table, project);
+                    }
                 }
+            }
+            catch (SqlException ex)
+            {
+                Log.Error(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex);
             }
         }
 
-        private static void ProcessTable(SqlConnection sqlConnection, string tableName, Project project, string outputFolderPath, ILogWriter logWriter)
+        private static void ProcessTable(SqlConnection sqlConnection, Table table, Project project)
         {
-            var pureName = ExtractTableName(tableName);
-            var fileName = pureName + ".csv";
-            var postfix = (outputFolderPath[outputFolderPath.Length - 1] == '\\') ? string.Empty : "\\";
+            var outputFolderPath = string.IsNullOrEmpty(table.Output) ? project.OutputFolder.Value : table.Output;
 
             if (!Directory.Exists(outputFolderPath))
             {
                 Directory.CreateDirectory(outputFolderPath);
             }
 
-            string fullFileName = outputFolderPath + postfix + fileName;
+            string fullFileName = Path.Combine(outputFolderPath, table.Csv);
             int records = 0;
 
             try
             {
-                List<Tuple<string, string>> schema = GetTableSchema(sqlConnection, tableName, logWriter);
+                List<Tuple<string, string>> schema = GetTableSchema(sqlConnection, table.Name);
                 if (schema.Count == 0)
                 {
-                    logWriter.WriteLine(string.Format("No columns was found in the '{0}' table to export into a csv file.", tableName));
+                    Log.Warning("No columns was found in the '{0}' table to export into a csv file.", table.Name);
                     return;
                 }
 
@@ -86,7 +97,7 @@ namespace Orc.DbToCsv
                     csvWriter.NextRecord();
 
                     // Write records
-                    var query = ConstructRecordQuery(tableName, schema, project.MaximumRowsInTable);
+                    var query = ConstructRecordQuery(table.Name, schema, project.MaximumRowsInTable.Value);
                     using (var command = new SqlCommand(query) {Connection = sqlConnection})
                     {
                         using (var dataReader = command.ExecuteReader())
@@ -96,6 +107,12 @@ namespace Orc.DbToCsv
                                 for (int i = 0; i < schema.Count; i++)
                                 {
                                     object value = dataReader.GetValue(i);
+
+                                    if (value is string)
+                                    {
+                                        value = ((string) value).Trim(); // Remove all white spaces
+                                    }
+
                                     csvWriter.WriteField(value);
                                 }
 
@@ -106,17 +123,11 @@ namespace Orc.DbToCsv
                     }
                 }
 
-                var okResult = string.Format(
-                "'{0}' records of '{1}' table succesfully exported to {2}.",
-                    records,
-                    tableName,
-                    fileName);
-
-                logWriter.WriteLine(okResult);
+                Log.Info("{0} records of '{1}' table successfully exported to {2}.", records, table.Name, fullFileName);
             }
             catch (Exception ex)
             {
-                logWriter.WriteLine(string.Format("{0} export failed because of exception: {1}", tableName, ex.Message));
+                Log.Error("{0} export failed because of exception: {1}", table.Name, ex.Message);
             }
         }
 
@@ -128,7 +139,7 @@ namespace Orc.DbToCsv
             return string.Format("SELECT {0} [{1}] FROM {2}", top, columns, tableName);
         }
 
-        private static List<Tuple<string, string>> GetTableSchema(SqlConnection sqlConnection, string tableName, ILogWriter logWriter)
+        private static List<Tuple<string, string>> GetTableSchema(SqlConnection sqlConnection, string tableName)
         {
             List<Tuple<string, string>> result = new List<Tuple<string, string>>();
             StringBuilder stringBuilder = new StringBuilder();
@@ -138,8 +149,8 @@ namespace Orc.DbToCsv
                 " WHERE c.object_id = OBJECT_ID('{0}') and t.name<>'sysname' ",
                 tableName);
 
-            logWriter.WriteLine("");
-            logWriter.WriteLine(string.Format("> Processing table '{0}'", tableName));
+            Log.Info("");
+            Log.Info("> Processing table '{0}'", tableName);
 
             string commandText = stringBuilder.ToString();
             using (SqlCommand schemaCommand = new SqlCommand(commandText) {Connection = sqlConnection})
@@ -165,7 +176,7 @@ namespace Orc.DbToCsv
                         {
                             case "bit":
                                 result.Add(new Tuple<string, string>(name, "boolean"));
-                                logWriter.WriteLine(string.Format("    Field name '{0}' is a '{1}' type.", name, "boolean"));
+                                Log.Info("    Field name '{0}' is a '{1}' type.", name, "boolean");
                                 break;
 
                             case "varchar":
@@ -174,7 +185,7 @@ namespace Orc.DbToCsv
                             case "text":
                             case "char":
                                 result.Add(new Tuple<string, string>(name, "string"));
-                                logWriter.WriteLine(string.Format("    Field name '{0}' is a '{1}' type.", name, "sting"));
+                                Log.Info("    Field name '{0}' is a '{1}' type.", name, "sting");
                                 break;
 
                             case "int":
@@ -182,7 +193,7 @@ namespace Orc.DbToCsv
                             case "tinyint":
                             case "bigint":
                                 result.Add(new Tuple<string, string>(name, "int"));
-                                logWriter.WriteLine(string.Format("    Field name '{0}' is a '{1}' type.", name, "int"));
+                                Log.Info("    Field name '{0}' is a '{1}' type.", name, "int");
                                 break;
 
                             case "float":
@@ -192,24 +203,27 @@ namespace Orc.DbToCsv
                             case "smallmoney":
                             case "decimal":
                                 result.Add(new Tuple<string, string>(name, "float"));
-                                logWriter.WriteLine(string.Format("    Field name '{0}' is a '{1}' type.", name, "float"));
+                                Log.Info("    Field name '{0}' is a '{1}' type.", name, "float");
                                 break;
 
                             case "datetime":
-                            case "timestamp":
                             case "smalldatetime":
                             case "datetime2":
                             case "date":
                                 result.Add(new Tuple<string, string>(name, "datetime"));
-                                logWriter.WriteLine(string.Format("    Field name '{0}' is a '{1}' type.", name, "datetime"));
+                                Log.Info("    Field name '{0}' is a '{1}' type.", name, "datetime");
                                 break;
                             case "time":
                                 result.Add(new Tuple<string, string>(name, "time"));
-                                logWriter.WriteLine(string.Format("    Field name '{0}' is a '{1}' type.", name, "time"));
+                                Log.Info("    Field name '{0}' is a '{1}' type.", name, "time");
+                                break;
+
+                            case "timestamp":
+                                // Ignore for now
                                 break;
                             default:
                                 result.Add(new Tuple<string, string>(name, "string"));
-                                logWriter.WriteLine(string.Format("    Field name '{0}' did not have a match for type '{1}', setting it to 'string'.", name, stringColumnType));
+                                Log.Info("    Field name '{0}' did not have a match for type '{1}', setting it to 'string'.", name, stringColumnType);
                                 break;
                         }
                     }
@@ -225,11 +239,11 @@ namespace Orc.DbToCsv
             return tableName.Substring(ndx + 1).Replace("[", string.Empty).Replace("]", string.Empty);
         }
 
-        private static List<string> GetAvailableTables(SqlConnection sqlConnection)
+        private static List<Table> GetAvailableTables(SqlConnection sqlConnection, string outputFolder)
         {
             const string CommandText = "SELECT '['+TABLE_SCHEMA+'].['+ TABLE_NAME + ']' FROM INFORMATION_SCHEMA.TABLES ORDER BY TABLE_SCHEMA, TABLE_NAME";
 
-            var result = new List<string>();
+            var result = new List<Table>();
 
             using (var schemaCommand = new SqlCommand(CommandText) {Connection = sqlConnection, CommandTimeout = 300})
             {
@@ -237,7 +251,11 @@ namespace Orc.DbToCsv
                 {
                     while (schemaReader.Read())
                     {
-                        result.Add(schemaReader.GetString(0));
+                        var table = new Table();
+                        table.Name = schemaReader.GetString(0);
+                        table.Csv = ExtractTableName(table.Name) + ".csv";
+                        table.Output = outputFolder;
+                        result.Add(table);
                     }
                 }
             }

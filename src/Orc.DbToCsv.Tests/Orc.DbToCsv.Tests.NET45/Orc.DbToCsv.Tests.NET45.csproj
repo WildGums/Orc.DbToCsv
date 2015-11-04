@@ -54,6 +54,12 @@
   <ItemGroup>
     <Folder Include="Properties\" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Orc.DbToCsv\Orc.DbToCsv.NET45\Orc.DbToCsv.NET45.csproj">
+      <Project>{00aff543-24e4-44a4-b1ad-490bbe47c754}</Project>
+      <Name>Orc.DbToCsv.NET45</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>

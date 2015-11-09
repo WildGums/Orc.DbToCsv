@@ -4,6 +4,7 @@
     using System.IO;
     using System.Threading.Tasks;
     using System.Windows;
+    using Catel.Configuration;
     using Catel.Logging;
     using Models;
     using Orchestra.Models;
@@ -12,7 +13,13 @@
 
     public class TaskRunnerService: ITaskRunnerService
     {
+        private readonly IConfigurationService _configurationService;
         private static ILog Log = LogManager.GetCurrentClassLogger();
+
+        public TaskRunnerService(IConfigurationService configurationService)
+        {
+            _configurationService = configurationService;
+        }
 
         public AboutInfo GetAboutInfo()
         {
@@ -21,7 +28,13 @@
 
         public object GetViewDataContext()
         {
-            return new Settings();
+            var settings = new Settings();
+            var lastProjectPath = _configurationService.GetValue("LastProjectPath", string.Empty);
+            if (!string.IsNullOrEmpty(lastProjectPath) && File.Exists(lastProjectPath))
+            {
+                settings.ProjectFile = lastProjectPath;
+            }
+            return settings;
         }
 
         public FrameworkElement GetView()
@@ -38,6 +51,10 @@
             project.OutputFolder.Value = settings.OutputDirectory;
             project.Tables = settings.Tables;
             Importer.ProcessProject(project);
+            if (File.Exists(settings.ProjectFile))
+            {
+                _configurationService.SetValue("LastProjectPath", settings.ProjectFile);
+            }
         }
 
         public Size GetInitialWindowSize()

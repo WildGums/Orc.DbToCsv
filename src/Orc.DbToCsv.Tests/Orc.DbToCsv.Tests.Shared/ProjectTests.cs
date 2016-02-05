@@ -5,7 +5,7 @@
 // --------------------------------------------------------------------------------------------------------------------
 
 
-namespace Orc.DbToCsv.Test
+namespace Orc.DbToCsv.Tests
 {
     using NUnit.Framework;
 

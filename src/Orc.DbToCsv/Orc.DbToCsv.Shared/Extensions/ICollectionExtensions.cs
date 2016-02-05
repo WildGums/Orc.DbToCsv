@@ -1,4 +1,11 @@
-﻿namespace Orc.DbToCsv
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="ICollectionExtensions.cs" company="WildGums">
+//   Copyright (c) 2008 - 2016 WildGums. All rights reserved.
+// </copyright>
+// --------------------------------------------------------------------------------------------------------------------
+
+
+namespace Orc.DbToCsv
 {
     using System;
     using System.Collections.Generic;
@@ -6,6 +13,7 @@
 
     public static class ICollectionExtensions
     {
+        #region Methods
         public static TTarget FindTypeOrCreateNew<T, TTarget>(this ICollection<T> collection, Func<TTarget> func)
             where TTarget : T
         {
@@ -17,5 +25,6 @@
             }
             return result;
         }
+        #endregion
     }
 }

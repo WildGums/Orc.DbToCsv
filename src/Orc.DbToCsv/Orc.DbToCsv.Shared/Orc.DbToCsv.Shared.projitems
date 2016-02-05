@@ -10,7 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)..\..\SolutionAssemblyInfo.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ICollectionExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Extensions\ICollectionExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Importer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Properties\AssemblyInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)XamlSchema\ConnectionString.cs" />

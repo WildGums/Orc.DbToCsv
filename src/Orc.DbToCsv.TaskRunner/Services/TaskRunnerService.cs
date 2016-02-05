@@ -1,4 +1,11 @@
-﻿namespace Orc.DbToCsv.TaskRunner
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="TaskRunnerService.cs" company="WildGums">
+//   Copyright (c) 2008 - 2016 WildGums. All rights reserved.
+// </copyright>
+// --------------------------------------------------------------------------------------------------------------------
+
+
+namespace Orc.DbToCsv.TaskRunner
 {
     using System;
     using System.IO;
@@ -11,16 +18,36 @@
     using Orchestra.Services;
     using Views;
 
-    public class TaskRunnerService: ITaskRunnerService
+    public class TaskRunnerService : ITaskRunnerService
     {
-        private readonly IConfigurationService _configurationService;
-        private static ILog Log = LogManager.GetCurrentClassLogger();
+        #region Constants
+        private static readonly ILog Log = LogManager.GetCurrentClassLogger();
+        #endregion
 
+        #region Fields
+        private readonly IConfigurationService _configurationService;
+        #endregion
+
+        #region Constructors
         public TaskRunnerService(IConfigurationService configurationService)
         {
             _configurationService = configurationService;
         }
+        #endregion
 
+        #region Properties
+        public string Title
+        {
+            get { return "Orc.DbToCsv"; }
+        }
+
+        public bool ShowCustomizeShortcutsButton
+        {
+            get { return false; }
+        }
+        #endregion
+
+        #region ITaskRunnerService Members
         public AboutInfo GetAboutInfo()
         {
             return new AboutInfo();
@@ -29,11 +56,13 @@
         public object GetViewDataContext()
         {
             var settings = new Settings();
+
             var lastProjectPath = _configurationService.GetValue("LastProjectPath", string.Empty);
             if (!string.IsNullOrEmpty(lastProjectPath) && File.Exists(lastProjectPath))
             {
                 settings.ProjectFile = lastProjectPath;
             }
+
             return settings;
         }
 
@@ -62,8 +91,7 @@
             return Size.Empty;
         }
 
-        public string Title { get { return "Orc.DbToCsv"; } }
-        public bool ShowCustomizeShortcutsButton { get { return false; } }
         public event EventHandler TitleChanged;
+        #endregion
     }
 }

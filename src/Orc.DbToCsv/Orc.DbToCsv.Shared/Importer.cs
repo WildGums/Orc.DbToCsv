@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="Importer.cs" company="Orcomp development team">
-//   Copyright (c) 2008 - 2015 Orcomp development team. All rights reserved.
+// <copyright file="Importer.cs" company="WildGums">
+//   Copyright (c) 2008 - 2016 WildGums. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -18,9 +18,11 @@ namespace Orc.DbToCsv
 
     public static class Importer
     {
-        private static ILog Log = LogManager.GetCurrentClassLogger();
-        #region Methods
+        #region Constants
+        private static readonly ILog Log = LogManager.GetCurrentClassLogger();
+        #endregion
 
+        #region Methods
         public static void ProcessProject(string projectFilePath, string outputFolderPath)
         {
             var project = Project.Load(projectFilePath);
@@ -157,7 +159,6 @@ namespace Orc.DbToCsv
             {
                 using (SqlDataReader schemaReader = schemaCommand.ExecuteReader())
                 {
-
                     var processedNames = new HashSet<string>();
 
                     while (schemaReader.Read())

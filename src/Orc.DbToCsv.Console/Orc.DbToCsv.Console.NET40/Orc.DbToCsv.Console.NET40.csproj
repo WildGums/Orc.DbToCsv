@@ -45,7 +45,11 @@
   <ItemGroup>
     <Reference Include="Catel.Core, Version=4.5.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\lib\Catel.Core.4.5.0-unstable0104\lib\net40\Catel.Core.dll</HintPath>
+      <HintPath>..\..\..\lib\Catel.Core.4.5.0-unstable0246\lib\net40\Catel.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Catel.Fody.Attributes">
+      <HintPath>..\..\..\lib\Catel.Fody.2.14.0\lib\portable-net4+sl4+wp7+win8+wpa81+MonoAndroid14+MonoTouch40\Catel.Fody.Attributes.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Threading.Tasks">
@@ -57,9 +61,9 @@
     <Reference Include="Microsoft.Threading.Tasks.Extensions.Desktop">
       <HintPath>..\..\..\lib\Microsoft.Bcl.Async.1.0.168\lib\net40\Microsoft.Threading.Tasks.Extensions.Desktop.dll</HintPath>
     </Reference>
-    <Reference Include="Orc.CommandLine, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Orc.CommandLine, Version=1.2.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\lib\Orc.CommandLine.1.1.0\lib\net40\Orc.CommandLine.dll</HintPath>
+      <HintPath>..\..\..\lib\Orc.CommandLine.1.2.0-unstable0005\lib\net40\Orc.CommandLine.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -95,6 +99,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="FodyWeavers.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ModuleInitializer.cs" />
   </ItemGroup>
   <Import Project="..\Orc.DbToCsv.Console.Shared\Orc.DbToCsv.Console.Shared.projitems" Label="Shared" Condition="Exists('..\Orc.DbToCsv.Console.Shared\Orc.DbToCsv.Console.Shared.projitems')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

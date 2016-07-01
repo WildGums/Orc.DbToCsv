@@ -57,7 +57,7 @@ namespace Orc.DbToCsv.TaskRunner
         {
             var settings = new Settings();
 
-            var lastProjectPath = _configurationService.GetValue("LastProjectPath", string.Empty);
+            var lastProjectPath = _configurationService.GetRoamingValue("LastProjectPath", string.Empty);
             if (!string.IsNullOrEmpty(lastProjectPath) && File.Exists(lastProjectPath))
             {
                 settings.ProjectFile = lastProjectPath;
@@ -82,7 +82,7 @@ namespace Orc.DbToCsv.TaskRunner
             Importer.ProcessProject(project);
             if (File.Exists(settings.ProjectFile))
             {
-                _configurationService.SetValue("LastProjectPath", settings.ProjectFile);
+                _configurationService.SetRoamingValue("LastProjectPath", settings.ProjectFile);
             }
         }
 

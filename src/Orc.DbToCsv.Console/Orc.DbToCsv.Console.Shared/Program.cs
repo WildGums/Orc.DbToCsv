@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="Program.cs" company="Orcomp development team">
-//   Copyright (c) 2008 - 2015 Orcomp development team. All rights reserved.
+// <copyright file="Program.cs" company="WildGums">
+//   Copyright (c) 2008 - 2015 WildGums. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -16,7 +16,7 @@ namespace Orc.DbToCsv
 
     internal class Program
     {
-        private static ILog Log = LogManager.GetCurrentClassLogger();
+        private static readonly ILog Log = LogManager.GetCurrentClassLogger();
         #region Methods
         private static void Main(string[] args)
         {
@@ -64,16 +64,15 @@ namespace Orc.DbToCsv
                 options.OutputFolder = project.OutputFolder.Value;
             }
 
-            string outputFolder = string.IsNullOrEmpty(options.OutputFolder) ? Directory.GetCurrentDirectory() : options.OutputFolder;
+            var outputFolder = string.IsNullOrEmpty(options.OutputFolder) ? Directory.GetCurrentDirectory() : options.OutputFolder;
 
             Importer.ProcessProject(project);
         }
 
         private static Project TryGetProjectAutomatically()
         {
-            DirectoryInfo directoryInfo = new DirectoryInfo(Directory.GetCurrentDirectory());
-
-            FileInfo[] candidates = directoryInfo.GetFiles("*.iprj");
+            var directoryInfo = new DirectoryInfo(Directory.GetCurrentDirectory());
+            var candidates = directoryInfo.GetFiles("*.iprj");
 
             foreach (FileInfo candidate in candidates)
             {

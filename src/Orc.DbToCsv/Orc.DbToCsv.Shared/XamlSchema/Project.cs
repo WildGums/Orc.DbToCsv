@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="Project.cs" company="Orcomp development team">
-//   Copyright (c) 2008 - 2015 Orcomp development team. All rights reserved.
+// <copyright file="Project.cs" company="WildGums">
+//   Copyright (c) 2008 - 2016 WildGums. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -17,27 +17,37 @@ namespace Orc.DbToCsv
     [ContentProperty("Properties")]
     public class Project
     {
+        #region Constants
         private static readonly ILog Log = LogManager.GetCurrentClassLogger();
+        #endregion
 
+        #region Fields
+        private ConnectionString _connectionString;
+
+        private MaximumRowsInTable _maximumRowsInTable;
+
+        private OutputFolder _outputFolder;
+        #endregion
+
+        #region Constructors
         public Project()
         {
             Tables = new List<Table>();
             Properties = new List<ProjectProperty>();
         }
+        #endregion
 
-        private ConnectionString _connectionString;
+        #region Properties
         public ConnectionString ConnectionString
         {
             get { return _connectionString ?? (_connectionString = Properties.FindTypeOrCreateNew(() => new ConnectionString())); }
         }
 
-        private MaximumRowsInTable _maximumRowsInTable;
         public MaximumRowsInTable MaximumRowsInTable
         {
             get { return _maximumRowsInTable ?? (_maximumRowsInTable = Properties.FindTypeOrCreateNew(() => new MaximumRowsInTable())); }
         }
 
-        private OutputFolder _outputFolder;
         public OutputFolder OutputFolder
         {
             get { return _outputFolder ?? (_outputFolder = Properties.FindTypeOrCreateNew(() => new OutputFolder())); }
@@ -45,13 +55,16 @@ namespace Orc.DbToCsv
 
         public List<Table> Tables { get; set; }
         public List<ProjectProperty> Properties { get; set; }
+        #endregion
 
+        #region Methods
         public void Validate()
         {
             if (string.IsNullOrEmpty(ConnectionString.Value))
             {
                 throw Log.ErrorAndCreateException<InvalidOperationException>("Connection string cannot be empty");
             }
+
             foreach (var table in Tables)
             {
                 if (string.IsNullOrEmpty(table.Name))
@@ -63,7 +76,7 @@ namespace Orc.DbToCsv
 
         public static Project Parse(string xaml)
         {
-            var result = (Project)XamlServices.Parse(xaml);
+            var result = (Project) XamlServices.Parse(xaml);
             return result;
         }
 
@@ -118,11 +131,12 @@ namespace Orc.DbToCsv
                 return null;
             }
         }
+
         private static string ExtractTableName(string tableName)
         {
             int ndx = tableName.LastIndexOf('.');
             return tableName.Substring(ndx + 1).Replace("[", string.Empty).Replace("]", string.Empty);
         }
-
+        #endregion
     }
 }

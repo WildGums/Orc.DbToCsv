@@ -1,18 +1,21 @@
-﻿using System;
-using System.Windows;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="App.xaml.cs" company="WildGums">
+//   Copyright (c) 2008 - 2016 WildGums. All rights reserved.
+// </copyright>
+// --------------------------------------------------------------------------------------------------------------------
+
 
 namespace Orc.DbToCsv.TaskRunner
 {
+    using System;
     using System.Diagnostics;
+    using System.Windows;
     using Catel.IoC;
     using Catel.Logging;
     using Orchestra.Services;
     using Orchestra.Views;
-
-    /// <summary>
-    /// Interaction logic for App.xaml
-    /// </summary>
-    public partial class App : Application
+    
+    public partial class App
     {
         #region Constants
         private static readonly ILog Log = LogManager.GetCurrentClassLogger();
@@ -33,7 +36,7 @@ namespace Orc.DbToCsv.TaskRunner
         }
         #endregion
 
-
+        #region Methods
         protected override void OnStartup(StartupEventArgs e)
         {
 #if DEBUG
@@ -50,6 +53,6 @@ namespace Orc.DbToCsv.TaskRunner
             Log.Info("Elapsed startup stopwatch time: {0}", _stopwatch.Elapsed);
             Log.Info("Elapsed startup time: {0}", _end - _start);
         }
-
+        #endregion
     }
 }

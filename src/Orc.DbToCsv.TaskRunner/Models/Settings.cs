@@ -1,3 +1,10 @@
+// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="Settings.cs" company="WildGums">
+//   Copyright (c) 2008 - 2016 WildGums. All rights reserved.
+// </copyright>
+// --------------------------------------------------------------------------------------------------------------------
+
+
 namespace Orc.DbToCsv.TaskRunner.Models
 {
     using System.Collections.Generic;
@@ -5,8 +12,11 @@ namespace Orc.DbToCsv.TaskRunner.Models
 
     public class Settings : ModelBase
     {
+        #region Fields
         private string _projectFile;
+        #endregion
 
+        #region Constructors
         public Settings()
         {
             ConnectionString = @"Data Source=localhost;Initial Catalog=MyDbBName;Integrated Security=True";
@@ -14,7 +24,9 @@ namespace Orc.DbToCsv.TaskRunner.Models
             OutputDirectory = "./Output";
             Tables = new List<Table>();
         }
+        #endregion
 
+        #region Properties
         public string ProjectFile
         {
             get { return _projectFile; }
@@ -36,5 +48,6 @@ namespace Orc.DbToCsv.TaskRunner.Models
         public int MaximumRowsInTable { get; set; }
 
         public string OutputDirectory { get; set; }
+        #endregion
     }
 }

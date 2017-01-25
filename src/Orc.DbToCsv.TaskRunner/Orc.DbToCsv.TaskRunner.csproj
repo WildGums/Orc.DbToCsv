@@ -59,13 +59,11 @@
       <HintPath>..\..\lib\Orc.LogViewer.1.2.0\lib\net45\Orc.LogViewer.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Orchestra.Core, Version=2.4.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\lib\Orchestra.Core.2.4.0\lib\net45\Orchestra.Core.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Orchestra.Core, Version=2.4.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\lib\Orchestra.Core.2.4.1\lib\net45\Orchestra.Core.dll</HintPath>
     </Reference>
-    <Reference Include="Orchestra.Shell.TaskRunner, Version=2.4.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\lib\Orchestra.Shell.TaskRunner.2.4.0\lib\net45\Orchestra.Shell.TaskRunner.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Orchestra.Shell.TaskRunner, Version=2.4.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\lib\Orchestra.Shell.TaskRunner.2.4.1\lib\net45\Orchestra.Shell.TaskRunner.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />

@@ -100,10 +100,14 @@ namespace Orc.DbToCsv
 
                     // Write records
                     var query = ConstructRecordQuery(table.Name, schema, project.MaximumRowsInTable.Value);
-                    using (var command = new SqlCommand(query) {Connection = sqlConnection})
+                    using (var command = new SqlCommand(query) {Connection = sqlConnection, CommandTimeout = 0})
                     {
+                        Log.Debug($"Executed: {query}");
+
                         using (var dataReader = command.ExecuteReader())
                         {
+                            Log.Debug($"The table has records = {dataReader.HasRows}");
+
                             while (dataReader.Read())
                             {
                                 for (int i = 0; i < schema.Count; i++)
@@ -119,6 +123,12 @@ namespace Orc.DbToCsv
                                 }
 
                                 records++;
+
+                                //if (records%100 == 0)
+                                //{
+                                //    Log.Debug($"{records} have been written");
+                                //}
+
                                 csvWriter.NextRecord();
                             }
                         }
@@ -186,7 +196,7 @@ namespace Orc.DbToCsv
                             case "text":
                             case "char":
                                 result.Add(new Tuple<string, string>(name, "string"));
-                                Log.Info("    Field name '{0}' is a '{1}' type.", name, "sting");
+                                Log.Info("    Field name '{0}' is a '{1}' type.", name, "string");
                                 break;
 
                             case "int":

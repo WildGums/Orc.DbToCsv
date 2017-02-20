@@ -122,7 +122,7 @@ namespace Orc.DbToCsv
                 Log.IndentLevel -= 2;
 
                 Log.Info("");
-                Log.Info("Please click the run button to start the conversion.");
+                // Log.Info("Please click the run button to start the conversion.");
                 return result;
             }
             catch (Exception ex)

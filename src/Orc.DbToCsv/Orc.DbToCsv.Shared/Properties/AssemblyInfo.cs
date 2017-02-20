@@ -6,6 +6,7 @@
 
 
 // All other assembly info is defined in SharedAssembly.cs
+
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Windows.Markup;
@@ -14,6 +15,7 @@ using System.Windows.Markup;
 [assembly: AssemblyProduct("Orc.DbToCsv")]
 [assembly: AssemblyDescription("Orc.DbToCsv library")]
 
+[assembly: XmlnsPrefix("http://wildgums/2015", "orc")]
 [assembly: XmlnsDefinition("http://wildgums/2015", "Orc.DbToCsv")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 

@@ -13,11 +13,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "misc", "misc", "{0C4D14F6-E
 		SolutionAssemblyInfo.cs = SolutionAssemblyInfo.cs
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orc.DbToCsv.NET40", "Orc.DbToCsv\Orc.DbToCsv.NET40\Orc.DbToCsv.NET40.csproj", "{0E21221E-89EF-4401-B7E5-DD7BD4609CD9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orc.DbToCsv.NET47", "Orc.DbToCsv\Orc.DbToCsv.NET47\Orc.DbToCsv.NET47.csproj", "{0E21221E-89EF-4401-B7E5-DD7BD4609CD9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orc.DbToCsv.Console.NET40", "Orc.DbToCsv.Console\Orc.DbToCsv.Console.NET40\Orc.DbToCsv.Console.NET40.csproj", "{E6BDF145-03AC-475F-844B-556F5BD235EA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orc.DbToCsv.Console.NET47", "Orc.DbToCsv.Console\Orc.DbToCsv.Console.NET47\Orc.DbToCsv.Console.NET47.csproj", "{E6BDF145-03AC-475F-844B-556F5BD235EA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orc.DbToCsv.Tests.NET40", "Orc.DbToCsv.Tests\Orc.DbToCsv.Tests.NET40\Orc.DbToCsv.Tests.NET40.csproj", "{6358053D-4551-45D1-859F-A3C7BD6275C7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orc.DbToCsv.Tests.NET47", "Orc.DbToCsv.Tests\Orc.DbToCsv.Tests.NET47\Orc.DbToCsv.Tests.NET47.csproj", "{6358053D-4551-45D1-859F-A3C7BD6275C7}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{2A428319-95F2-4B81-9418-B4F2B9098246}"
 EndProject

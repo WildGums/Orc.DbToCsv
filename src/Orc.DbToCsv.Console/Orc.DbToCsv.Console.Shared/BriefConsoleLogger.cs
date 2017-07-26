@@ -19,6 +19,7 @@ namespace Orc.DbToCsv
             {
                 return;
             }
+
             if (logEvent == LogEvent.Error)
             {
                 Console.ForegroundColor = ConsoleColor.Red;

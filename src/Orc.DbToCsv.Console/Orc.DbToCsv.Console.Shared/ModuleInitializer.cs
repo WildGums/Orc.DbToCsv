@@ -1,7 +1,6 @@
 ﻿
 using Catel.IoC;
 using Catel.Services;
-using Catel.Services.Models;
 
 /// <summary>
 /// Used by the ModuleInit. All code inside the Initialize method is ran as soon as the assembly is loaded.
@@ -15,7 +14,7 @@ public static class ModuleInitializer
     {
         var serviceLocator = ServiceLocator.Default;
 
-        var languageService = serviceLocator.ResolveType<ILanguageService>();
-        languageService.RegisterLanguageSource(new LanguageResourceSource("Orc.DbToCsv.Console", "Orc.DbToCsv.Properties", "Resources"));
+        //var languageService = serviceLocator.ResolveType<ILanguageService>();
+        //languageService.RegisterLanguageSource(new LanguageResourceSource("Orc.DbToCsv.Console", "Orc.DbToCsv.Properties", "Resources"));
     }
 }

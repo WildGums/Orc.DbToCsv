@@ -14,7 +14,7 @@ public static class ModuleInitializer
     {
         var serviceLocator = ServiceLocator.Default;
 
-        var languageService = serviceLocator.ResolveType<ILanguageService>();
-        languageService.RegisterLanguageSource(new LanguageResourceSource("Orc.DbToCsv.Console", "Orc.DbToCsv.Properties", "Resources"));
+        //var languageService = serviceLocator.ResolveType<ILanguageService>();
+        //languageService.RegisterLanguageSource(new LanguageResourceSource("Orc.DbToCsv.Console", "Orc.DbToCsv.Properties", "Resources"));
     }
 }

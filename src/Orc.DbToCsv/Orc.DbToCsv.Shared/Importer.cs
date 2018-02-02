@@ -13,6 +13,7 @@ namespace Orc.DbToCsv
     using System.IO;
     using System.Linq;
     using System.Text;
+    using System.Threading.Tasks;
     using Catel.Logging;
     using CsvHelper;
 
@@ -23,14 +24,13 @@ namespace Orc.DbToCsv
         #endregion
 
         #region Methods
-        public static void ProcessProject(string projectFilePath, string outputFolderPath)
+        public static async Task ProcessProjectAsync(string projectFilePath, string outputFolderPath)
         {
-            var project = Project.Load(projectFilePath);
-
-            ProcessProject(project);
+            var project = await Project.LoadAsync(projectFilePath);
+            await ProcessProjectAsync(project);
         }
 
-        public static void ProcessProject(Project project)
+        public static async Task ProcessProjectAsync(Project project)
         {
             Log.Info("Project processing started ...");
 
@@ -42,13 +42,14 @@ namespace Orc.DbToCsv
                     var tables = project.Tables;
                     if (project.Tables == null || project.Tables.Count == 0)
                     {
-                        tables = GetAvailableTables(sqlConnection, project.OutputFolder.Value);
+                        tables = await GetAvailableTablesAsync(sqlConnection, project.OutputFolder.Value);
                     }
 
                     Log.Info("{0} tables to process", tables.Count.ToString());
+
                     foreach (var table in tables)
                     {
-                        ProcessTable(sqlConnection, table, project);
+                        await ProcessTableAsync(sqlConnection, table, project);
                     }
                 }
             }
@@ -62,7 +63,7 @@ namespace Orc.DbToCsv
             }
         }
 
-        private static void ProcessTable(SqlConnection sqlConnection, Table table, Project project)
+        private static async Task ProcessTableAsync(SqlConnection sqlConnection, Table table, Project project)
         {
             var outputFolderPath = string.IsNullOrEmpty(table.Output) ? project.OutputFolder.Value : table.Output;
 
@@ -71,12 +72,12 @@ namespace Orc.DbToCsv
                 Directory.CreateDirectory(outputFolderPath);
             }
 
-            string fullFileName = Path.Combine(outputFolderPath, table.Csv);
-            int records = 0;
+            var fullFileName = Path.Combine(outputFolderPath, table.Csv);
+            var records = 0;
 
             try
             {
-                List<Tuple<string, string>> schema = GetTableSchema(sqlConnection, table.Name);
+                var schema = await GetTableSchemaAsync(sqlConnection, table.Name);
                 if (schema.Count == 0)
                 {
                     Log.Warning("No columns was found in the '{0}' table to export into a csv file.", table.Name);
@@ -91,32 +92,34 @@ namespace Orc.DbToCsv
                 using (var streamWriter = new StreamWriter(new FileStream(fullFileName, FileMode.OpenOrCreate)))
                 {
                     var csvWriter = new CsvWriter(streamWriter);
+
                     // Write Header
                     foreach (var tuple in schema)
                     {
                         csvWriter.WriteField(tuple.Item1);
                     }
+
                     csvWriter.NextRecord();
 
                     // Write records
                     var query = ConstructRecordQuery(table.Name, schema, project.MaximumRowsInTable.Value);
-                    using (var command = new SqlCommand(query) {Connection = sqlConnection, CommandTimeout = 0})
+                    using (var command = new SqlCommand(query) { Connection = sqlConnection, CommandTimeout = 0 })
                     {
                         Log.Debug($"Executed: {query}");
 
-                        using (var dataReader = command.ExecuteReader())
+                        using (var dataReader = await command.ExecuteReaderAsync())
                         {
                             Log.Debug($"The table has records = {dataReader.HasRows}");
 
-                            while (dataReader.Read())
+                            while (await dataReader.ReadAsync())
                             {
-                                for (int i = 0; i < schema.Count; i++)
+                                for (var i = 0; i < schema.Count; i++)
                                 {
-                                    object value = dataReader.GetValue(i);
+                                    var value = dataReader.GetValue(i);
 
                                     if (value is string)
                                     {
-                                        value = ((string) value).Trim(); // Remove all white spaces
+                                        value = ((string)value).Trim(); // Remove all white spaces
                                     }
 
                                     csvWriter.WriteField(value);
@@ -129,7 +132,7 @@ namespace Orc.DbToCsv
                                 //    Log.Debug($"{records} have been written");
                                 //}
 
-                                csvWriter.NextRecord();
+                                await csvWriter.NextRecordAsync();
                             }
                         }
                     }
@@ -145,36 +148,35 @@ namespace Orc.DbToCsv
 
         private static string ConstructRecordQuery(string tableName, List<Tuple<string, string>> schema, int maximumRowsInTable)
         {
-            string columns = string.Join("], [", schema.Select(t => t.Item1));
-            string top = maximumRowsInTable > 0 ? string.Format("TOP {0}", maximumRowsInTable) : string.Empty;
+            var columns = string.Join("], [", schema.Select(t => t.Item1));
+            var top = maximumRowsInTable > 0 ? string.Format("TOP {0}", maximumRowsInTable) : string.Empty;
 
             return string.Format("SELECT {0} [{1}] FROM {2}", top, columns, tableName);
         }
 
-        private static List<Tuple<string, string>> GetTableSchema(SqlConnection sqlConnection, string tableName)
+        private static async Task<List<Tuple<string, string>>> GetTableSchemaAsync(SqlConnection sqlConnection, string tableName)
         {
-            List<Tuple<string, string>> result = new List<Tuple<string, string>>();
-            StringBuilder stringBuilder = new StringBuilder();
+            var result = new List<Tuple<string, string>>();
+
+            var stringBuilder = new StringBuilder();
             stringBuilder.AppendLine("SELECT c.name AS Name, t.name AS columnType");
             stringBuilder.AppendLine("FROM sys.columns c INNER JOIN sys.types t ON c.system_type_id = t.system_type_id");
-            stringBuilder.AppendFormat(
-                " WHERE c.object_id = OBJECT_ID('{0}') and t.name<>'sysname' ",
-                tableName);
+            stringBuilder.AppendFormat(" WHERE c.object_id = OBJECT_ID('{0}') and t.name<>'sysname' ", tableName);
 
             Log.Info("");
             Log.Info("> Processing table '{0}'", tableName);
 
             string commandText = stringBuilder.ToString();
-            using (SqlCommand schemaCommand = new SqlCommand(commandText) {Connection = sqlConnection})
+            using (var schemaCommand = new SqlCommand(commandText) { Connection = sqlConnection })
             {
-                using (SqlDataReader schemaReader = schemaCommand.ExecuteReader())
+                using (var schemaReader = await schemaCommand.ExecuteReaderAsync())
                 {
                     var processedNames = new HashSet<string>();
 
                     while (schemaReader.Read())
                     {
-                        string name = schemaReader.GetString(0);
-                        string stringColumnType = schemaReader.GetString(1);
+                        var name = schemaReader.GetString(0);
+                        var stringColumnType = schemaReader.GetString(1);
 
                         if (processedNames.Contains(name))
                         {
@@ -224,6 +226,7 @@ namespace Orc.DbToCsv
                                 result.Add(new Tuple<string, string>(name, "datetime"));
                                 Log.Info("    Field name '{0}' is a '{1}' type.", name, "datetime");
                                 break;
+
                             case "time":
                                 result.Add(new Tuple<string, string>(name, "time"));
                                 Log.Info("    Field name '{0}' is a '{1}' type.", name, "time");
@@ -232,6 +235,7 @@ namespace Orc.DbToCsv
                             case "timestamp":
                                 // Ignore for now
                                 break;
+
                             default:
                                 result.Add(new Tuple<string, string>(name, "string"));
                                 Log.Info("    Field name '{0}' did not have a match for type '{1}', setting it to 'string'.", name, stringColumnType);
@@ -246,21 +250,21 @@ namespace Orc.DbToCsv
 
         private static string ExtractTableName(string tableName)
         {
-            int ndx = tableName.LastIndexOf('.');
+            var ndx = tableName.LastIndexOf('.');
             return tableName.Substring(ndx + 1).Replace("[", string.Empty).Replace("]", string.Empty);
         }
 
-        private static List<Table> GetAvailableTables(SqlConnection sqlConnection, string outputFolder)
+        private static async Task<List<Table>> GetAvailableTablesAsync(SqlConnection sqlConnection, string outputFolder)
         {
             const string CommandText = "SELECT '['+TABLE_SCHEMA+'].['+ TABLE_NAME + ']' FROM INFORMATION_SCHEMA.TABLES ORDER BY TABLE_SCHEMA, TABLE_NAME";
 
             var result = new List<Table>();
 
-            using (var schemaCommand = new SqlCommand(CommandText) {Connection = sqlConnection, CommandTimeout = 300})
+            using (var schemaCommand = new SqlCommand(CommandText) { Connection = sqlConnection, CommandTimeout = 300 })
             {
-                using (var schemaReader = schemaCommand.ExecuteReader())
+                using (var schemaReader = await schemaCommand.ExecuteReaderAsync())
                 {
-                    while (schemaReader.Read())
+                    while (await schemaReader.ReadAsync())
                     {
                         var table = new Table();
                         table.Name = schemaReader.GetString(0);

@@ -10,6 +10,7 @@ namespace Orc.DbToCsv
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Threading.Tasks;
     using System.Windows.Markup;
     using System.Xaml;
     using Catel.Logging;
@@ -80,7 +81,7 @@ namespace Orc.DbToCsv
             return result;
         }
 
-        public static Project Load(string path = "project.iprj")
+        public static async Task<Project> LoadAsync(string path = "project.iprj")
         {
             try
             {

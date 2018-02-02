@@ -24,8 +24,8 @@ namespace Orc.DbToCsv
     }
     public class static Importer
     {
-        public static void ProcessProject(string projectFilePath, string outputFolderPath) { }
-        public static void ProcessProject(Orc.DbToCsv.Project project) { }
+        public static System.Threading.Tasks.Task ProcessProjectAsync(string projectFilePath, string outputFolderPath) { }
+        public static System.Threading.Tasks.Task ProcessProjectAsync(Orc.DbToCsv.Project project) { }
     }
     [System.Windows.Markup.ContentPropertyAttribute("Value")]
     public class Int32ProjectProperty : Orc.DbToCsv.ProjectProperty
@@ -50,7 +50,7 @@ namespace Orc.DbToCsv
         public Orc.DbToCsv.OutputFolder OutputFolder { get; }
         public System.Collections.Generic.List<Orc.DbToCsv.ProjectProperty> Properties { get; set; }
         public System.Collections.Generic.List<Orc.DbToCsv.Table> Tables { get; set; }
-        public static Orc.DbToCsv.Project Load(string path = "project.iprj") { }
+        public static System.Threading.Tasks.Task<Orc.DbToCsv.Project> LoadAsync(string path = "project.iprj") { }
         public static Orc.DbToCsv.Project Parse(string xaml) { }
         public void Validate() { }
     }

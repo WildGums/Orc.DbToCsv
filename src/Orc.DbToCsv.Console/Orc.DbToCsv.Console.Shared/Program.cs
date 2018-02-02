@@ -10,6 +10,7 @@ namespace Orc.DbToCsv
     using System;
     using System.IO;
     using System.Linq;
+    using System.Threading.Tasks;
     using Catel.IoC;
     using Catel.Logging;
     using CommandLine;
@@ -45,13 +46,14 @@ namespace Orc.DbToCsv
             }
 
             Project project = null;
+
             if (!string.IsNullOrEmpty(options.Project))
             {
-                project = Project.Load(options.Project);
+                project = Project.LoadAsync(options.Project).GetAwaiter().GetResult();
             }
             else
             {
-                project = TryGetProjectAutomatically();
+                project = TryGetProjectAutomaticallyAsync().GetAwaiter().GetResult();
             }
 
             if (project == null)
@@ -66,19 +68,19 @@ namespace Orc.DbToCsv
 
             var outputFolder = string.IsNullOrEmpty(options.OutputFolder) ? Directory.GetCurrentDirectory() : options.OutputFolder;
 
-            Importer.ProcessProject(project);
+            Importer.ProcessProjectAsync(project).GetAwaiter().GetResult();
         }
 
-        private static Project TryGetProjectAutomatically()
+        private static async Task<Project> TryGetProjectAutomaticallyAsync()
         {
             var directoryInfo = new DirectoryInfo(Directory.GetCurrentDirectory());
             var candidates = directoryInfo.GetFiles("*.iprj");
 
-            foreach (FileInfo candidate in candidates)
+            foreach (var candidate in candidates)
             {
                 try
                 {
-                    var project = Project.Load(candidate.FullName);
+                    var project = await Project.LoadAsync(candidate.FullName);
                     return project;
                 }
                 catch

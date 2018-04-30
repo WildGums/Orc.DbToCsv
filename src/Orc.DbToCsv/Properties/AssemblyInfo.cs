@@ -8,7 +8,6 @@
 // All other assembly info is defined in SharedAssembly.cs
 
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Windows.Markup;
 
 [assembly: AssemblyTitle("Orc.DbToCsv")]
@@ -17,9 +16,3 @@ using System.Windows.Markup;
 
 [assembly: XmlnsPrefix("http://wildgums/2015", "orc")]
 [assembly: XmlnsDefinition("http://wildgums/2015", "Orc.DbToCsv")]
-
-// Setting ComVisible to false makes the types in this assembly not visible 
-// to COM components.  If you need to access a type in this assembly from 
-// COM, set the ComVisible attribute to true on that type.
-
-[assembly: ComVisible(false)]

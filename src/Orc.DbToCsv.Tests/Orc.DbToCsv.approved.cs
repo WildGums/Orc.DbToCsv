@@ -1,5 +1,4 @@
-﻿[assembly: System.Runtime.InteropServices.ComVisibleAttribute(false)]
-[assembly: System.Runtime.Versioning.TargetFrameworkAttribute(".NETFramework,Version=v4.6", FrameworkDisplayName=".NET Framework 4.6")]
+﻿[assembly: System.Runtime.Versioning.TargetFrameworkAttribute(".NETFramework,Version=v4.6", FrameworkDisplayName=".NET Framework 4.6")]
 [assembly: System.Windows.Markup.XmlnsDefinitionAttribute("http://wildgums/2015", "Orc.DbToCsv")]
 [assembly: System.Windows.Markup.XmlnsPrefixAttribute("http://wildgums/2015", "orc")]
 public class static ModuleInitializer

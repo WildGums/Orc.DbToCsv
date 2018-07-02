@@ -11,6 +11,11 @@
   </PropertyGroup>
 
   <PropertyGroup>
+    <!-- SonarQube requires a project guid -->
+    <ProjectGuid>8DBEE369-1E9B-4043-990D-C2E67876C129</ProjectGuid>
+  </PropertyGroup>
+  
+  <PropertyGroup>
     <OutputType>Exe</OutputType>
     <StartupObject />
   </PropertyGroup>

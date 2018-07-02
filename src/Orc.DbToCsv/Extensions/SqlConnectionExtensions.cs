@@ -41,7 +41,7 @@ namespace Orc.DbToCsv
             var command = new SqlCommand();
 
             var columns = string.Join("], [", schema.Select(t => t.Item1));
-            var top = maximumRowsInTable > 0 ? $"TOP \"{maximumRowsInTable}\"" : string.Empty;
+            var top = maximumRowsInTable > 0 ? $"TOP {maximumRowsInTable}" : string.Empty;
             command.CommandText = $"SELECT {top} [{columns}] FROM [{tableName}]";
 
             command.Connection = sqlConnection;

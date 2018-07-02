@@ -41,8 +41,8 @@ namespace Orc.DbToCsv
             var command = new SqlCommand();
 
             var columns = string.Join("], [", schema.Select(t => t.Item1));
-            var top = maximumRowsInTable > 0 ? $"TOP {maximumRowsInTable}" : string.Empty;
-            command.CommandText = $"SELECT {top} [{columns}] FROM {tableName}";
+            var top = maximumRowsInTable > 0 ? $"TOP \"{maximumRowsInTable}\"" : string.Empty;
+            command.CommandText = $"SELECT {top} [{columns}] FROM [{tableName}]";
 
             command.Connection = sqlConnection;
             command.CommandTimeout = 0;
@@ -54,14 +54,12 @@ namespace Orc.DbToCsv
         {
             Argument.IsNotNull(() => sqlConnection);
 
-            var command = new SqlCommand();
-
-            command.CommandText = "SELECT '['+TABLE_SCHEMA+'].['+ TABLE_NAME + ']' FROM INFORMATION_SCHEMA.TABLES ORDER BY TABLE_SCHEMA, TABLE_NAME";
-
-            command.Connection = sqlConnection;
-            command.CommandTimeout = 300;
-
-            return command;
+            return new SqlCommand
+            {
+                CommandText = "SELECT '['+TABLE_SCHEMA+'].['+ TABLE_NAME + ']' FROM INFORMATION_SCHEMA.TABLES ORDER BY TABLE_SCHEMA, TABLE_NAME",
+                Connection = sqlConnection,
+                CommandTimeout = 300
+            };
         }
         #endregion
     }

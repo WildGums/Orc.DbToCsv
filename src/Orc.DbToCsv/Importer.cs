@@ -103,10 +103,9 @@ namespace Orc.DbToCsv
                     csvWriter.NextRecord();
 
                     // Write records
-                    var query = ConstructRecordQuery(table.Name, schema, project.MaximumRowsInTable.Value);
-                    using (var command = new SqlCommand(query) { Connection = sqlConnection, CommandTimeout = 0 })
+                    using (var command = sqlConnection.CreateGetRecordsSqlCommand(table.Name, schema, project.MaximumRowsInTable.Value))
                     {
-                        Log.Debug($"Executed: {query}");
+                        Log.Debug($"Executed: {command.CommandText}");
 
                         using (var dataReader = await command.ExecuteReaderAsync())
                         {
@@ -143,14 +142,6 @@ namespace Orc.DbToCsv
             }
         }
 
-        private static string ConstructRecordQuery(string tableName, List<Tuple<string, string>> schema, int maximumRowsInTable)
-        {
-            var columns = string.Join("], [", schema.Select(t => t.Item1));
-            var top = maximumRowsInTable > 0 ? $"TOP {maximumRowsInTable}" : string.Empty;
-
-            return $"SELECT {top} [{columns}] FROM {tableName}";
-        }
-
         private static async Task<List<Tuple<string, string>>> GetTableSchemaAsync(SqlConnection sqlConnection, string tableName)
         {
             var result = new List<Tuple<string, string>>();
@@ -158,7 +149,7 @@ namespace Orc.DbToCsv
             Log.Info("");
             Log.Info("> Processing table '{0}'", tableName);
 
-            using (var schemaCommand = CreateGetTableSchemaSqlCommand(sqlConnection, tableName))
+            using (var schemaCommand = sqlConnection.CreateGetTableSchemaSqlCommand(tableName))
             {
                 using (var schemaReader = await schemaCommand.ExecuteReaderAsync())
                 {
@@ -239,19 +230,6 @@ namespace Orc.DbToCsv
             return result;
         }
 
-        private static SqlCommand CreateGetTableSchemaSqlCommand(SqlConnection sqlConnection, string tableName)
-        {
-            var command = new SqlCommand();
-            command.Parameters.Add("@tableName", SqlDbType.VarChar).Value = tableName;
-            command.CommandText = "SELECT c.name AS Name, t.name AS columnType " +
-                                  "FROM sys.columns c INNER JOIN sys.types t ON c.system_type_id = t.system_type_id " +
-                                  "WHERE c.object_id = OBJECT_ID(@tableName) and t.name<>'sysname'";
-
-            command.Connection = sqlConnection;
-
-            return command;
-        }
-
         private static string ExtractTableName(string tableName)
         {
             var ndx = tableName.LastIndexOf('.');
@@ -260,11 +238,9 @@ namespace Orc.DbToCsv
 
         private static async Task<List<Table>> GetAvailableTablesAsync(SqlConnection sqlConnection, string outputFolder)
         {
-            const string CommandText = "SELECT '['+TABLE_SCHEMA+'].['+ TABLE_NAME + ']' FROM INFORMATION_SCHEMA.TABLES ORDER BY TABLE_SCHEMA, TABLE_NAME";
-
             var result = new List<Table>();
 
-            using (var schemaCommand = new SqlCommand(CommandText) { Connection = sqlConnection, CommandTimeout = 300 })
+            using (var schemaCommand = sqlConnection.CreateGetAvailableTablesSqlCommand())
             {
                 using (var schemaReader = await schemaCommand.ExecuteReaderAsync())
                 {

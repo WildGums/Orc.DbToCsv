@@ -241,15 +241,12 @@ namespace Orc.DbToCsv
 
         private static SqlCommand CreateGetTableSchemaSqlCommand(SqlConnection sqlConnection, string tableName)
         {
-            var stringBuilder = new StringBuilder();
-            stringBuilder.AppendLine("SELECT c.name AS Name, t.name AS columnType");
-            stringBuilder.AppendLine("FROM sys.columns c INNER JOIN sys.types t ON c.system_type_id = t.system_type_id");
-            stringBuilder.AppendFormat(" WHERE c.object_id = OBJECT_ID({0}) and t.name<>'sysname' ", "@tableName");
-            var commandText = stringBuilder.ToString();
-
             var command = new SqlCommand();
             command.Parameters.Add("@tableName", SqlDbType.VarChar).Value = tableName;
-            command.CommandText = commandText;
+            command.CommandText = "SELECT c.name AS Name, t.name AS columnType " +
+                                  "FROM sys.columns c INNER JOIN sys.types t ON c.system_type_id = t.system_type_id " +
+                                  "WHERE c.object_id = OBJECT_ID(@tableName) and t.name<>'sysname'";
+
             command.Connection = sqlConnection;
 
             return command;

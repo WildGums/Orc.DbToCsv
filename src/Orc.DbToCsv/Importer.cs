@@ -155,19 +155,11 @@ namespace Orc.DbToCsv
         {
             var result = new List<Tuple<string, string>>();
 
-            var stringBuilder = new StringBuilder();
-            stringBuilder.AppendLine("SELECT c.name AS Name, t.name AS columnType");
-            stringBuilder.AppendLine("FROM sys.columns c INNER JOIN sys.types t ON c.system_type_id = t.system_type_id");
-            stringBuilder.AppendFormat(" WHERE c.object_id = OBJECT_ID({0}) and t.name<>'sysname' ", "@tableName");
-
             Log.Info("");
             Log.Info("> Processing table '{0}'", tableName);
 
-            var commandText = stringBuilder.ToString();
-            using (var schemaCommand = new SqlCommand(commandText) { Connection = sqlConnection })
+            using (var schemaCommand = CreateGetTableSchemaSqlCommand(sqlConnection, tableName))
             {
-                schemaCommand.Parameters.Add("@tableName", SqlDbType.VarChar).Value = tableName;
-
                 using (var schemaReader = await schemaCommand.ExecuteReaderAsync())
                 {
                     var processedNames = new HashSet<string>();
@@ -245,6 +237,22 @@ namespace Orc.DbToCsv
             }
 
             return result;
+        }
+
+        private static SqlCommand CreateGetTableSchemaSqlCommand(SqlConnection sqlConnection, string tableName)
+        {
+            var stringBuilder = new StringBuilder();
+            stringBuilder.AppendLine("SELECT c.name AS Name, t.name AS columnType");
+            stringBuilder.AppendLine("FROM sys.columns c INNER JOIN sys.types t ON c.system_type_id = t.system_type_id");
+            stringBuilder.AppendFormat(" WHERE c.object_id = OBJECT_ID({0}) and t.name<>'sysname' ", "@tableName");
+            var commandText = stringBuilder.ToString();
+
+            var command = new SqlCommand();
+            command.Parameters.Add("@tableName", SqlDbType.VarChar).Value = tableName;
+            command.CommandText = commandText;
+            command.Connection = sqlConnection;
+
+            return command;
         }
 
         private static string ExtractTableName(string tableName)

@@ -9,6 +9,7 @@ namespace Orc.DbToCsv
 {
     using System;
     using System.Collections.Generic;
+    using System.Data;
     using System.Data.SqlClient;
     using System.IO;
     using System.Linq;
@@ -117,20 +118,16 @@ namespace Orc.DbToCsv
                                 {
                                     var value = dataReader.GetValue(i);
 
-                                    if (value is string)
+                                    var strValue = value as string;
+                                    if (strValue != null)
                                     {
-                                        value = ((string)value).Trim(); // Remove all white spaces
+                                        value = strValue.Trim(); // Remove all white spaces
                                     }
 
                                     csvWriter.WriteField(value);
                                 }
 
                                 records++;
-
-                                //if (records%100 == 0)
-                                //{
-                                //    Log.Debug($"{records} have been written");
-                                //}
 
                                 await csvWriter.NextRecordAsync();
                             }
@@ -149,9 +146,9 @@ namespace Orc.DbToCsv
         private static string ConstructRecordQuery(string tableName, List<Tuple<string, string>> schema, int maximumRowsInTable)
         {
             var columns = string.Join("], [", schema.Select(t => t.Item1));
-            var top = maximumRowsInTable > 0 ? string.Format("TOP {0}", maximumRowsInTable) : string.Empty;
+            var top = maximumRowsInTable > 0 ? $"TOP {maximumRowsInTable}" : string.Empty;
 
-            return string.Format("SELECT {0} [{1}] FROM {2}", top, columns, tableName);
+            return $"SELECT {top} [{columns}] FROM {tableName}";
         }
 
         private static async Task<List<Tuple<string, string>>> GetTableSchemaAsync(SqlConnection sqlConnection, string tableName)
@@ -161,14 +158,16 @@ namespace Orc.DbToCsv
             var stringBuilder = new StringBuilder();
             stringBuilder.AppendLine("SELECT c.name AS Name, t.name AS columnType");
             stringBuilder.AppendLine("FROM sys.columns c INNER JOIN sys.types t ON c.system_type_id = t.system_type_id");
-            stringBuilder.AppendFormat(" WHERE c.object_id = OBJECT_ID('{0}') and t.name<>'sysname' ", tableName);
+            stringBuilder.AppendFormat(" WHERE c.object_id = OBJECT_ID({0}) and t.name<>'sysname' ", "@tableName");
 
             Log.Info("");
             Log.Info("> Processing table '{0}'", tableName);
 
-            string commandText = stringBuilder.ToString();
+            var commandText = stringBuilder.ToString();
             using (var schemaCommand = new SqlCommand(commandText) { Connection = sqlConnection })
             {
+                schemaCommand.Parameters.Add("@tableName", SqlDbType.VarChar).Value = tableName;
+
                 using (var schemaReader = await schemaCommand.ExecuteReaderAsync())
                 {
                     var processedNames = new HashSet<string>();

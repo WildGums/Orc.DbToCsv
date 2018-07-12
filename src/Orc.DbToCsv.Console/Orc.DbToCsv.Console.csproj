@@ -1,0 +1,70 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net46;net47</TargetFrameworks>
+    <AssemblyName>Orc.DbToCsv.Console</AssemblyName>
+    <RootNamespace>Orc.DbToCsv</RootNamespace>
+    <DefaultLanguage>en-US</DefaultLanguage>
+    <PackageId>Orc.DbToCsv.Console</PackageId>
+    <PackageVersion>1.0.0-alpha0001</PackageVersion>
+    <Description>Db to csv converter library.</Description>
+    <PackageTags>orc;db;database;sql;csv;converter</PackageTags>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- SonarQube requires a project guid -->
+    <ProjectGuid>8DBEE369-1E9B-4043-990D-C2E67876C129</ProjectGuid>
+  </PropertyGroup>
+  
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <StartupObject />
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Costura.Fody" Version="3.1.0" />
+    <PackageReference Include="MethodTimer.Fody" Version="2.1.1" PrivateAssets="all" />
+    <PackageReference Include="MSBuild.Sdk.Extras" Version="1.5.4" PrivateAssets="all" />
+    <PackageReference Include="Catel.Core" Version="5.6.0" />
+    <PackageReference Include="Catel.Fody" Version="3.3.0" PrivateAssets="all" />
+    <PackageReference Include="Fody" Version="3.1.3" PrivateAssets="all">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="ModuleInit.Fody" Version="1.8.1" PrivateAssets="all" />
+    <PackageReference Include="Obsolete.Fody" Version="4.4.1" PrivateAssets="all" />
+    <PackageReference Include="Orc.CommandLine" Version="3.0.0" />
+    <PackageReference Include="WpfAnalyzers" Version="2.1.3.2" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Orc.DbToCsv\Orc.DbToCsv.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Sample.iprj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="NETStandard.Library" Version="2.0.1" />
+  </ItemGroup>
+
+  <Import Project="$(MSBuildSDKExtrasTargets)" Condition="Exists('$(MSBuildSDKExtrasTargets)')" />
+  <Import Project="$(MSBuildProjectDirectory)\..\Directory.build.shared.explicit.props" Condition="Exists('$(MSBuildProjectDirectory)\..\Directory.build.shared.explicit.props')" />
+  <Import Project="$(MSBuildProjectDirectory)\..\Directory.build.shared.mat.props" Condition="Exists('$(MSBuildProjectDirectory)\..\Directory.build.shared.mat.props')" />
+</Project>

@@ -8,6 +8,7 @@
     <PackageVersion>1.0.0-alpha0001</PackageVersion>
     <Description>Db to csv converter library.</Description>
     <PackageTags>orc;db;database;sql;csv;converter</PackageTags>
+    <UseWpf>true</UseWpf>
   </PropertyGroup>
 
   <PropertyGroup>

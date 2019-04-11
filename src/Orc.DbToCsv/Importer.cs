@@ -10,13 +10,14 @@ namespace Orc.DbToCsv
     using System;
     using System.Collections.Generic;
     using System.Data;
+    using System.Data.Common;
     using System.Data.SqlClient;
     using System.IO;
-    using System.Linq;
-    using System.Text;
+    using System.Security.Cryptography.X509Certificates;
     using System.Threading.Tasks;
     using Catel.Logging;
     using CsvHelper;
+    using System.Linq;
 
     public static class Importer
     {
@@ -40,6 +41,7 @@ namespace Orc.DbToCsv
                 using (var sqlConnection = new SqlConnection(project.ConnectionString.Value))
                 {
                     sqlConnection.Open();
+
                     var tables = project.Tables;
                     if (project.Tables == null || project.Tables.Count == 0)
                     {
@@ -64,7 +66,7 @@ namespace Orc.DbToCsv
             }
         }
 
-        private static async Task ProcessTableAsync(SqlConnection sqlConnection, Table table, Project project)
+        private static async Task ProcessTableAsync(DbConnection sqlConnection, Table table, Project project)
         {
             var outputFolderPath = string.IsNullOrEmpty(table.Output) ? project.OutputFolder.Value : table.Output;
 
@@ -72,19 +74,12 @@ namespace Orc.DbToCsv
             {
                 Directory.CreateDirectory(outputFolderPath);
             }
-
+            
             var fullFileName = Path.Combine(outputFolderPath, table.Csv);
             var records = 0;
 
             try
             {
-                var schema = await GetTableSchemaAsync(sqlConnection, table.Name);
-                if (schema.Count == 0)
-                {
-                    Log.Warning("No columns was found in the '{0}' table to export into a csv file.", table.Name);
-                    return;
-                }
-
                 if (File.Exists(fullFileName))
                 {
                     File.Delete(fullFileName);
@@ -92,33 +87,29 @@ namespace Orc.DbToCsv
 
                 using (var streamWriter = new StreamWriter(new FileStream(fullFileName, FileMode.OpenOrCreate)))
                 {
-                    var csvWriter = new CsvWriter(streamWriter);
-
-                    // Write Header
-                    foreach (var tuple in schema)
+                    using (var csvWriter = new CsvWriter(streamWriter))
                     {
-                        csvWriter.WriteField(tuple.Item1);
-                    }
-
-                    csvWriter.NextRecord();
-
-                    // Write records
-                    using (var command = sqlConnection.CreateGetRecordsSqlCommand(table.Name, schema, project.MaximumRowsInTable.Value))
-                    {
-                        Log.Debug($"Executed: {command.CommandText}");
-
-                        using (var dataReader = await command.ExecuteReaderAsync())
+                        using (var dataReader = sqlConnection.GetRecordsReader(project, table.Name))
                         {
-                            Log.Debug($"The table has records = {dataReader.HasRows}");
-
-                            while (await dataReader.ReadAsync())
+                            var schemaTable = dataReader.GetSchemaTable();
+                            var schemaRows = schemaTable?.Rows;
+                            var schemaRowsCount = schemaRows?.Count ?? 0;
+                            for (var i = 0; i < schemaRowsCount; i++)
                             {
-                                for (var i = 0; i < schema.Count; i++)
+                                var row = schemaRows[i];
+                                var columnName = row["ColumnName"] as string;
+                                csvWriter.WriteField(columnName);
+                            }
+
+                            csvWriter.NextRecord();
+
+                            while (dataReader.Read())
+                            {
+                                for (var i = 0; i < schemaRowsCount; i++)
                                 {
                                     var value = dataReader.GetValue(i);
 
-                                    var strValue = value as string;
-                                    if (strValue != null)
+                                    if (value is string strValue)
                                     {
                                         value = strValue.Trim(); // Remove all white spaces
                                     }
@@ -133,7 +124,7 @@ namespace Orc.DbToCsv
                         }
                     }
                 }
-
+                
                 Log.Info("{0} records of '{1}' table successfully exported to {2}.", records, table.Name, fullFileName);
             }
             catch (Exception ex)

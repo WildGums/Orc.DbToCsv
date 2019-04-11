@@ -17,6 +17,8 @@
   </PropertyGroup>
   
   <ItemGroup>
+    <PackageReference Include="Insight.Database" Version="6.2.8" />
+    <PackageReference Include="Insight.Database.Providers.Oracle" Version="5.2.10" />
     <PackageReference Include="MethodTimer.Fody" Version="2.1.1" PrivateAssets="all" />
     <PackageReference Include="Catel.Core" Version="5.9.0" />
     <PackageReference Include="Catel.Fody" Version="3.9.0" PrivateAssets="all" />

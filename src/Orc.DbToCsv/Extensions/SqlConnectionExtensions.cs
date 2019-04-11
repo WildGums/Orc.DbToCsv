@@ -10,9 +10,12 @@ namespace Orc.DbToCsv
     using System;
     using System.Collections.Generic;
     using System.Data;
+    using System.Data.Common;
     using System.Data.SqlClient;
     using System.Linq;
+    using System.Threading.Tasks;
     using Catel;
+    using Insight.Database;
 
     internal static class SqlConnectionExtensions
     {
@@ -31,6 +34,22 @@ namespace Orc.DbToCsv
             command.Connection = sqlConnection;
 
             return command;
+        }
+
+        internal static IDataReader GetRecordsReader(this DbConnection connection, Project project, string tableName)
+        {
+            Argument.IsNotNull(() => connection);
+            Argument.IsNotNull(() => project);
+
+            return connection.GetReaderSql($"select top {project.MaximumRowsInTable.Value} * from {tableName}");
+        }
+
+        internal static Task<IList<FastExpando>> GetRecordsAsync(this DbConnection connection, Project project, string tableName)
+        {
+            Argument.IsNotNull(() => connection);
+            Argument.IsNotNull(() => project);
+
+            return connection.QuerySqlAsync($"select top {project.MaximumRowsInTable.Value} * from {tableName}");
         }
 
         internal static SqlCommand CreateGetRecordsSqlCommand(this SqlConnection sqlConnection, string tableName, List<Tuple<string, string>> schema, int maximumRowsInTable)

@@ -135,7 +135,7 @@ namespace Orc.DbToCsv
 
         private static string ExtractTableName(string tableName)
         {
-            int ndx = tableName.LastIndexOf('.');
+            var ndx = tableName.LastIndexOf('.');
             return tableName.Substring(ndx + 1).Replace("[", string.Empty).Replace("]", string.Empty);
         }
         #endregion

@@ -1,9 +1,8 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="ICollectionExtensions.cs" company="WildGums">
-//   Copyright (c) 2008 - 2016 WildGums. All rights reserved.
+//   Copyright (c) 2008 - 2019 WildGums. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
-
 
 namespace Orc.DbToCsv
 {
@@ -18,11 +17,13 @@ namespace Orc.DbToCsv
             where TTarget : T
         {
             var result = collection.OfType<TTarget>().FirstOrDefault();
-            if (result == null)
+            if (result != null)
             {
-                result = func();
-                collection.Add(result);
+                return result;
             }
+
+            result = func();
+            collection.Add(result);
             return result;
         }
         #endregion

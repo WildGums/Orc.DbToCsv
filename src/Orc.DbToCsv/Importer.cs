@@ -11,10 +11,15 @@ namespace Orc.DbToCsv
     using System.Data.Common;
     using System.Data.SqlClient;
     using System.IO;
+    using System.Linq;
     using System.Threading.Tasks;
     using Catel.Logging;
     using CsvHelper;
+    using DatabaseManagement;
     using Insight.Database;
+    using Insight.Database.Providers;
+    using Insight.Database.Providers.PostgreSQL;
+    using Npgsql;
 
     public static class Importer
     {
@@ -29,27 +34,45 @@ namespace Orc.DbToCsv
             await ProcessProjectAsync(project);
         }
 
+        private static InsightDbProvider GetProvider(Project project)
+        {
+            return new PostgreSQLInsightDbProvider();
+        }
+
         public static async Task ProcessProjectAsync(Project project)
         {
             Log.Info("Project processing started ...");
 
             try
             {
-                using (var sqlConnection = new SqlConnection(project.ConnectionString.Value))
+                var p = new PostgreSQLDbProvider();
+                var connection1 = p.CreateConnection(new DatabaseSource(@"ConnectionString=Server=127.0.0.1;Port=5432;Database=newDb;User Id=postgres;Password=postleovg2562;, Table=NewPT"));
+                await connection1.OpenConnectionAsync1();
+                var results1 = await connection1.QuerySqlAsync("select * from \"newPT\" limit 3");
+
+                var p2 = new MsSqlDbProvider();
+                var connection2 = p2.CreateConnection(new DatabaseSource($@"ConnectionString={project.ConnectionString.Value}"));
+                await connection2.OpenConnectionAsync1();
+                var results2 = await connection2.QuerySqlAsync($"select * from test_1");
+                
+                var provider = GetProvider(project);
+
+                using (var connection = provider.CreateDbConnection())
                 {
-                    sqlConnection.Open();
+                    connection.ConnectionString = project.ConnectionString.Value;// "Server=127.0.0.1;Port=5432;Database=newDb;User Id=postgres;Password=postleovg2562;";
+                    await connection.OpenConnectionAsync();
 
                     var tables = project.Tables;
                     if (project.Tables == null || project.Tables.Count == 0)
                     {
-                        tables = await GetAvailableTablesAsync(sqlConnection, project.OutputFolder.Value);
+                       // tables = await GetAvailableTablesAsync(connection, project.OutputFolder.Value);
                     }
 
                     Log.Info("{0} tables to process", tables.Count.ToString());
 
                     foreach (var table in tables)
                     {
-                        await ProcessTableAsync(sqlConnection, table, project);
+                        await ProcessTableAsync(connection, table, project);
                     }
                 }
             }
@@ -81,12 +104,12 @@ namespace Orc.DbToCsv
                 {
                     File.Delete(fullFileName);
                 }
-
+                
                 using (var streamWriter = new StreamWriter(new FileStream(fullFileName, FileMode.OpenOrCreate)))
                 {
                     using (var csvWriter = new CsvWriter(streamWriter))
                     {
-                        using (var dataReader = sqlConnection.GetRecordsReader(project, table.Name) as DbDataReader)
+                        using (var dataReader = sqlConnection.GetRecordsReader(project, table.Name))
                         {
                             if (dataReader == null)
                             {

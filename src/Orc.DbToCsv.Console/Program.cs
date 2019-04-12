@@ -14,25 +14,32 @@ namespace Orc.DbToCsv
     using Catel.IoC;
     using Catel.Logging;
     using CommandLine;
+    using DatabaseManagement;
 
     internal class Program
     {
         private static readonly ILog Log = LogManager.GetCurrentClassLogger();
+
         #region Methods
         private static void Main(string[] args)
         {
             InitializeLogManager();
             var commandLine = Environment.CommandLine.GetCommandLine(true);
             var options = new Options();
+
+            options.OutputFolder = "F:\\output";
+            options.Project = "F:\\Sample1.iprj";
             
             var serviceLocator = ServiceLocator.Default;
             var commandLineParser = serviceLocator.ResolveType<ICommandLineParser>();
-            var validationContext = commandLineParser.Parse(commandLine, options);
-            if (validationContext.HasErrors)
-            {
-                Console.WriteLine(validationContext.GetErrors().First().Message);
-                Environment.Exit(1);
-            }
+    //        var validationContext = commandLineParser.Parse(commandLine, options);
+         //   if (validationContext.HasErrors)
+      //      {
+     //           Console.WriteLine(validationContext.GetErrors().First().Message);
+   //             Environment.Exit(1);
+    //        }
+
+            var databaseSource = new DatabaseSource(@"TableType=View,ConnectionString=Data Source=DESKTOP-O27UDHP\\SQLEXPRESS;Initial Catalog=RanttSaaS;Integrated Security=True, Table=Table_To_Test");
 
             if (options.IsHelp)
             {
@@ -45,7 +52,7 @@ namespace Orc.DbToCsv
                 return;
             }
 
-            Project project = null;
+            Project project;
 
             if (!string.IsNullOrEmpty(options.Project))
             {

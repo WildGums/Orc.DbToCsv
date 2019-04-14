@@ -39,8 +39,6 @@ namespace Orc.DbToCsv
    //             Environment.Exit(1);
     //        }
 
-            var databaseSource = new DatabaseSource(@"TableType=View,ConnectionString=Data Source=DESKTOP-O27UDHP\\SQLEXPRESS;Initial Catalog=RanttSaaS;Integrated Security=True, Table=Table_To_Test");
-
             if (options.IsHelp)
             {
                 var helpWriterService = serviceLocator.ResolveType<IHelpWriterService>();

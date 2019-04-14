@@ -16,10 +16,9 @@ namespace Orc.DbToCsv
     using Catel.Logging;
     using CsvHelper;
     using DatabaseManagement;
-    using Insight.Database;
-    using Insight.Database.Providers;
-    using Insight.Database.Providers.PostgreSQL;
     using Npgsql;
+    using SqlKata;
+    using SqlKata.Compilers;
 
     public static class Importer
     {
@@ -34,33 +33,32 @@ namespace Orc.DbToCsv
             await ProcessProjectAsync(project);
         }
 
-        private static InsightDbProvider GetProvider(Project project)
-        {
-            return new PostgreSQLInsightDbProvider();
-        }
-
         public static async Task ProcessProjectAsync(Project project)
         {
             Log.Info("Project processing started ...");
 
             try
             {
-                var p = new PostgreSQLDbProvider();
+                //var p = new PostgreSQLDbProvider();
+                var p = DbProvider.GetRegisteredProviders()["Npgsql"];
                 var connection1 = p.CreateConnection(new DatabaseSource(@"ConnectionString=Server=127.0.0.1;Port=5432;Database=newDb;User Id=postgres;Password=postleovg2562;, Table=NewPT"));
-                await connection1.OpenConnectionAsync1();
-                var results1 = await connection1.QuerySqlAsync("select * from \"newPT\" limit 3");
+                await connection1.OpenConnectionAsync();
 
-                var p2 = new MsSqlDbProvider();
+                var provider1 = connection1.GetDbProvider();
+               // var results1 = await connection1.QuerySqlAsync("select * from \"newPT\" limit 3");
+
+               //var provider
+                var p2 = DbProvider.GetRegisteredProviders()["System.Data.SqlClient"];
                 var connection2 = p2.CreateConnection(new DatabaseSource($@"ConnectionString={project.ConnectionString.Value}"));
-                await connection2.OpenConnectionAsync1();
-                var results2 = await connection2.QuerySqlAsync($"select * from test_1");
-                
-                var provider = GetProvider(project);
+                await connection2.OpenConnectionAsync();
 
-                using (var connection = provider.CreateDbConnection())
+                var provider2 = connection2.GetDbProvider();
+              //  var results2 = await connection2.QuerySqlAsync($"select * from test_1");
+                
+               using (var connection = connection1/*p2.CreateConnection(new DatabaseSource($@"ConnectionString={project.ConnectionString.Value}"))*/)
                 {
-                    connection.ConnectionString = project.ConnectionString.Value;// "Server=127.0.0.1;Port=5432;Database=newDb;User Id=postgres;Password=postleovg2562;";
-                    await connection.OpenConnectionAsync();
+                   // connection.ConnectionString = project.ConnectionString.Value;// "Server=127.0.0.1;Port=5432;Database=newDb;User Id=postgres;Password=postleovg2562;";
+                 //  await connection.OpenConnectionAsync1();
 
                     var tables = project.Tables;
                     if (project.Tables == null || project.Tables.Count == 0)

@@ -1,15 +1,18 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="SQLiteProvider.cs" company="WildGums">
+// <copyright file="PostgreSQLCompiler.cs" company="WildGums">
 //   Copyright (c) 2008 - 2019 WildGums. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Orc.DbToCsv.DatabaseManagement
 {
-    public class SQLiteProvider : DbProviderBase
+    using SqlKata.Compilers;
+
+    [ConnectToProvider("Npgsql")]
+    public class PostgreSqlCompiler : SqlCompilerBase
     {
-        public SQLiteProvider()
-            : base("System.Data.SQLite")
+        public PostgreSqlCompiler()
+            : base(new PostgresCompiler())
         {
         }
     }

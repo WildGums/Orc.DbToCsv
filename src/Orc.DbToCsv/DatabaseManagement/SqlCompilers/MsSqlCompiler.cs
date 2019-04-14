@@ -1,23 +1,20 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="IDbManager.cs" company="WildGums">
+// <copyright file="MsSqlCompiler.cs" company="WildGums">
 //   Copyright (c) 2008 - 2019 WildGums. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Orc.DbToCsv.DatabaseManagement
 {
-    using System.Collections.Generic;
+    using SqlKata.Compilers;
 
-    public interface IDbManager
+    [ConnectToProvider("System.Data.SqlClient")]
+    public class MsSqlCompiler : SqlCompilerBase
     {
-        #region Properties
-        IReadOnlyDictionary<string, DbProvider> DbProviders { get; }
-        #endregion
-
-        #region Methods
-        void Initialize();
-
-        void AddProvider(DbProvider dbProvider);
-        #endregion
+        public MsSqlCompiler()
+            : base(new SqlServerCompiler())
+        {
+            
+        }
     }
 }

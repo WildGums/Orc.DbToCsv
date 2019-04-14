@@ -1,16 +1,15 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="MsSqlDbProvider.cs" company="WildGums">
+// <copyright file="ISqlCompiler.cs" company="WildGums">
 //   Copyright (c) 2008 - 2019 WildGums. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Orc.DbToCsv.DatabaseManagement
 {
-    public class MsSqlDbProvider : DbProviderBase
+    using SqlKata;
+
+    public interface ISqlCompiler
     {
-        public MsSqlDbProvider()
-            : base("System.Data.SqlClient")
-        {
-        }
+        string Compile(Query query);
     }
 }

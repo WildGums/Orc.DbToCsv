@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="ConnectedTypesHelper.cs" company="WildGums">
+// <copyright file="DbQueryParameter.cs" company="WildGums">
 //   Copyright (c) 2008 - 2019 WildGums. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
@@ -7,22 +7,12 @@
 
 namespace Orc.DbToCsv.DatabaseManagement
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using Catel;
-    using Catel.Caching;
-    using Catel.IoC;
-    using Catel.Reflection;
-
-    internal static class ConnectedTypesHelper
+    public class DbQueryParameter
     {
-        #region Constants
-
-        #endregion
-
-        #region Methods
-     
+        #region Properties
+        public string Name { get; set; }
+        public string Type { get; set; }
+        public string Value { get; set; }
         #endregion
     }
 }

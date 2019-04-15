@@ -13,8 +13,8 @@ namespace Orc.DbToCsv.DataAccess
     {
         #region Properties
         string[] FieldHeaders { get; }
-        string this[int index] { get; }
-        string this[string name] { get; }
+        object this[int index] { get; }
+        object this[string name] { get; }
         int TotalRecordCount { get; }
 
         CultureInfo Culture { get; set; }

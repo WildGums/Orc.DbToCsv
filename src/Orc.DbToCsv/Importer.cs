@@ -13,12 +13,10 @@ namespace Orc.DbToCsv
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
+    using Catel.Data;
     using Catel.Logging;
     using CsvHelper;
     using DatabaseManagement;
-    using Npgsql;
-    using SqlKata;
-    using SqlKata.Compilers;
 
     public static class Importer
     {
@@ -39,39 +37,13 @@ namespace Orc.DbToCsv
 
             try
             {
-                //var p = new PostgreSQLDbProvider();
-                var p = DbProvider.GetRegisteredProviders()["Npgsql"];
-                var connection1 = p.CreateConnection(new DatabaseSource(@"ConnectionString=Server=127.0.0.1;Port=5432;Database=newDb;User Id=postgres;Password=postleovg2562;, Table=NewPT"));
-                await connection1.OpenConnectionAsync();
+                var exportDescriptions = project.GetDbToCsvExportDescriptions();
 
-                var provider1 = connection1.GetDbProvider();
-               // var results1 = await connection1.QuerySqlAsync("select * from \"newPT\" limit 3");
+                Log.Info("{0} tables to process", exportDescriptions.Count.ToString());
 
-               //var provider
-                var p2 = DbProvider.GetRegisteredProviders()["System.Data.SqlClient"];
-                var connection2 = p2.CreateConnection(new DatabaseSource($@"ConnectionString={project.ConnectionString.Value}"));
-                await connection2.OpenConnectionAsync();
-
-                var provider2 = connection2.GetDbProvider();
-              //  var results2 = await connection2.QuerySqlAsync($"select * from test_1");
-                
-               using (var connection = connection1/*p2.CreateConnection(new DatabaseSource($@"ConnectionString={project.ConnectionString.Value}"))*/)
+                foreach (var exportDescription in exportDescriptions)
                 {
-                   // connection.ConnectionString = project.ConnectionString.Value;// "Server=127.0.0.1;Port=5432;Database=newDb;User Id=postgres;Password=postleovg2562;";
-                 //  await connection.OpenConnectionAsync1();
-
-                    var tables = project.Tables;
-                    if (project.Tables == null || project.Tables.Count == 0)
-                    {
-                       // tables = await GetAvailableTablesAsync(connection, project.OutputFolder.Value);
-                    }
-
-                    Log.Info("{0} tables to process", tables.Count.ToString());
-
-                    foreach (var table in tables)
-                    {
-                        await ProcessTableAsync(connection, table, project);
-                    }
+                    await ProcessTableAsync(exportDescription, project);
                 }
             }
             catch (SqlException ex)
@@ -84,17 +56,17 @@ namespace Orc.DbToCsv
             }
         }
 
-        private static async Task ProcessTableAsync(DbConnection sqlConnection, Table table, Project project)
+        private static async Task ProcessTableAsync(DbToCsvExportDescription exportDescription, Project project)
         {
-            var outputFolderPath = string.IsNullOrEmpty(table.Output) ? project.OutputFolder.Value : table.Output;
-
+            var fullFileName = exportDescription.CsvFilePath;
+            var outputFolderPath = Path.GetDirectoryName(fullFileName);
             if (!Directory.Exists(outputFolderPath))
             {
                 Directory.CreateDirectory(outputFolderPath);
             }
 
-            var fullFileName = Path.Combine(outputFolderPath, table.Csv);
             var records = 0;
+            var source = exportDescription.Source;
 
             try
             {
@@ -107,30 +79,34 @@ namespace Orc.DbToCsv
                 {
                     using (var csvWriter = new CsvWriter(streamWriter))
                     {
-                        using (var dataReader = sqlConnection.GetRecordsReader(project, table.Name))
+                        var validationContext = new ValidationContext();
+                        using (var dataReader = new SqlTableReader(source.ToString(), validationContext)
                         {
-                            if (dataReader == null)
+                            Offset = 0,
+                            FetchCount = project.MaximumRowsInTable.Value
+                        })
+                        {
+                            while (true)
                             {
-                                return;
-                            }
+                                var currentRecord = dataReader.GetColumns();
 
-                            while (dataReader.HasRows)
-                            {
-                                var schemaTable = dataReader.GetSchemaTable();
-                                var schemaRows = schemaTable?.Rows;
-                                var schemaRowsCount = schemaRows?.Count ?? 0;
-                                for (var i = 0; i < schemaRowsCount; i++)
+                                //var readFirstRecordResult = await dataReader.ReadAsync();
+                                //if (!readFirstRecordResult)
+                                //{
+                                //    break;
+                                //}
+
+                           //     var currentRecord = dataReader.FieldHeaders;
+
+                                foreach (var field in currentRecord)
                                 {
-                                    var row = schemaRows[i];
-                                    var columnName = row["ColumnName"] as string;
-                                    csvWriter.WriteField(columnName);
+                                    csvWriter.WriteField(field);
                                 }
-
                                 csvWriter.NextRecord();
 
                                 while (await dataReader.ReadAsync())
                                 {
-                                    for (var i = 0; i < schemaRowsCount; i++)
+                                    for (var i = 0; i < currentRecord.Length; i++)
                                     {
                                         var value = dataReader.GetValue(i);
 
@@ -147,17 +123,25 @@ namespace Orc.DbToCsv
                                     await csvWriter.NextRecordAsync();
                                 }
 
-                                await dataReader.NextResultAsync();
+                                if (!await dataReader.NextResultAsync())
+                                {
+                                    break;
+                                }
+
+                                if (!dataReader.HasRows)
+                                {
+                                    break;
+                                }
                             }
                         }
                     }
                 }
 
-                Log.Info("{0} records of '{1}' table successfully exported to {2}.", records, table.Name, fullFileName);
+                Log.Info("{0} records of '{1}' table successfully exported to {2}.", records, source.Table, fullFileName);
             }
             catch (Exception ex)
             {
-                Log.Error("{0} export failed because of exception: {1}", table.Name, ex.Message);
+                Log.Error("{0} export failed because of exception: {1}", source.Table, ex.Message);
             }
         }
 

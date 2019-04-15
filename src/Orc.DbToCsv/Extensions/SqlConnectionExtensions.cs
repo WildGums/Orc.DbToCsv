@@ -99,6 +99,46 @@ namespace Orc.DbToCsv
             return DbProviderCache.GetProviderByConnectionType(connectionType);
         }
 
+        public static DbDataReader GetRecords(this DbConnection connection, DatabaseSource source, int offset, int fetchCount, DbQueryParameters queryParameters)
+        {
+            Argument.IsNotNull(() => connection);
+            Argument.IsNotNull(() => source);
+
+            if (connection.State != ConnectionState.Open)
+            {
+                connection.Open();
+            }
+
+            var sql = source.Table;
+            if (source.TableType == TableType.Table || source.TableType == TableType.View)
+            {
+                var query = new Query(source.Table)
+                    .Select("*")
+                    .ForPage(offset / fetchCount + 1, fetchCount);
+
+                var compiler = connection.GetCompiler();
+                sql = compiler.Compile(query);
+            }
+
+            return connection.GetReaderSql(sql) as DbDataReader;
+        }
+
+        internal static DbDataReader GetRecordsReader(this DbConnection connection, Project project, DatabaseSource source)
+        {
+            Argument.IsNotNull(() => connection);
+            Argument.IsNotNull(() => project);
+            Argument.IsNotNull(() => source);
+
+            var query = new Query(source.Table)
+                .Select("*")
+                .ForPage(1, project.MaximumRowsInTable.Value);
+
+            var compiler = connection.GetCompiler();
+            var sql = compiler.Compile(query);
+
+            return connection.GetReaderSql(sql) as DbDataReader;
+        }
+
         internal static DbDataReader GetRecordsReader(this DbConnection connection, Project project, string tableName)
         {
             Argument.IsNotNull(() => connection);
@@ -109,8 +149,7 @@ namespace Orc.DbToCsv
                 .ForPage(1, project.MaximumRowsInTable.Value);
 
             var compiler = connection.GetCompiler();
-            var result = compiler.Compile(query);
-            var sql = result.ToString();
+            var sql = compiler.Compile(query);
 
             return connection.GetReaderSql(sql) as DbDataReader;
         }

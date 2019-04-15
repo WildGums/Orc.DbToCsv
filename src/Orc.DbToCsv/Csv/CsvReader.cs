@@ -49,8 +49,8 @@ namespace Orc.DbToCsv.Csv
 
         #region Properties
         public string[] FieldHeaders => _reader.Context.HeaderRecord;
-        public string this[int index] => _reader[index];
-        public string this[string name] => _reader[name];
+        public object this[int index] => _reader[index];
+        public object this[string name] => _reader[name];
         public int TotalRecordCount => GetRecordCount();
         public CultureInfo Culture { get; set; }
         public int Offset { get; set; }

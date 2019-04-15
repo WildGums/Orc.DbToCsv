@@ -34,7 +34,7 @@ namespace Orc.DbToCsv
                     Console.ForegroundColor = ConsoleColor.White;
                     break;
             }
-          //  Console.WriteLine("{0}", message);
+            Console.WriteLine("{0}", message);
         }
         #endregion
     }

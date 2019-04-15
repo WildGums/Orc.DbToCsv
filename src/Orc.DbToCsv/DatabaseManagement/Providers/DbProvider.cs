@@ -62,6 +62,17 @@ namespace Orc.DbToCsv.DatabaseManagement
             Providers[provider.ProviderInvariantName] = provider;
         }
 
+        public static DbProvider GetRegisteredProvider(string invariantName)
+        {
+            var registeredProviders = GetRegisteredProviders();
+            if (registeredProviders.TryGetValue(invariantName, out var dbProvider))
+            {
+                return dbProvider;
+            }
+
+            return null;
+        }
+
         public static IReadOnlyDictionary<string, DbProvider> GetRegisteredProviders()
         {
             var providers = Providers;
@@ -90,6 +101,7 @@ namespace Orc.DbToCsv.DatabaseManagement
             if (_connectionType == null)
             {
                 _connectionType = connection?.GetType();
+                this.ConnectType<DbConnection>(_connectionType);
             }
 
             return connection;

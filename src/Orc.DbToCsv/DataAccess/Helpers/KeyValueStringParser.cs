@@ -30,7 +30,10 @@ namespace Orc.DbToCsv.DataAccess
         #region Methods
         public static Dictionary<string, string> Parse(string source)
         {
-            Argument.IsNotNullOrWhitespace(() => source);
+            if (string.IsNullOrWhiteSpace(source))
+            {
+                return new Dictionary<string, string>();
+            }
 
             var keyValuePairs = source.Split(KeyValuePairsDelimiter);
 

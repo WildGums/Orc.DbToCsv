@@ -8,10 +8,8 @@ namespace Orc.DbToCsv
 {
     using System;
     using System.Collections.Generic;
-    using System.Data.Common;
     using System.Data.SqlClient;
     using System.IO;
-    using System.Linq;
     using System.Threading.Tasks;
     using Catel.Data;
     using Catel.Logging;
@@ -80,24 +78,11 @@ namespace Orc.DbToCsv
                     using (var csvWriter = new CsvWriter(streamWriter))
                     {
                         var validationContext = new ValidationContext();
-                        using (var dataReader = new SqlTableReader(source.ToString(), validationContext)
-                        {
-                            Offset = 0,
-                            FetchCount = project.MaximumRowsInTable.Value
-                        })
+                        using (var dataReader = new SqlTableReader(source.ToString(), validationContext, 0, project.MaximumRowsInTable.Value))
                         {
                             while (true)
                             {
-                                var currentRecord = dataReader.GetColumns();
-
-                                //var readFirstRecordResult = await dataReader.ReadAsync();
-                                //if (!readFirstRecordResult)
-                                //{
-                                //    break;
-                                //}
-
-                           //     var currentRecord = dataReader.FieldHeaders;
-
+                                var currentRecord = dataReader.FieldHeaders;
                                 foreach (var field in currentRecord)
                                 {
                                     csvWriter.WriteField(field);
@@ -127,11 +112,6 @@ namespace Orc.DbToCsv
                                 {
                                     break;
                                 }
-
-                                if (!dataReader.HasRows)
-                                {
-                                    break;
-                                }
                             }
                         }
                     }
@@ -143,12 +123,6 @@ namespace Orc.DbToCsv
             {
                 Log.Error("{0} export failed because of exception: {1}", source.Table, ex.Message);
             }
-        }
-
-        private static string ExtractTableName(string tableName)
-        {
-            var ndx = tableName.LastIndexOf('.');
-            return tableName.Substring(ndx + 1).Replace("[", string.Empty).Replace("]", string.Empty);
         }
 
         private static async Task<List<Table>> GetAvailableTablesAsync(SqlConnection sqlConnection, string outputFolder)
@@ -175,6 +149,12 @@ namespace Orc.DbToCsv
             }
 
             return result;
+        }
+
+        private static string ExtractTableName(string tableName)
+        {
+            var ndx = tableName.LastIndexOf('.');
+            return tableName.Substring(ndx + 1).Replace("[", string.Empty).Replace("]", string.Empty);
         }
         #endregion
     }

@@ -15,7 +15,6 @@ namespace Orc.DbToCsv.DatabaseManagement
     using Catel;
     using Catel.Data;
     using Catel.Logging;
-    using Catel.Threading;
     using DataAccess;
 
     public class SqlTableReader : ReaderBase, IReader
@@ -30,37 +29,37 @@ namespace Orc.DbToCsv.DatabaseManagement
         private bool _isFieldHeadersInitialized;
         private bool _isInitialized;
         private DbDataReader _reader;
+        private string[] _fieldHeaders = new string[0];
         #endregion
 
         #region Constructors
-        public SqlTableReader(string source, IValidationContext validationContext)
+        public SqlTableReader(string source, IValidationContext validationContext, int offset = 0, int fetchCount = 0)
             : base(source, validationContext)
         {
             Argument.IsNotNullOrEmpty(() => source);
 
             _source = source;
+            Offset = offset;
+            FetchCount = fetchCount;
         }
         #endregion
 
-        public string[] GetColumns()
+        #region Properties
+        public string[] FieldHeaders
         {
-            TryInitialize();
-
-            var schemaTable = _reader.GetSchemaTable();
-            var schemaRows = schemaTable?.Rows;
-            var schemaRowsCount = schemaRows?.Count ?? 0;
-            var columns = new string[schemaRowsCount];
-            for (var i = 0; i < schemaRowsCount; i++)
+            get
             {
-                var row = schemaRows[i];
-                columns[i] =row["ColumnName"] as string;
+                if (_isFieldHeadersInitialized)
+                {
+                    return _fieldHeaders;
+                }
+
+                TryInitialize();
+                return _fieldHeaders;
             }
 
-            return columns.ToArray();
+            private set => _fieldHeaders = value;
         }
-
-        #region Properties
-        public string[] FieldHeaders { get; private set; } = new string[0];
 
         public object this[int index] => GetValue(index);
         public object this[string name] => GetValue(name);

@@ -4,47 +4,30 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
+
 namespace Orc.DbToCsv
 {
-    using System;
-    using System.Collections.Generic;
     using System.Data;
     using System.Data.Common;
     using System.Data.SqlClient;
-    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Catel;
     using Common;
     using DatabaseManagement;
     using SqlKata;
-    using SqlKata.Compilers;
 
     internal static class SqlConnectionExtensions
     {
         #region Methods
-        public static async Task<T> OpenConnectionAsync<T>(this T connection, CancellationToken cancellationToken = default)
-            where T : class, IDbConnection
-        {
-            Argument.IsNotNull(() => connection);
-
-            if (!((object) connection is DbConnection dbConnection))
-            {
-                connection.Open();
-                return connection;
-            }
-            await dbConnection.OpenAsync(cancellationToken);
-            return connection;
-        }
-
-        public static IDataReader GetReaderSql(this IDbConnection connection, string sql, object parameters = null, int? commandTimeout = null)
+        public static IDataReader GetReaderSql(this DbConnection connection, string sql, object parameters = null, int? commandTimeout = null)
         {
             Argument.IsNotNull(() => connection);
 
             return connection.GetReader(sql, CommandType.Text, parameters, commandTimeout);
         }
 
-        public static IDataReader GetReader(this IDbConnection connection, string sql, CommandType commandType = CommandType.Text,
+        public static IDataReader GetReader(this DbConnection connection, string sql, CommandType commandType = CommandType.Text,
             object parameters = null, int? commandTimeout = null)
         {
             Argument.IsNotNull(() => connection);
@@ -55,16 +38,7 @@ namespace Orc.DbToCsv
             }
         }
 
-        //public static IDataReader GetReader(this DbConnection connection, Query query)
-        //{
-        //    var provider = connection.GetDbProvider();
-        //    var compiler = provider.SqlCompiler;
-
-        //    var result = compiler.Compile(query);
-
-        //}
-
-        public static IDbCommand CreateCommand(this IDbConnection connection, string sql, object parameters = null,
+        public static IDbCommand CreateCommand(this DbConnection connection, string sql, object parameters = null,
             CommandType commandType = CommandType.Text, int? commandTimeout = null)
         {
             Argument.IsNotNull(() => connection);

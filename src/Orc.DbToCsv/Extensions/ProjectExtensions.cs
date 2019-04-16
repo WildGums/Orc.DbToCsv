@@ -9,12 +9,20 @@ namespace Orc.DbToCsv
 {
     using System.Collections.Generic;
     using System.IO;
+    using System.Threading.Tasks;
     using Catel;
     using DatabaseManagement;
 
     public static class ProjectExtensions
     {
         #region Methods
+        public static Task ExportAsync(this Project project)
+        {
+            Argument.IsNotNull(() => project);
+
+            return Importer.ProcessProjectAsync(project);
+        }
+
         public static IList<DbToCsvExportDescription> GetDbToCsvExportDescriptions(this Project project)
         {
             Argument.IsNotNull(() => project);

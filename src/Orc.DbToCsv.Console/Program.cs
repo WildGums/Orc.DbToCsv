@@ -14,7 +14,6 @@ namespace Orc.DbToCsv
     using Catel.IoC;
     using Catel.Logging;
     using CommandLine;
-    using DatabaseManagement;
 
     internal class Program
     {
@@ -50,16 +49,9 @@ namespace Orc.DbToCsv
                 return;
             }
 
-            Project project;
-
-            if (!string.IsNullOrEmpty(options.Project))
-            {
-                project = Project.LoadAsync(options.Project).GetAwaiter().GetResult();
-            }
-            else
-            {
-                project = TryGetProjectAutomaticallyAsync().GetAwaiter().GetResult();
-            }
+            var project = !string.IsNullOrEmpty(options.Project) 
+                ? Project.LoadAsync(options.Project).GetAwaiter().GetResult()
+                : TryGetProjectAutomaticallyAsync().GetAwaiter().GetResult();
 
             if (project == null)
             {
@@ -71,9 +63,7 @@ namespace Orc.DbToCsv
                 options.OutputFolder = project.OutputFolder.Value;
             }
 
-            var outputFolder = string.IsNullOrEmpty(options.OutputFolder) ? Directory.GetCurrentDirectory() : options.OutputFolder;
-
-            Importer.ProcessProjectAsync(project).GetAwaiter().GetResult();
+            project.ExportAsync().GetAwaiter().GetResult();
         }
 
         private static async Task<Project> TryGetProjectAutomaticallyAsync()

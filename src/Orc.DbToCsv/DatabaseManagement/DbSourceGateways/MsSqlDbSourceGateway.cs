@@ -119,13 +119,11 @@ namespace Orc.DbToCsv.DatabaseManagement
 
                 case TableType.StoredProcedure:
                 {
-                    var query = new Query("sys.parameters")
-                        .Select("name", "type_name(user_type_id)")
-                        .Where("object_id", $"object_id('{source.Table}')");
+                    var query = $"SELECT [name], type_name(user_type_id) as type FROM [sys].[parameters] WHERE [object_id] = object_id('{source.Table}')";
 
                     var connection = GetOpenedConnection();
                     var queryParameters = new DbQueryParameters();
-                    using (var reader = connection.ExecuteReader(query))
+                    using (var reader = connection.GetReader(query))
                     {
                         while (reader.Read())
                         {
@@ -139,7 +137,7 @@ namespace Orc.DbToCsv.DatabaseManagement
                         }
                     }
 
-                    break;
+                    return queryParameters;
                 }
                 case TableType.Table:
                     break;

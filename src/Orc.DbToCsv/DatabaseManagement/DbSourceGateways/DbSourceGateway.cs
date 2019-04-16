@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="Database.cs" company="WildGums">
+// <copyright file="DbSourceGateway.cs" company="WildGums">
 //   Copyright (c) 2008 - 2019 WildGums. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
@@ -35,6 +35,11 @@ namespace Orc.DbToCsv.DatabaseManagement
         #endregion
 
         #region Methods
+        public abstract DbDataReader GetRecords(DbQueryParameters queryParameters = null, int offset = 0, int fetchCount = -1);
+        public abstract int GetCount(DbQueryParameters queryParameters = null);
+        public abstract DbQueryParameters GetQueryParameters();
+        public abstract IList<DbObject> GetObjects();
+
         protected DbConnection GetOpenedConnection()
         {
             var connection = Connection;
@@ -50,11 +55,6 @@ namespace Orc.DbToCsv.DatabaseManagement
 
             return connection;
         }
-
-        public abstract DbDataReader GetRecords(DbQueryParameters queryParameters = null, int offset = 0, int fetchCount = -1);
-        public abstract int GetCount(DbQueryParameters queryParameters = null);
-        public abstract DbQueryParameters GetQueryParameters();
-        public abstract IList<DbObject> GetObjects();
         #endregion
     }
 }

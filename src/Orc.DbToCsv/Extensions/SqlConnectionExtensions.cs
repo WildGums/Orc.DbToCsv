@@ -7,11 +7,11 @@
 
 namespace Orc.DbToCsv
 {
+    using System;
+    using System.Collections.Generic;
     using System.Data;
     using System.Data.Common;
     using System.Data.SqlClient;
-    using System.Threading;
-    using System.Threading.Tasks;
     using Catel;
     using Common;
     using DatabaseManagement;
@@ -20,25 +20,25 @@ namespace Orc.DbToCsv
     internal static class SqlConnectionExtensions
     {
         #region Methods
-        public static IDataReader GetReaderSql(this DbConnection connection, string sql, object parameters = null, int? commandTimeout = null)
+        public static DbDataReader GetReaderSql(this DbConnection connection, string sql, int? commandTimeout = null)
         {
             Argument.IsNotNull(() => connection);
 
-            return connection.GetReader(sql, CommandType.Text, parameters, commandTimeout);
+            return connection.GetReader(sql, CommandType.Text, commandTimeout);
         }
 
-        public static IDataReader GetReader(this DbConnection connection, string sql, CommandType commandType = CommandType.Text,
-            object parameters = null, int? commandTimeout = null)
+        public static DbDataReader GetReader(this DbConnection connection, string sql, CommandType commandType = CommandType.Text,
+            int? commandTimeout = null)
         {
             Argument.IsNotNull(() => connection);
 
-            using (var command = connection.CreateCommand(sql, parameters, commandType, commandTimeout))
+            using (var command = connection.CreateCommand(sql, commandType, commandTimeout))
             {
-                return command.ExecuteReader();
+                return command.ExecuteReader() as DbDataReader;
             }
         }
 
-        public static IDbCommand CreateCommand(this DbConnection connection, string sql, object parameters = null,
+        public static DbCommand CreateCommand(this DbConnection connection, string sql,
             CommandType commandType = CommandType.Text, int? commandTimeout = null)
         {
             Argument.IsNotNull(() => connection);
@@ -90,11 +90,70 @@ namespace Orc.DbToCsv
                     .Select("*")
                     .ForPage(offset / fetchCount + 1, fetchCount);
 
-                var compiler = connection.GetCompiler();
-                sql = compiler.Compile(query);
+                return connection.ExecuteReader(query) as DbDataReader;
             }
 
             return connection.GetReaderSql(sql) as DbDataReader;
+        }
+
+        internal static DbCommand CreateCommand(this DbConnection connection, Query query, int? commandTimeout = null)
+        {
+            Argument.IsNotNull(() => connection);
+            Argument.IsNotNull(() => query);
+
+            var compiler = connection.GetCompiler();
+            var sql = compiler.Compile(query);
+            return connection.CreateCommand(sql, CommandType.Text, commandTimeout);
+        }
+
+        internal static DbDataReader ExecuteReader(this DbConnection connection, Query query, int? commandTimeout = null)
+        {
+            Argument.IsNotNull(() => connection);
+            Argument.IsNotNull(() => query);
+
+            var compiler = connection.GetCompiler();
+            var sql = compiler.Compile(query);
+            return connection.GetReaderSql(sql, commandTimeout);
+        }
+
+        public static DbCommand AddParameters(this DbCommand dbCommand, DbQueryParameters parameters)
+        {
+            Argument.IsNotNull(() => dbCommand);
+
+            parameters?.Parameters?.ForEach(x => dbCommand.AddParameter(x));
+
+            return dbCommand;
+        }
+
+        public static DbCommand AddParameter(this DbCommand dbCommand, DbQueryParameter parameter)
+        {
+            Argument.IsNotNull(() => dbCommand);
+            Argument.IsNotNull(() => parameter);
+
+            return dbCommand.AddParameter(parameter.Name, parameter.Value);
+        }
+
+        public static DbCommand AddParameter(this DbCommand dbCommand, string name, object value)
+        {
+            Argument.IsNotNull(() => dbCommand);
+
+            var parameter = dbCommand.CreateParameter();
+            parameter.Value = value;
+            parameter.ParameterName = name;
+            dbCommand.Parameters.Add(parameter);
+
+            return dbCommand;
+        }
+
+        public static DbCommand CreateCommandFromQuery(this DbConnection connection, string query)
+        {
+            Argument.IsNotNull(() => connection);
+
+            var command = connection.CreateCommand();
+            command.CommandText = query;
+            command.CommandType = CommandType.Text;
+
+            return command;
         }
 
         internal static DbDataReader GetRecordsReader(this DbConnection connection, Project project, DatabaseSource source)

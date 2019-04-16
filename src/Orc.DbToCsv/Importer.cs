@@ -72,6 +72,19 @@ namespace Orc.DbToCsv
                 {
                     File.Delete(fullFileName);
                 }
+
+                
+                try
+                {
+                    var gateway = source.CreateGateway();
+                    var tables = gateway.GetObjects();
+                    var count = gateway.GetCount();
+                    var parameters = gateway.GetQueryParameters();
+                }
+                catch(Exception ex)
+                {
+                    Console.Write(ex);
+                }
                 
                 using (var streamWriter = new StreamWriter(new FileStream(fullFileName, FileMode.OpenOrCreate)))
                 {

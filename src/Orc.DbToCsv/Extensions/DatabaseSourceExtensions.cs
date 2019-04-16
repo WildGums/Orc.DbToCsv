@@ -14,19 +14,27 @@ namespace Orc.DbToCsv
     public static class DatabaseSourceExtensions
     {
         #region Methods
-        public static DbProvider GetProvider(this DatabaseSource databaseSource)
-        {
-            Argument.IsNotNull(() => databaseSource);
-
-            return DbProvider.GetRegisteredProviders()[databaseSource.ProviderName];
-        }
-
         public static DbConnection CreateConnection(this DatabaseSource databaseSource)
         {
             Argument.IsNotNull(() => databaseSource);
 
             var provider = databaseSource.GetProvider();
             return provider?.CreateConnection(databaseSource);
+        }
+
+        public static DbSourceGateway CreateGateway(this DatabaseSource databaseSource)
+        {
+            Argument.IsNotNull(() => databaseSource);
+
+            var dbProvider = databaseSource.GetProvider();
+            return dbProvider?.CreateDbSourceGateway(databaseSource);
+        }
+
+        public static DbProvider GetProvider(this DatabaseSource databaseSource)
+        {
+            Argument.IsNotNull(() => databaseSource);
+
+            return DbProvider.GetRegisteredProvider(databaseSource.ProviderName);
         }
         #endregion
     }

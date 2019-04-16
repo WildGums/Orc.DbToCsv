@@ -10,6 +10,7 @@ namespace Orc.DbToCsv.DatabaseManagement
     {
         Table,
         View,
-        StoredProcedure
+        StoredProcedure,
+        Sql
     }
 }

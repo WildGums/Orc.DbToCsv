@@ -14,16 +14,14 @@ namespace Orc.DbToCsv.DatabaseManagement
     using System.Linq;
     using Catel;
     using Catel.Collections;
-    using Common;
 
     public class DbProvider
     {
-        #region Constants
-        private static readonly Dictionary<string, DbProvider> Providers = new Dictionary<string, DbProvider>();
-        private static bool IsProvidersInitialized = false;
-        #endregion
-
         #region Fields
+        private static readonly Dictionary<string, DbProvider> Providers = new Dictionary<string, DbProvider>();
+
+        private static bool IsProvidersInitialized = false;
+
         private Type _connectionType;
         private DbProviderFactory _dbProviderFactory;
         private DbProviderInfo _info;
@@ -76,21 +74,23 @@ namespace Orc.DbToCsv.DatabaseManagement
         public static IReadOnlyDictionary<string, DbProvider> GetRegisteredProviders()
         {
             var providers = Providers;
-            if (!IsProvidersInitialized)
+            if (IsProvidersInitialized)
             {
-                DbProviderFactories.GetFactoryClasses().Rows.OfType<DataRow>()
-                    .Select(x => new DbProviderInfo
-                    {
-                        Name = x["Name"]?.ToString(),
-                        Description = x["Description"]?.ToString(),
-                        InvariantName = x["InvariantName"]?.ToString(),
-                    })
-                    .OrderBy(x => x.Name)
-                    .Select(x => new DbProvider(x))
-                    .ForEach(x => providers[x.ProviderInvariantName] = x);
-
-                IsProvidersInitialized = true;
+                return providers;
             }
+
+            DbProviderFactories.GetFactoryClasses().Rows.OfType<DataRow>()
+                .Select(x => new DbProviderInfo
+                {
+                    Name = x["Name"]?.ToString(),
+                    Description = x["Description"]?.ToString(),
+                    InvariantName = x["InvariantName"]?.ToString(),
+                })
+                .OrderBy(x => x.Name)
+                .Select(x => new DbProvider(x))
+                .ForEach(x => providers[x.ProviderInvariantName] = x);
+
+            IsProvidersInitialized = true;
 
             return providers;
         }

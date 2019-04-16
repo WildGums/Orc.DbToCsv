@@ -9,6 +9,7 @@ namespace Orc.DbToCsv
 {
     using System;
     using System.Collections.Generic;
+    using System.Data;
     using System.Data.Common;
     using System.Linq;
     using Catel;
@@ -32,7 +33,7 @@ namespace Orc.DbToCsv
             return (T)ConnectedInstances.GetFromCacheOrFetch(dbProvider.ProviderInvariantName, () => CreateConnectedInstance<T>(dbProvider));
         }
 
-        public static T CreateConnectedInstance<T>(this DbProvider dbProvider)
+        public static T CreateConnectedInstance<T>(this DbProvider dbProvider, params object[] parameters)
         {
             Argument.IsNotNull(() => dbProvider);
 
@@ -43,7 +44,7 @@ namespace Orc.DbToCsv
             }
 
             var typeFactory = dbProvider.GetTypeFactory();
-            return (T)typeFactory.CreateInstanceWithParametersAndAutoCompletion(connectedType);
+            return (T)typeFactory.CreateInstanceWithParametersAndAutoCompletion(connectedType, parameters);
         }
 
         public static IList<Type> GetConnectedTypes<T>(this DbProvider provider)
@@ -92,6 +93,49 @@ namespace Orc.DbToCsv
             Argument.IsNotNull(() => databaseSource);
 
             return CreateConnection(dbProvider, databaseSource.ConnectionString);
+        }
+
+        public static DbSourceGateway CreateDbSourceGateway(this DbProvider dbProvider, DatabaseSource databaseSource)
+        {
+            Argument.IsNotNull(() => databaseSource);
+
+            return dbProvider.CreateConnectedInstance<DbSourceGateway>(databaseSource);
+        }
+
+        public static DbConnection CreateAndOpenConnection(this DbProvider dbProvider, string connectionString)
+        {
+            Argument.IsNotNull(() => dbProvider);
+
+            var connection = dbProvider.CreateConnection(connectionString);
+            if (connection == null)
+            {
+                return null;
+            }
+
+            if (!connection.State.HasFlag(ConnectionState.Open))
+            {
+                connection.Open();
+            }
+
+            return null;
+        }
+
+        public static DbConnection CreateAndOpenConnection(this DbProvider dbProvider, DatabaseSource databaseSource)
+        {
+            Argument.IsNotNull(() => dbProvider);
+
+            var connection = dbProvider.CreateConnection(databaseSource);
+            if (connection == null)
+            {
+                return null;
+            }
+
+            if (!connection.State.HasFlag(ConnectionState.Open))
+            {
+                connection.Open();
+            }
+
+            return null;
         }
 
         public static DbConnection CreateConnection(this DbProvider dbProvider, string connectionString)

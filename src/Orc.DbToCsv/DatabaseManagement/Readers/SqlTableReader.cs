@@ -232,10 +232,10 @@ namespace Orc.DbToCsv.DatabaseManagement
                 return;
             }
 
-            FieldHeaders = Enumerable.Range(0, _reader.FieldCount).Select(_reader.GetName).ToArray();
+            _fieldHeaders = Enumerable.Range(0, _reader.FieldCount).Select(_reader.GetName).ToArray();
 
 #if DEBUG
-            Log.Debug($"'{FieldHeaders.Length}' headers of table were read");
+            Log.Debug($"'{_fieldHeaders.Length}' headers of table were read");
 #endif
         }
         #endregion

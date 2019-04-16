@@ -23,6 +23,7 @@ namespace Orc.DbToCsv
         private static void Main(string[] args)
         {
             InitializeLogManager();
+
             var commandLine = Environment.CommandLine.GetCommandLine(true);
             var options = new Options();
 

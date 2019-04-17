@@ -12,7 +12,6 @@ namespace Orc.DbToCsv
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
-    using Catel.Data;
     using Catel.Logging;
     using CsvHelper;
     using DatabaseManagement;

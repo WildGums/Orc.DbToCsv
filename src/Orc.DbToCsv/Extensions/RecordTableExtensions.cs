@@ -9,7 +9,7 @@ namespace Orc.DbToCsv
 {
     using System.Linq;
     using Catel;
-    using DatabaseManagement;
+    using DataAccess;
 
     public static class RecordTableExtensions
     {

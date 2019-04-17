@@ -11,6 +11,7 @@ namespace Orc.DbToCsv
     using System.Data.Common;
     using System.Linq;
     using Catel;
+    using DataAccess;
     using DatabaseManagement;
 
     public static class DbReaderExtensions

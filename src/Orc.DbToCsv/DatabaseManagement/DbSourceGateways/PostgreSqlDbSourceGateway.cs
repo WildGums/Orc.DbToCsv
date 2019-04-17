@@ -9,6 +9,7 @@ namespace Orc.DbToCsv.DatabaseManagement
 {
     using System;
     using System.Collections.Generic;
+    using System.Data.Common;
     using System.Linq;
     using DataAccess;
 
@@ -47,10 +48,10 @@ namespace Orc.DbToCsv.DatabaseManagement
                             var parameters = result.Split(',').Select(x => x.Trim().Split(' ')).Select(x => new DataSourceParameter
                             {
                                 Name = x[0],
-                                Type =  x[1]
+                                Type = x[1]
                             }).ToList();
 
-                            return new DataSourceParameters { Parameters = parameters};
+                            return new DataSourceParameters {Parameters = parameters};
                         }
                     }
 
@@ -118,6 +119,11 @@ Where 	 r.data_type = 'record' and pg_n.nspname = 'public'";
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+        }
+
+        protected override DbCommand CreateStoredProcedureCommand(DbConnection connection, DataSourceParameters parameters)
+        {
+            return connection.CreateCommand($"call {Source.Table}({parameters?.ToArgsNamesString() ?? string.Empty})");
         }
         #endregion
     }

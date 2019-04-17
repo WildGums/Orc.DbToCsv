@@ -48,11 +48,11 @@ namespace Orc.DbToCsv.DatabaseManagement
                 }
 
                 case TableType.StoredProcedure:
-                    command = connection.CreateCommand(sql, CommandType.StoredProcedure);
+                    command = CreateStoredProcedureCommand(connection, queryParameters);
                     break;
 
                 case TableType.Function:
-                    command = connection.CreateCommand($"select * from {source.Table}({queryParameters?.ToArgsNamesString() ?? string.Empty})");
+                    command = CreateFunctionCommand(connection, queryParameters);
                     break;
 
                 case TableType.Sql:
@@ -72,6 +72,16 @@ namespace Orc.DbToCsv.DatabaseManagement
             }
 
             return reader;
+        }
+
+        protected virtual DbCommand CreateStoredProcedureCommand(DbConnection connection, DataSourceParameters parameters)
+        {
+            return connection.CreateCommand(Source.Table, CommandType.StoredProcedure);
+        }
+
+        protected virtual DbCommand CreateFunctionCommand(DbConnection connection, DataSourceParameters parameters)
+        {
+            return connection.CreateCommand($"select * from {Source.Table}({parameters?.ToArgsNamesString() ?? string.Empty})");
         }
 
         public override long GetCount(DataSourceParameters queryParameters = null)

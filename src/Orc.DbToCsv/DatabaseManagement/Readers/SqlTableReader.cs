@@ -13,7 +13,6 @@ namespace Orc.DbToCsv.DatabaseManagement
     using System.Linq;
     using System.Threading.Tasks;
     using Catel;
-    using Catel.Data;
     using Catel.Logging;
     using DataAccess;
 
@@ -22,23 +21,27 @@ namespace Orc.DbToCsv.DatabaseManagement
         #region Fields
         private static readonly ILog Log = LogManager.GetCurrentClassLogger();
 
-        private readonly string _source;
+        private readonly DatabaseSource _databaseSource;
 
-        private DbConnection _connection;
-        private DatabaseSource _databaseSource;
+        private string[] _fieldHeaders = new string[0];
+        private DbSourceGatewayBase _gateway;
         private bool _isFieldHeadersInitialized;
         private bool _isInitialized;
         private DbDataReader _reader;
-        private string[] _fieldHeaders = new string[0];
         #endregion
 
         #region Constructors
-        public SqlTableReader(string source, IValidationContext validationContext, int offset = 0, int fetchCount = 0)
-            : base(source, validationContext)
+        public SqlTableReader(string source, int offset = 0, int fetchCount = 0)
+            : this(new DatabaseSource(source), offset, fetchCount)
         {
-            Argument.IsNotNullOrEmpty(() => source);
+        }
 
-            _source = source;
+        public SqlTableReader(DatabaseSource source, int offset = 0, int fetchCount = 0)
+            : base(source.ToString())
+        {
+            Argument.IsNotNull(() => source);
+
+            _databaseSource = source;
             Offset = offset;
             FetchCount = fetchCount;
         }
@@ -57,8 +60,6 @@ namespace Orc.DbToCsv.DatabaseManagement
                 TryInitialize();
                 return _fieldHeaders;
             }
-
-            private set => _fieldHeaders = value;
         }
 
         public object this[int index] => GetValue(index);
@@ -70,49 +71,45 @@ namespace Orc.DbToCsv.DatabaseManagement
         public int ReadCount { get; private set; } = 0;
         public int ResultIndex { get; private set; } = 0;
         public DbQueryParameters QueryParameters { get; set; }
+        public bool HasRows => _reader.HasRows;
         #endregion
 
         #region IReader Members
-        public object GetValue(int index) => _reader[index];
-        public object GetValue(string name) => _reader[name];
-
-        public bool HasRows => _reader.HasRows;
-
-        public async Task<bool> NextResultAsync()
+        public async Task<bool> ReadAsync()
         {
-            var result = await _reader.NextResultAsync();
-            if (result)
+            try
             {
-                ResultIndex++;
-                ReadCount = 0;
-                _isFieldHeadersInitialized = false;
-            }
+                TryInitialize();
+                if (_reader == null)
+                {
+                    return false;
+                }
 
-            return result;
+                var readResult = await _reader.ReadAsync();
+                if (readResult)
+                {
+                    ReadCount++;
+                }
+
+                return readResult;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"Failed to read source '{Source}'");
+                AddValidationError($"Failed to read data: '{ex.Message}'");
+                return false;
+            }
         }
-
-        public void Dispose()
-        {
-            if (_reader != null)
-            {
-                _reader.Close();
-                _reader.Dispose();
-            }
-
-            if (_connection == null)
-            {
-                return;
-            }
-
-            _connection.Close();
-            _connection.Dispose();
-        }
-
         public bool Read()
         {
             try
             {
                 TryInitialize();
+
+                if (_reader == null)
+                {
+                    return false;
+                }
 
                 var readResult = _reader.Read();
                 if (readResult)
@@ -130,26 +127,39 @@ namespace Orc.DbToCsv.DatabaseManagement
             }
         }
 
-        public async Task<bool> ReadAsync()
+        public void Dispose()
         {
-            try
+            if (_reader != null)
             {
-                TryInitialize();
-
-                var readResult = await _reader.ReadAsync();
-                if (readResult)
-                {
-                    ReadCount++;
-                }
-
-                return readResult;
+                _reader.Close();
+                _reader.Dispose();
             }
-            catch (Exception ex)
+
+            if (_gateway == null)
             {
-                Log.Error(ex, $"Failed to read source '{Source}'");
-                AddValidationError($"Failed to read data: '{ex.Message}'");
-                return false;
+                return;
             }
+
+            _gateway.Close();
+            _gateway.Dispose();
+        }
+        #endregion
+
+        #region Methods
+        public object GetValue(int index) => _reader[index];
+        public object GetValue(string name) => _reader[name];
+
+        public async Task<bool> NextResultAsync()
+        {
+            var result = await _reader.NextResultAsync();
+            if (result)
+            {
+                ResultIndex++;
+                ReadCount = 0;
+                _isFieldHeadersInitialized = false;
+            }
+
+            return result;
         }
 
         private void TryInitialize()
@@ -170,9 +180,7 @@ namespace Orc.DbToCsv.DatabaseManagement
                 _isFieldHeadersInitialized = true;
             }
         }
-        #endregion
 
-        #region Methods
         private void Initialize()
         {
             if (_isInitialized)
@@ -182,20 +190,7 @@ namespace Orc.DbToCsv.DatabaseManagement
 
             try
             {
-                _databaseSource = new DatabaseSource(_source);
-                _connection = _databaseSource.CreateConnection();
-                //if (_connection == null)
-                //{
-                //    AddValidationError(errorMessage);
-                //}
-
-               //
-               // TotalRecordCount = _dbManager.GetRecordCount(DatabaseSource.Parse(Source, false), QueryParameters, out errorMessage);
-              
-               //if (!string.IsNullOrWhiteSpace(errorMessage))
-                //{
-                //    AddValidationError(errorMessage);
-                //}
+                _gateway = _databaseSource.CreateGateway();
             }
             catch (Exception ex)
             {
@@ -213,7 +208,7 @@ namespace Orc.DbToCsv.DatabaseManagement
         {
             try
             {
-               _reader = _connection.GetRecords(_databaseSource, Offset, FetchCount, QueryParameters);
+                _reader = _gateway.GetRecords(QueryParameters, Offset, FetchCount);
             }
             catch (Exception ex)
             {

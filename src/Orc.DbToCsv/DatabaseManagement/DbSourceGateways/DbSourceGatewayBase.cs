@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="DbSourceGateway.cs" company="WildGums">
+// <copyright file="DbSourceGatewayBase.cs" company="WildGums">
 //   Copyright (c) 2008 - 2019 WildGums. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
@@ -7,12 +7,13 @@
 
 namespace Orc.DbToCsv.DatabaseManagement
 {
+    using System;
     using System.Collections.Generic;
     using System.Data;
     using System.Data.Common;
     using Catel;
 
-    public abstract class DbSourceGatewayBase
+    public abstract class DbSourceGatewayBase : IDisposable
     {
         #region Fields
         private DbConnection _connection;
@@ -32,6 +33,13 @@ namespace Orc.DbToCsv.DatabaseManagement
         public DatabaseSource Source { get; }
         public DbProvider Provider => _provider ?? (_provider = Source.GetProvider());
         public DbConnection Connection => _connection ?? (_connection = Provider?.CreateConnection(Source));
+        #endregion
+
+        #region IDisposable Members
+        public void Dispose()
+        {
+            Connection?.Dispose();
+        }
         #endregion
 
         #region Methods
@@ -59,6 +67,11 @@ namespace Orc.DbToCsv.DatabaseManagement
             }
 
             return connection;
+        }
+
+        public void Close()
+        {
+            Connection?.Close();
         }
         #endregion
     }

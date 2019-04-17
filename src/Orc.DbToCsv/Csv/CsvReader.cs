@@ -23,11 +23,10 @@ namespace Orc.DbToCsv.Csv
         #endregion
 
         #region Constructors
-        public CsvReader(string source, IValidationContext validationContext, ICsvReaderService csvReaderService, IFileService fileService)
-            : base(source, validationContext)
+        public CsvReader(string source, ICsvReaderService csvReaderService, IFileService fileService)
+            : base(source)
         {
             Argument.IsNotNullOrWhitespace(() => source);
-            Argument.IsNotNull(() => validationContext);
             Argument.IsNotNull(() => csvReaderService);
             Argument.IsNotNull(() => fileService);
 

@@ -4,6 +4,7 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
+
 namespace Orc.DbToCsv.DataAccess
 {
     using Catel;
@@ -11,27 +12,29 @@ namespace Orc.DbToCsv.DataAccess
 
     public abstract class ReaderBase
     {
+        #region Fields
+        protected readonly string Source;
+        #endregion
+
         #region Constructors
-        protected ReaderBase(string source, IValidationContext validationContext)
+        protected ReaderBase(string source)
         {
             Argument.IsNotNullOrWhitespace(() => source);
-            Argument.IsNotNull(() => validationContext);
 
             Source = source;
-            _validationContext = validationContext;
+            ValidationContext = new ValidationContext();
         }
+        #endregion
+
+        #region Properties
+        public IValidationContext ValidationContext { get; }
         #endregion
 
         #region Methods
         protected void AddValidationError(string message)
         {
-            _validationContext.AddValidationError(message, $"DataSource: '{Source}'");
+            ValidationContext.AddValidationError(message, $"DataSource: '{Source}'");
         }
-        #endregion
-
-        #region Fields
-        private readonly IValidationContext _validationContext;
-        protected readonly string Source;
         #endregion
     }
 }

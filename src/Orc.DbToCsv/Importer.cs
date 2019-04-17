@@ -10,6 +10,7 @@ namespace Orc.DbToCsv
     using System.Collections.Generic;
     using System.Data.SqlClient;
     using System.IO;
+    using System.Linq;
     using System.Threading.Tasks;
     using Catel.Data;
     using Catel.Logging;
@@ -71,42 +72,26 @@ namespace Orc.DbToCsv
                 if (File.Exists(fullFileName))
                 {
                     File.Delete(fullFileName);
-                }
-                
-                try
-                {
-                    var gateway = source.CreateGateway();
-                    var reader = gateway.GetRecords(null, 2, 3);
-                    while (reader.Read())
-                    {
-                        var test = reader.GetValue(0);
-                    }
-
-                    var count = gateway.GetCount();
-
-                    var tables = gateway.GetObjects();
-                    var parameters = gateway.GetQueryParameters();
-                }
-                catch(Exception ex)
-                {
-                    Console.Write(ex);
-                }
+                }  
                 
                 using (var streamWriter = new StreamWriter(new FileStream(fullFileName, FileMode.OpenOrCreate)))
                 {
                     using (var csvWriter = new CsvWriter(streamWriter))
                     {
-                        var validationContext = new ValidationContext();
-                        using (var dataReader = new SqlTableReader(source.ToString(), validationContext, 0, project.MaximumRowsInTable.Value))
+                        using (var dataReader = new SqlTableReader(source.ToString(), 0, project.MaximumRowsInTable.Value))
                         {
                             while (true)
                             {
                                 var currentRecord = dataReader.FieldHeaders;
-                                foreach (var field in currentRecord)
+                                if (currentRecord.Any())
                                 {
-                                    csvWriter.WriteField(field);
+                                    foreach (var field in currentRecord)
+                                    {
+                                        csvWriter.WriteField(field);
+                                    }
+
+                                    csvWriter.NextRecord();
                                 }
-                                csvWriter.NextRecord();
 
                                 while (await dataReader.ReadAsync())
                                 {
@@ -125,6 +110,13 @@ namespace Orc.DbToCsv
                                     records++;
 
                                     await csvWriter.NextRecordAsync();
+                                }
+                                
+                                if (dataReader.ValidationContext.HasErrors)
+                                {
+                                    Log.Error(dataReader.ValidationContext.ToString());
+
+                                    return;
                                 }
 
                                 if (!await dataReader.NextResultAsync())

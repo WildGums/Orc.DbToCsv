@@ -38,8 +38,8 @@ namespace Orc.DbToCsv.DatabaseManagement
         public int Offset { get; }
         public int Fetch { get; }
         public override int FieldCount => _reader.FieldCount;
-        public override object this[int ordinal] => throw new NotImplementedException();
-        public override object this[string name] => throw new NotImplementedException();
+        public override object this[int ordinal] => _reader[ordinal];
+        public override object this[string name] => _reader[name];
         public override int RecordsAffected => _reader.RecordsAffected;
         public override bool HasRows => _reader.HasRows;
         public override bool IsClosed => _reader.IsClosed;
@@ -49,15 +49,11 @@ namespace Orc.DbToCsv.DatabaseManagement
         #region Methods
         public override bool GetBoolean(int ordinal) => _reader.GetBoolean(ordinal);
         public override byte GetByte(int ordinal) => _reader.GetByte(ordinal);
-
         public override long GetBytes(int ordinal, long dataOffset, byte[] buffer, int bufferOffset, int length) =>
             _reader.GetBytes(ordinal, dataOffset, buffer, bufferOffset, length);
-
         public override char GetChar(int ordinal) => _reader.GetChar(ordinal);
-
         public override long GetChars(int ordinal, long dataOffset, char[] buffer, int bufferOffset, int length) =>
             _reader.GetChars(ordinal, dataOffset, buffer, bufferOffset, length);
-
         public override string GetDataTypeName(int ordinal) => _reader.GetDataTypeName(ordinal);
         public override DateTime GetDateTime(int ordinal) => _reader.GetDateTime(ordinal);
         public override decimal GetDecimal(int ordinal) => _reader.GetDecimal(ordinal);

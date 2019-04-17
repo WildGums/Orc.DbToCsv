@@ -85,10 +85,10 @@ namespace Orc.DbToCsv
                         {
                             while (true)
                             {
-                                var currentRecord = dataReader.FieldHeaders;
-                                if (currentRecord.Any())
+                                var headers = dataReader.FieldHeaders;
+                                if (headers.Any())
                                 {
-                                    foreach (var field in currentRecord)
+                                    foreach (var field in headers)
                                     {
                                         csvWriter.WriteField(field);
                                     }
@@ -98,7 +98,7 @@ namespace Orc.DbToCsv
 
                                 while (await dataReader.ReadAsync())
                                 {
-                                    for (var i = 0; i < currentRecord.Length; i++)
+                                    for (var i = 0; i < headers.Length; i++)
                                     {
                                         var value = dataReader.GetValue(i);
 

@@ -9,7 +9,6 @@ namespace Orc.DbToCsv
 {
     using System.Data;
     using System.Data.Common;
-    using System.Data.SqlClient;
     using Catel;
     using Common;
     using DataAccess;
@@ -33,7 +32,7 @@ namespace Orc.DbToCsv
 
             using (var command = connection.CreateCommand(sql, commandType, commandTimeout))
             {
-                return command.ExecuteReader() as DbDataReader;
+                return command.ExecuteReader();
             }
         }
 
@@ -69,29 +68,6 @@ namespace Orc.DbToCsv
 
             var connectionType = connection.GetType();
             return DbProviderCache.GetProviderByConnectionType(connectionType);
-        }
-
-        public static DbDataReader GetRecords(this DbConnection connection, DatabaseSource source, int offset, int fetchCount, DataSourceParameters queryParameters)
-        {
-            Argument.IsNotNull(() => connection);
-            Argument.IsNotNull(() => source);
-
-            if (connection.State != ConnectionState.Open)
-            {
-                connection.Open();
-            }
-
-            var sql = source.Table;
-            if (source.TableType == TableType.Table || source.TableType == TableType.View)
-            {
-                var query = new Query(source.Table)
-                    .Select("*")
-                    .ForPage(offset / fetchCount + 1, fetchCount);
-
-                return connection.ExecuteReader(query) as DbDataReader;
-            }
-
-            return connection.GetReaderSql(sql) as DbDataReader;
         }
 
         internal static DbCommand CreateCommand(this DbConnection connection, Query query, int? commandTimeout = null)
@@ -141,60 +117,6 @@ namespace Orc.DbToCsv
             dbCommand.Parameters.Add(parameter);
 
             return dbCommand;
-        }
-
-        public static DbCommand CreateCommandFromQuery(this DbConnection connection, string query)
-        {
-            Argument.IsNotNull(() => connection);
-
-            var command = connection.CreateCommand();
-            command.CommandText = query;
-            command.CommandType = CommandType.Text;
-
-            return command;
-        }
-
-        internal static DbDataReader GetRecordsReader(this DbConnection connection, Project project, DatabaseSource source)
-        {
-            Argument.IsNotNull(() => connection);
-            Argument.IsNotNull(() => project);
-            Argument.IsNotNull(() => source);
-
-            var query = new Query(source.Table)
-                .Select("*")
-                .ForPage(1, project.MaximumRowsInTable.Value);
-
-            var compiler = connection.GetCompiler();
-            var sql = compiler.Compile(query);
-
-            return connection.GetReaderSql(sql) as DbDataReader;
-        }
-
-        internal static DbDataReader GetRecordsReader(this DbConnection connection, Project project, string tableName)
-        {
-            Argument.IsNotNull(() => connection);
-            Argument.IsNotNull(() => project);
-
-            var query = new Query(tableName)
-                .Select("*")
-                .ForPage(1, project.MaximumRowsInTable.Value);
-
-            var compiler = connection.GetCompiler();
-            var sql = compiler.Compile(query);
-
-            return connection.GetReaderSql(sql) as DbDataReader;
-        }
-
-        internal static SqlCommand CreateGetAvailableTablesSqlCommand(this SqlConnection sqlConnection)
-        {
-            Argument.IsNotNull(() => sqlConnection);
-
-            return new SqlCommand
-            {
-                CommandText = "SELECT '['+TABLE_SCHEMA+'].['+ TABLE_NAME + ']' FROM INFORMATION_SCHEMA.TABLES ORDER BY TABLE_SCHEMA, TABLE_NAME",
-                Connection = sqlConnection,
-                CommandTimeout = 300
-            };
         }
         #endregion
     }

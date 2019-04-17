@@ -12,7 +12,7 @@ namespace Orc.DbToCsv.DatabaseManagement
     using System.Data;
     using System.Data.Common;
     using SqlKata;
-
+    
     public abstract class SqlDbSourceGatewayBase : DbSourceGatewayBase
     {
         #region Constructors
@@ -27,6 +27,7 @@ namespace Orc.DbToCsv.DatabaseManagement
         {
             var connection = GetOpenedConnection();
             var source = Source;
+            var isPagingQuery = offset >= 0 && fetchCount >= 0;
 
             var sql = source.Table;
             DbCommand command;
@@ -35,8 +36,8 @@ namespace Orc.DbToCsv.DatabaseManagement
                 case TableType.Table:
                 case TableType.View:
                 {
-                    var query = new Query(source.Table).Select("*");
-                    if (offset <= 0 && fetchCount <= 0)
+                    var query = new Query(source.Table).Select();
+                    if (isPagingQuery)
                     {
                         query = query.ForPage(offset / fetchCount + 1, fetchCount);
                     }
@@ -59,7 +60,13 @@ namespace Orc.DbToCsv.DatabaseManagement
 
             command.AddParameters(queryParameters);
 
-            return command.ExecuteReader();
+            var reader = command.ExecuteReader();
+            if (isPagingQuery && (source.TableType == TableType.Sql || source.TableType == TableType.StoredProcedure))
+            {
+                return new SkipTakeDbReader(reader, offset, fetchCount);
+            }
+
+            return reader;
         }
 
         public override long GetCount(DbQueryParameters queryParameters = null)

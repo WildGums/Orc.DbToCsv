@@ -73,24 +73,24 @@ namespace Orc.DbToCsv
                     File.Delete(fullFileName);
                 }
                 
-                //try
-                //{
-                //    var gateway = source.CreateGateway();
-                //    var reader = gateway.GetRecords();
-                //    while (reader.Read())
-                //    {
-                //        var test = reader.GetValue(0);
-                //    }
+                try
+                {
+                    var gateway = source.CreateGateway();
+                    var reader = gateway.GetRecords(null, 2, 3);
+                    while (reader.Read())
+                    {
+                        var test = reader.GetValue(0);
+                    }
 
-                //    var count = gateway.GetCount();
+                    var count = gateway.GetCount();
 
-                //    var tables = gateway.GetObjects();
-                //    var parameters = gateway.GetQueryParameters();
-                //}
-                //catch(Exception ex)
-                //{
-                //    Console.Write(ex);
-                //}
+                    var tables = gateway.GetObjects();
+                    var parameters = gateway.GetQueryParameters();
+                }
+                catch(Exception ex)
+                {
+                    Console.Write(ex);
+                }
                 
                 using (var streamWriter = new StreamWriter(new FileStream(fullFileName, FileMode.OpenOrCreate)))
                 {

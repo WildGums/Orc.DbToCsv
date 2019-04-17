@@ -7,13 +7,13 @@
 
 namespace Orc.DbToCsv
 {
-    using System.Collections.Generic;
+    using DataAccess;
     using DatabaseManagement;
 
     public class DbToCsvExportDescription
     {
         public DatabaseSource Source { get; set; }
-        public List<Parameter> Parameters { get; set; }
+        public DataSourceParameters Parameters { get; set; }
         public string CsvFilePath { get; set; }
     }
 }

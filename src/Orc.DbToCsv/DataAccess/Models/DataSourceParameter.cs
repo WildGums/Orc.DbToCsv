@@ -5,9 +5,9 @@
 // --------------------------------------------------------------------------------------------------------------------
 
 
-namespace Orc.DbToCsv.DatabaseManagement
+namespace Orc.DbToCsv.DataAccess
 {
-    public class DbQueryParameter
+    public class DataSourceParameter
     {
         #region Properties
         public string Name { get; set; }

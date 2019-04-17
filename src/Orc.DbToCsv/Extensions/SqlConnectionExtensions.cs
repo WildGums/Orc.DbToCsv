@@ -12,6 +12,7 @@ namespace Orc.DbToCsv
     using System.Data.SqlClient;
     using Catel;
     using Common;
+    using DataAccess;
     using DatabaseManagement;
     using SqlKata;
 
@@ -70,7 +71,7 @@ namespace Orc.DbToCsv
             return DbProviderCache.GetProviderByConnectionType(connectionType);
         }
 
-        public static DbDataReader GetRecords(this DbConnection connection, DatabaseSource source, int offset, int fetchCount, DbQueryParameters queryParameters)
+        public static DbDataReader GetRecords(this DbConnection connection, DatabaseSource source, int offset, int fetchCount, DataSourceParameters queryParameters)
         {
             Argument.IsNotNull(() => connection);
             Argument.IsNotNull(() => source);
@@ -113,7 +114,7 @@ namespace Orc.DbToCsv
             return connection.GetReaderSql(sql, commandTimeout);
         }
 
-        public static DbCommand AddParameters(this DbCommand dbCommand, DbQueryParameters parameters)
+        public static DbCommand AddParameters(this DbCommand dbCommand, DataSourceParameters parameters)
         {
             Argument.IsNotNull(() => dbCommand);
 
@@ -122,7 +123,7 @@ namespace Orc.DbToCsv
             return dbCommand;
         }
 
-        public static DbCommand AddParameter(this DbCommand dbCommand, DbQueryParameter parameter)
+        public static DbCommand AddParameter(this DbCommand dbCommand, DataSourceParameter parameter)
         {
             Argument.IsNotNull(() => dbCommand);
             Argument.IsNotNull(() => parameter);

@@ -10,6 +10,7 @@ namespace Orc.DbToCsv.DatabaseManagement
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using DataAccess;
 
     [ConnectToProvider("Npgsql")]
     public class PostgreSqlDbSourceGateway : SqlDbSourceGatewayBase
@@ -22,7 +23,7 @@ namespace Orc.DbToCsv.DatabaseManagement
         #endregion
 
         #region Methods
-        public override DbQueryParameters GetQueryParameters()
+        public override DataSourceParameters GetQueryParameters()
         {
             var source = Source;
             switch (source.TableType)
@@ -40,20 +41,20 @@ namespace Orc.DbToCsv.DatabaseManagement
                             var result = reader.GetString(0);
                             if (string.IsNullOrEmpty(result))
                             {
-                                return new DbQueryParameters();
+                                return new DataSourceParameters();
                             }
 
-                            var parameters = result.Split(',').Select(x => x.Trim().Split(' ')).Select(x => new DbQueryParameter
+                            var parameters = result.Split(',').Select(x => x.Trim().Split(' ')).Select(x => new DataSourceParameter
                             {
                                 Name = x[0],
                                 Type =  x[1]
                             }).ToList();
 
-                            return new DbQueryParameters { Parameters = parameters};
+                            return new DataSourceParameters { Parameters = parameters};
                         }
                     }
 
-                    return new DbQueryParameters();
+                    return new DataSourceParameters();
                 }
                 case TableType.Table:
                     break;
@@ -63,10 +64,10 @@ namespace Orc.DbToCsv.DatabaseManagement
                     //TODO: parce sql string
                     break;
                 default:
-                    return new DbQueryParameters();
+                    return new DataSourceParameters();
             }
 
-            return new DbQueryParameters();
+            return new DataSourceParameters();
         }
 
         public override IList<DbObject> GetObjects()

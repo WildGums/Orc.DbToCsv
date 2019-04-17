@@ -5,24 +5,24 @@
 // --------------------------------------------------------------------------------------------------------------------
 
 
-namespace Orc.DbToCsv.DatabaseManagement
+namespace Orc.DbToCsv.DataAccess
 {
     using System;
     using System.Collections.Generic;
     using Catel.Data;
 
     [Serializable]
-    public class DbQueryParameters : SavableModelBase<DbQueryParameters>
+    public class DataSourceParameters : SavableModelBase<DataSourceParameters>
     {
         #region Constructors
-        public DbQueryParameters()
+        public DataSourceParameters()
         {
-            Parameters = new List<DbQueryParameter>();
+            Parameters = new List<DataSourceParameter>();
         }
         #endregion
 
         #region Properties
-        public List<DbQueryParameter> Parameters { get; set; }
+        public List<DataSourceParameter> Parameters { get; set; }
         #endregion
     }
 }

@@ -11,6 +11,7 @@ namespace Orc.DbToCsv.DatabaseManagement
     using System.Collections.Generic;
     using System.Data;
     using System.Data.Common;
+    using DataAccess;
     using SqlKata;
     
     public abstract class SqlDbSourceGatewayBase : DbSourceGatewayBase
@@ -23,7 +24,7 @@ namespace Orc.DbToCsv.DatabaseManagement
         #endregion
 
         #region Methods
-        public override DbDataReader GetRecords(DbQueryParameters queryParameters = null, int offset = 0, int fetchCount = -1)
+        public override DbDataReader GetRecords(DataSourceParameters queryParameters = null, int offset = 0, int fetchCount = -1)
         {
             var connection = GetOpenedConnection();
             var source = Source;
@@ -73,7 +74,7 @@ namespace Orc.DbToCsv.DatabaseManagement
             return reader;
         }
 
-        public override long GetCount(DbQueryParameters queryParameters = null)
+        public override long GetCount(DataSourceParameters queryParameters = null)
         {
             var source = Source;
             var connection = GetOpenedConnection();

@@ -9,8 +9,10 @@ namespace Orc.DbToCsv
 {
     using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
     using System.Threading.Tasks;
     using Catel;
+    using DataAccess;
     using DatabaseManagement;
 
     public static class ProjectExtensions
@@ -46,7 +48,10 @@ namespace Orc.DbToCsv
                 {
                     CsvFilePath = destinationFile,
                     Source = databaseSource,
-                    Parameters = table.Parameters,
+                    Parameters = new DataSourceParameters
+                    {
+                        Parameters = table.Parameters.Select(x => new DataSourceParameter{Name = x.Name, Value = x.Value}).ToList()
+                    },
                 });
             }
 

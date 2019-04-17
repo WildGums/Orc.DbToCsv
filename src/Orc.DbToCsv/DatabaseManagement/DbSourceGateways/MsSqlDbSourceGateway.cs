@@ -9,6 +9,7 @@ namespace Orc.DbToCsv.DatabaseManagement
 {
     using System;
     using System.Collections.Generic;
+    using DataAccess;
     using SqlKata;
 
     [ConnectToProvider("System.Data.SqlClient")]
@@ -22,13 +23,13 @@ namespace Orc.DbToCsv.DatabaseManagement
         #endregion
 
         #region Methods
-        public override DbQueryParameters GetQueryParameters()
+        public override DataSourceParameters GetQueryParameters()
         {
             var source = Source;
             switch (source.TableType)
             {
                 case TableType.Sql:
-                    return new DbQueryParameters();
+                    return new DataSourceParameters();
 
                 case TableType.StoredProcedure:
                 case TableType.Function:
@@ -36,12 +37,12 @@ namespace Orc.DbToCsv.DatabaseManagement
                     var query = $"SELECT [name], type_name(user_type_id) as type FROM [sys].[parameters] WHERE [object_id] = object_id('{source.Table}')";
 
                     var connection = GetOpenedConnection();
-                    var queryParameters = new DbQueryParameters();
+                    var queryParameters = new DataSourceParameters();
                     using (var reader = connection.GetReader(query))
                     {
                         while (reader.Read())
                         {
-                            var args = new DbQueryParameter
+                            var args = new DataSourceParameter
                             {
                                 Name = reader.GetString(0),
                                 Type = reader.GetString(1)
@@ -64,7 +65,7 @@ namespace Orc.DbToCsv.DatabaseManagement
                     throw new ArgumentOutOfRangeException();
             }
 
-            return new DbQueryParameters();
+            return new DataSourceParameters();
         }
 
         public override IList<DbObject> GetObjects()

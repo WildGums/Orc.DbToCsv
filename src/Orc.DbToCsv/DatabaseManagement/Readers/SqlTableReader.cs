@@ -10,6 +10,7 @@ namespace Orc.DbToCsv.DatabaseManagement
     using System;
     using System.Data.Common;
     using System.Globalization;
+    using System.Linq;
     using System.Threading.Tasks;
     using Catel;
     using Catel.Logging;
@@ -31,12 +32,12 @@ namespace Orc.DbToCsv.DatabaseManagement
         #endregion
 
         #region Constructors
-        public SqlTableReader(string source, int offset = 0, int fetchCount = 0, DbQueryParameters parameters = null)
+        public SqlTableReader(string source, int offset = 0, int fetchCount = 0, DataSourceParameters parameters = null)
             : this(new DatabaseSource(source), offset, fetchCount, parameters)
         {
         }
 
-        public SqlTableReader(DatabaseSource source, int offset = 0, int fetchCount = 0, DbQueryParameters parameters = null)
+        public SqlTableReader(DatabaseSource source, int offset = 0, int fetchCount = 0, DataSourceParameters parameters = null)
             : base(source.ToString(), offset, fetchCount)
         {
             Argument.IsNotNull(() => source);
@@ -69,7 +70,7 @@ namespace Orc.DbToCsv.DatabaseManagement
 
         public int ReadCount { get; private set; } = 0;
         public int ResultIndex { get; private set; } = 0;
-        public DbQueryParameters QueryParameters { get; set; }
+        public DataSourceParameters QueryParameters { get; set; }
         public bool HasRows => _reader.HasRows;
         #endregion
 
@@ -207,6 +208,16 @@ namespace Orc.DbToCsv.DatabaseManagement
         {
             try
             {
+                var userParameters = QueryParameters.Parameters.ToDictionary(x => x.Name);
+                var queryParameters = _gateway.GetQueryParameters();
+                foreach (var parameter in queryParameters.Parameters)
+                {
+                    if (userParameters.TryGetValue(parameter.Name, out var userParameter))
+                    {
+                        parameter.Value = userParameter.Value;
+                    }
+                }
+
                 _reader = _gateway.GetRecords(QueryParameters, Offset, FetchCount);
             }
             catch (Exception ex)

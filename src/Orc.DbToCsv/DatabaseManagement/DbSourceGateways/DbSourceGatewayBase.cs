@@ -12,6 +12,7 @@ namespace Orc.DbToCsv.DatabaseManagement
     using System.Data;
     using System.Data.Common;
     using Catel;
+    using DataAccess;
 
     public abstract class DbSourceGatewayBase : IDisposable
     {
@@ -43,9 +44,9 @@ namespace Orc.DbToCsv.DatabaseManagement
         #endregion
 
         #region Methods
-        public abstract DbDataReader GetRecords(DbQueryParameters queryParameters = null, int offset = 0, int fetchCount = -1);
-        public abstract long GetCount(DbQueryParameters queryParameters = null);
-        public abstract DbQueryParameters GetQueryParameters();
+        public abstract DbDataReader GetRecords(DataSourceParameters queryParameters = null, int offset = 0, int fetchCount = -1);
+        public abstract long GetCount(DataSourceParameters queryParameters = null);
+        public abstract DataSourceParameters GetQueryParameters();
         public abstract IList<DbObject> GetObjects();
 
         protected DbConnection GetOpenedConnection()

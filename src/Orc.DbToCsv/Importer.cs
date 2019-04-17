@@ -76,22 +76,12 @@ namespace Orc.DbToCsv
 
                 //var recors = source.CreateGateway().GetRecords().ReadAll();
                 var objects = source.CreateGateway().GetObjects();
-
-                var userParameters = exportDescription.Parameters.ToDictionary(x => x.Name);
-                var queryParameters = source.CreateGateway().GetQueryParameters();
-                foreach (var parameter in queryParameters.Parameters)
-                {
-                    if (userParameters.TryGetValue(parameter.Name, out var value))
-                    {
-                        parameter.Value = value;
-                    }
-                }
                 
                 using (var streamWriter = new StreamWriter(new FileStream(fullFileName, FileMode.OpenOrCreate)))
                 {
                     using (var csvWriter = new CsvWriter(streamWriter))
                     {
-                        using (var dataReader = new SqlTableReader(source.ToString(), 0, project.MaximumRowsInTable.Value, queryParameters))
+                        using (var dataReader = new SqlTableReader(source.ToString(), 0, project.MaximumRowsInTable.Value, exportDescription.Parameters))
                         {
                             while (true)
                             {

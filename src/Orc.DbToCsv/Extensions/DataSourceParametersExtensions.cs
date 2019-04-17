@@ -9,16 +9,16 @@ namespace Orc.DbToCsv
 {
     using System.Collections.Generic;
     using System.Linq;
-    using DatabaseManagement;
+    using DataAccess;
 
-    public static class DbQueryParametersExtensions
+    public static class DataSourceParametersExtensions
     {
-        public static string ToArgsValueString(this DbQueryParameters queryParameters)
+        public static string ToArgsValueString(this DataSourceParameters queryParameters)
         {
             return queryParameters != null ? string.Join(",", queryParameters.Parameters?.Select(x => $"'{x.Value}'") ?? new List<string>()) : string.Empty;
         }
 
-        public static string ToArgsNamesString(this DbQueryParameters queryParameters, string argsPrefix = "")
+        public static string ToArgsNamesString(this DataSourceParameters queryParameters, string argsPrefix = "")
         {
             return queryParameters != null ? string.Join(",", queryParameters.Parameters?.Select(x => $"{argsPrefix}{x.Name}") ?? new List<string>()) : string.Empty;
         }

@@ -98,26 +98,6 @@ namespace Orc.DbToCsv
 
             return dbCommand;
         }
-
-        public static DbCommand AddParameter(this DbCommand dbCommand, DataSourceParameter parameter)
-        {
-            Argument.IsNotNull(() => dbCommand);
-            Argument.IsNotNull(() => parameter);
-
-            return dbCommand.AddParameter(parameter.Name, parameter.Value);
-        }
-
-        public static DbCommand AddParameter(this DbCommand dbCommand, string name, object value)
-        {
-            Argument.IsNotNull(() => dbCommand);
-
-            var parameter = dbCommand.CreateParameter();
-            parameter.Value = value;
-            parameter.ParameterName = name;
-            dbCommand.Parameters.Add(parameter);
-
-            return dbCommand;
-        }
         #endregion
     }
 }

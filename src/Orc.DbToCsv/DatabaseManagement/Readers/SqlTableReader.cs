@@ -31,18 +31,19 @@ namespace Orc.DbToCsv.DatabaseManagement
         #endregion
 
         #region Constructors
-        public SqlTableReader(string source, int offset = 0, int fetchCount = 0)
-            : this(new DatabaseSource(source), offset, fetchCount)
+        public SqlTableReader(string source, int offset = 0, int fetchCount = 0, DbQueryParameters parameters = null)
+            : this(new DatabaseSource(source), offset, fetchCount, parameters)
         {
         }
 
-        public SqlTableReader(DatabaseSource source, int offset = 0, int fetchCount = 0)
+        public SqlTableReader(DatabaseSource source, int offset = 0, int fetchCount = 0, DbQueryParameters parameters = null)
             : base(source.ToString(), offset, fetchCount)
         {
             Argument.IsNotNull(() => source);
 
             _databaseSource = source;
             _totalRecordCount = 0;
+            QueryParameters = parameters;
         }
         #endregion
 

@@ -11,6 +11,7 @@ namespace Orc.DbToCsv.DatabaseManagement
         Table,
         View,
         StoredProcedure,
+        Function,
         Sql
     }
 }

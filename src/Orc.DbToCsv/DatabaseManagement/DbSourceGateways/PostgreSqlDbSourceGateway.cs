@@ -25,32 +25,45 @@ namespace Orc.DbToCsv.DatabaseManagement
         public override DbQueryParameters GetQueryParameters()
         {
             var source = Source;
-            if (source.TableType == TableType.StoredProcedure)
+            switch (source.TableType)
             {
-                var query = $"SELECT pg_get_function_identity_arguments('{source.Table}'::regproc);";
-
-                var connection = GetOpenedConnection();
-                using (var reader = connection.GetReaderSql(query))
+                case TableType.StoredProcedure:
+                case TableType.Function:
                 {
-                    while (reader.Read())
+                    var query = $"SELECT pg_get_function_identity_arguments('{source.Table}'::regproc);";
+
+                    var connection = GetOpenedConnection();
+                    using (var reader = connection.GetReaderSql(query))
                     {
-                        var result = reader.GetString(0);
-                        if (string.IsNullOrEmpty(result))
+                        while (reader.Read())
                         {
-                            return new DbQueryParameters();
+                            var result = reader.GetString(0);
+                            if (string.IsNullOrEmpty(result))
+                            {
+                                return new DbQueryParameters();
+                            }
+
+                            var parameters = result.Split(',').Select(x => x.Trim().Split(' ')).Select(x => new DbQueryParameter
+                            {
+                                Name = x[0],
+                                Type =  x[1]
+                            }).ToList();
+
+                            return new DbQueryParameters { Parameters = parameters};
                         }
-
-                        var parameters = result.Split(',').Select(x => x.Trim().Split(' ')).Select(x => new DbQueryParameter
-                        {
-                            Name = x[0],
-                            Type =  x[1]
-                        }).ToList();
-
-                        return new DbQueryParameters { Parameters = parameters};
                     }
-                }
 
-                return new DbQueryParameters();
+                    return new DbQueryParameters();
+                }
+                case TableType.Table:
+                    break;
+                case TableType.View:
+                    break;
+                case TableType.Sql:
+                    //TODO: parce sql string
+                    break;
+                default:
+                    return new DbQueryParameters();
             }
 
             return new DbQueryParameters();
@@ -83,6 +96,20 @@ namespace Orc.DbToCsv.DatabaseManagement
                                 JOIN    pg_catalog.pg_proc p
                                 ON      p.pronamespace = n.oid
                                 WHERE   n.nspname = 'public';";
+
+                    return ReadAllDbObjects(x => x.GetReaderSql(sql));
+                }
+
+                case TableType.Function:
+                {
+                    var sql = @"SELECT   distinct  r.routine_name
+FROM     information_schema.routines r
+JOIN     information_schema.parameters p
+USING   (specific_catalog, specific_schema, specific_name)
+JOIN     pg_namespace pg_n ON r.specific_schema = pg_n.nspname
+JOIN     pg_proc pg_p ON pg_p.pronamespace = pg_n.oid
+AND      pg_p.proname = r.routine_name
+Where 	 r.data_type = 'record' and pg_n.nspname = 'public'";
 
                     return ReadAllDbObjects(x => x.GetReaderSql(sql));
                 }

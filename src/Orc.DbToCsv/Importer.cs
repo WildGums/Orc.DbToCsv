@@ -74,15 +74,24 @@ namespace Orc.DbToCsv
                     File.Delete(fullFileName);
                 }
 
-                var recors = source.CreateGateway().GetRecords().ReadAll();
+                //var recors = source.CreateGateway().GetRecords().ReadAll();
                 var objects = source.CreateGateway().GetObjects();
-                var parameters = source.CreateGateway().GetQueryParameters();
+
+                var userParameters = exportDescription.Parameters.ToDictionary(x => x.Name);
+                var queryParameters = source.CreateGateway().GetQueryParameters();
+                foreach (var parameter in queryParameters.Parameters)
+                {
+                    if (userParameters.TryGetValue(parameter.Name, out var value))
+                    {
+                        parameter.Value = value;
+                    }
+                }
                 
                 using (var streamWriter = new StreamWriter(new FileStream(fullFileName, FileMode.OpenOrCreate)))
                 {
                     using (var csvWriter = new CsvWriter(streamWriter))
                     {
-                        using (var dataReader = new SqlTableReader(source.ToString(), 0, project.MaximumRowsInTable.Value))
+                        using (var dataReader = new SqlTableReader(source.ToString(), 0, project.MaximumRowsInTable.Value, queryParameters))
                         {
                             while (true)
                             {

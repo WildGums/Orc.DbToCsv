@@ -45,7 +45,8 @@ namespace Orc.DbToCsv
                 dbToCsvExportDescriptions.Add(new DbToCsvExportDescription
                 {
                     CsvFilePath = destinationFile,
-                    Source = databaseSource
+                    Source = databaseSource,
+                    Parameters = table.Parameters,
                 });
             }
 

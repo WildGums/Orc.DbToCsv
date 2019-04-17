@@ -50,6 +50,10 @@ namespace Orc.DbToCsv.DatabaseManagement
                     command = connection.CreateCommand(sql, CommandType.StoredProcedure);
                     break;
 
+                case TableType.Function:
+                    command = connection.CreateCommand($"select * from {source.Table}({queryParameters?.ToArgsNamesString() ?? string.Empty})");
+                    break;
+
                 case TableType.Sql:
                     command = connection.CreateCommand(sql);
                     break;

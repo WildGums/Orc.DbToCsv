@@ -31,6 +31,7 @@ namespace Orc.DbToCsv.DatabaseManagement
                     return new DbQueryParameters();
 
                 case TableType.StoredProcedure:
+                case TableType.Function:
                 {
                     var query = $"SELECT [name], type_name(user_type_id) as type FROM [sys].[parameters] WHERE [object_id] = object_id('{source.Table}')";
 
@@ -42,7 +43,7 @@ namespace Orc.DbToCsv.DatabaseManagement
                         {
                             var args = new DbQueryParameter
                             {
-                                Name = reader.GetString(0).Replace("@", string.Empty),
+                                Name = reader.GetString(0),
                                 Type = reader.GetString(1)
                             };
 
@@ -52,6 +53,7 @@ namespace Orc.DbToCsv.DatabaseManagement
 
                     return queryParameters;
                 }
+
                 case TableType.Table:
                     break;
 
@@ -73,6 +75,10 @@ namespace Orc.DbToCsv.DatabaseManagement
             {
                 case TableType.StoredProcedure:
                     literalType = "P";
+                    break;
+
+                case TableType.Function:
+                    literalType = "IF";
                     break;
 
                 case TableType.Table:

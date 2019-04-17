@@ -19,11 +19,9 @@ namespace Orc.DbToCsv.DataAccess
 
     public abstract class DataSourceBase : ModelBase
     {
-        #region Constants
-        private static readonly CacheStorage<Type, PropertyInfo[]> PropertiesCache = new CacheStorage<Type, PropertyInfo[]>();
-        #endregion
-
         #region Fields
+        private static readonly CacheStorage<Type, PropertyInfo[]> PropertiesCache = new CacheStorage<Type, PropertyInfo[]>();
+
         protected readonly Dictionary<string, string> Properties = new Dictionary<string, string>();
         #endregion
 

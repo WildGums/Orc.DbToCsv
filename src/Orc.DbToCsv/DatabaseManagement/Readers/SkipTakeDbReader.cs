@@ -49,11 +49,15 @@ namespace Orc.DbToCsv.DatabaseManagement
         #region Methods
         public override bool GetBoolean(int ordinal) => _reader.GetBoolean(ordinal);
         public override byte GetByte(int ordinal) => _reader.GetByte(ordinal);
+
         public override long GetBytes(int ordinal, long dataOffset, byte[] buffer, int bufferOffset, int length) =>
             _reader.GetBytes(ordinal, dataOffset, buffer, bufferOffset, length);
+
         public override char GetChar(int ordinal) => _reader.GetChar(ordinal);
+
         public override long GetChars(int ordinal, long dataOffset, char[] buffer, int bufferOffset, int length) =>
             _reader.GetChars(ordinal, dataOffset, buffer, bufferOffset, length);
+
         public override string GetDataTypeName(int ordinal) => _reader.GetDataTypeName(ordinal);
         public override DateTime GetDateTime(int ordinal) => _reader.GetDateTime(ordinal);
         public override decimal GetDecimal(int ordinal) => _reader.GetDecimal(ordinal);

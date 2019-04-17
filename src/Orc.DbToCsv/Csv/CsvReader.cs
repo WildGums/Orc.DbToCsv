@@ -4,6 +4,7 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
+
 namespace Orc.DbToCsv.Csv
 {
     using System;
@@ -16,8 +17,15 @@ namespace Orc.DbToCsv.Csv
 
     public class CsvReader : ReaderBase
     {
-        #region Constants
+        #region Fields
         private static readonly ILog Log = LogManager.GetCurrentClassLogger();
+
+        private readonly ICsvReaderService _csvReaderService;
+        private readonly IFileService _fileService;
+
+        private int _currentOffset;
+        private int _fetchedCount;
+        private CsvHelper.CsvReader _reader;
         #endregion
 
         #region Constructors
@@ -35,15 +43,6 @@ namespace Orc.DbToCsv.Csv
         }
         #endregion
 
-        #region Fields
-        private readonly ICsvReaderService _csvReaderService;
-        private readonly IFileService _fileService;
-
-        private int _currentOffset;
-        private int _fetchedCount;
-        private CsvHelper.CsvReader _reader;
-        #endregion
-
         #region Properties
         public override string[] FieldHeaders => _reader.Context.HeaderRecord;
         public override object this[int index] => _reader[index];
@@ -51,7 +50,7 @@ namespace Orc.DbToCsv.Csv
         public override int TotalRecordCount => GetRecordCount();
         #endregion
 
-        #region IReader Members
+        #region Methods
         public override bool Read()
         {
             if (ReferenceEquals(_reader, null))
@@ -97,9 +96,7 @@ namespace Orc.DbToCsv.Csv
         {
             _reader?.Dispose();
         }
-        #endregion
 
-        #region Methods
         private int GetRecordCount()
         {
             var lineCount = 0;

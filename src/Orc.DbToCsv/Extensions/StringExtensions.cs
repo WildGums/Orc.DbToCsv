@@ -81,7 +81,7 @@ namespace Orc.DbToCsv
         }
 
         //TODO:Remove
-                public static string Encrypt(this string plainText) /////to encrypt password
+        public static string Encrypt(this string plainText) /////to encrypt password
         {
             var passPhrase = "FG_EncryptionKey"; /////encryption Key text
             var initVectorBytes = Encoding.UTF8.GetBytes(InitVector);

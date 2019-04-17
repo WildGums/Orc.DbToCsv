@@ -18,7 +18,7 @@ namespace Orc.DbToCsv
 
     public static class Importer
     {
-        #region Constants
+        #region Fields
         private static readonly ILog Log = LogManager.GetCurrentClassLogger();
         #endregion
 

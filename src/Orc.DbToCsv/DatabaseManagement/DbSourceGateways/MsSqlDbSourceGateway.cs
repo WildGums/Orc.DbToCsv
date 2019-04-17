@@ -96,7 +96,7 @@ namespace Orc.DbToCsv.DatabaseManagement
                 default:
                     throw new ArgumentOutOfRangeException(nameof(tableType), tableType, null);
             }
-            
+
             var query = new Query("dbo.sysobjects")
                 .Select("name")
                 .Where("uid", 1)

@@ -1,30 +1,30 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="StringExtensions.cs" company="WildGums">
+// <copyright file="KeyValueStringParser.cs" company="WildGums">
 //   Copyright (c) 2008 - 2019 WildGums. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
+
 
 namespace Orc.DbToCsv.DataAccess
 {
     using System.Collections.Generic;
     using System.Linq;
     using System.Text.RegularExpressions;
-    using Catel;
 
     public static class KeyValueStringParser
     {
+        #region Constants
+        public const char KeyValuePairsDelimiter = ',';
+        public const char KeyValueDelimiter = '=';
+        private static readonly Regex KeyValueGroupRegex;
+        #endregion
+
         #region Constructors
         static KeyValueStringParser()
         {
             //NOTE: regex is not compiled because this operation is very rare
             KeyValueGroupRegex = new Regex($@"(?<key>\w+)\s*{KeyValueDelimiter}\s*(?<value>.+)(?:\s|$)");
         }
-        #endregion
-
-        #region Constants
-        public const char KeyValuePairsDelimiter = ',';
-        public const char KeyValueDelimiter = '=';
-        private static readonly Regex KeyValueGroupRegex;
         #endregion
 
         #region Methods

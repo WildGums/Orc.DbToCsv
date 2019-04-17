@@ -7,16 +7,21 @@
 
 namespace Orc.DbToCsv
 {
+    using System;
+    using System.Collections.Generic;
     using System.Data;
     using System.Data.Common;
     using Catel;
-    using Common;
     using DataAccess;
     using DatabaseManagement;
     using SqlKata;
 
     internal static class SqlConnectionExtensions
     {
+        #region Fields
+        private static readonly Dictionary<Type, DbProvider> ConnectionTypeToProvider = new Dictionary<Type, DbProvider>();
+        #endregion
+
         #region Methods
         public static DbDataReader GetReaderSql(this DbConnection connection, string sql, int? commandTimeout = null)
         {
@@ -67,7 +72,7 @@ namespace Orc.DbToCsv
             Argument.IsNotNull(() => connection);
 
             var connectionType = connection.GetType();
-            return DbProviderCache.GetProviderByConnectionType(connectionType);
+            return GetProviderByConnectionType(connectionType);
         }
 
         internal static DbCommand CreateCommand(this DbConnection connection, Query query, int? commandTimeout = null)
@@ -97,6 +102,28 @@ namespace Orc.DbToCsv
             parameters?.Parameters?.ForEach(x => dbCommand.AddParameter(x));
 
             return dbCommand;
+        }
+
+        private static DbProvider GetProviderByConnectionType(Type connectionType)
+        {
+            Argument.IsNotNull(() => connectionType);
+
+            if (ConnectionTypeToProvider.TryGetValue(connectionType, out var dbProvider))
+            {
+                return dbProvider;
+            }
+
+            var dbProviders = DbProvider.GetRegisteredProviders();
+            foreach (var currentProvider in dbProviders.Values)
+            {
+                if (currentProvider.ConnectionType == connectionType)
+                {
+                    ConnectionTypeToProvider[connectionType] = currentProvider;
+                    return currentProvider;
+                }
+            }
+
+            return null;
         }
         #endregion
     }

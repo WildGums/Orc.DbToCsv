@@ -9,7 +9,6 @@ namespace Orc.DbToCsv.DatabaseManagement
 {
     using System;
     using System.Data.Common;
-    using System.Globalization;
     using System.Linq;
     using System.Threading.Tasks;
     using Catel;
@@ -22,13 +21,13 @@ namespace Orc.DbToCsv.DatabaseManagement
         private static readonly ILog Log = LogManager.GetCurrentClassLogger();
 
         private readonly DatabaseSource _databaseSource;
+        private readonly int _totalRecordCount;
 
         private string[] _fieldHeaders = new string[0];
         private DbSourceGatewayBase _gateway;
         private bool _isFieldHeadersInitialized;
         private bool _isInitialized;
         private DbDataReader _reader;
-        private readonly int _totalRecordCount;
         #endregion
 
         #region Constructors
@@ -74,7 +73,7 @@ namespace Orc.DbToCsv.DatabaseManagement
         public bool HasRows => _reader.HasRows;
         #endregion
 
-        #region IReader Members
+        #region Methods
         public async Task<bool> ReadAsync()
         {
             try
@@ -100,6 +99,7 @@ namespace Orc.DbToCsv.DatabaseManagement
                 return false;
             }
         }
+
         public override bool Read()
         {
             try
@@ -143,9 +143,7 @@ namespace Orc.DbToCsv.DatabaseManagement
             _gateway.Close();
             _gateway.Dispose();
         }
-        #endregion
 
-        #region Methods
         public object GetValue(int index) => _reader[index];
         public object GetValue(string name) => _reader[name];
 

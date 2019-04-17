@@ -12,9 +12,8 @@ namespace Orc.DbToCsv
     using System.Linq;
     using Catel;
     using DataAccess;
-    using DatabaseManagement;
 
-    public static class DbReaderExtensions
+    public static class DbDataReaderExtensions
     {
         #region Methods
         public static string[] GetHeaders(this DbDataReader reader)

@@ -12,8 +12,10 @@ namespace Orc.DbToCsv
 
     public class DbToCsvExportDescription
     {
+        #region Properties
         public DatabaseSource Source { get; set; }
         public DataSourceParameters Parameters { get; set; }
         public string CsvFilePath { get; set; }
+        #endregion
     }
 }

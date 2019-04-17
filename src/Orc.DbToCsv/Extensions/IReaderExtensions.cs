@@ -10,10 +10,10 @@ namespace Orc.DbToCsv
     using System.Collections.Generic;
     using Catel;
     using DataAccess;
-    using DatabaseManagement;
 
     public static class IReaderExtensions
     {
+        #region Methods
         public static List<RecordTable> ReadAll(this IReader reader)
         {
             Argument.IsNotNull(() => reader);
@@ -49,7 +49,7 @@ namespace Orc.DbToCsv
             }
 
             return results;
-
         }
+        #endregion
     }
 }

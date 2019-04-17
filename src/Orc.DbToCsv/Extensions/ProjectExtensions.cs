@@ -50,7 +50,7 @@ namespace Orc.DbToCsv
                     Source = databaseSource,
                     Parameters = new DataSourceParameters
                     {
-                        Parameters = table.Parameters.Select(x => new DataSourceParameter{Name = x.Name, Value = x.Value}).ToList()
+                        Parameters = table.Parameters.Select(x => new DataSourceParameter {Name = x.Name, Value = x.Value}).ToList()
                     },
                 });
             }

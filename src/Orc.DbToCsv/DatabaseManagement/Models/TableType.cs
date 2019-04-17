@@ -4,6 +4,7 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
+
 namespace Orc.DbToCsv.DatabaseManagement
 {
     public enum TableType

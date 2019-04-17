@@ -13,7 +13,7 @@ namespace Orc.DbToCsv.DatabaseManagement
     using System.Data.Common;
     using DataAccess;
     using SqlKata;
-    
+
     public abstract class SqlDbSourceGatewayBase : DbSourceGatewayBase
     {
         #region Constructors

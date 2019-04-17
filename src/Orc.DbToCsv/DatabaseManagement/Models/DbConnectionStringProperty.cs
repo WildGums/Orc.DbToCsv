@@ -50,5 +50,4 @@ namespace Orc.DbToCsv.DatabaseManagement
         }
         #endregion
     }
-
 }

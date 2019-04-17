@@ -1,28 +1,25 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="ConnectedTypesHelper.cs" company="WildGums">
+// <copyright file="RecordTableExtensions.cs" company="WildGums">
 //   Copyright (c) 2008 - 2019 WildGums. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
 
-namespace Orc.DbToCsv.DatabaseManagement
+namespace Orc.DbToCsv
 {
-    using System;
-    using System.Collections.Generic;
     using System.Linq;
     using Catel;
-    using Catel.Caching;
-    using Catel.IoC;
-    using Catel.Reflection;
+    using DatabaseManagement;
 
-    internal static class ConnectedTypesHelper
+    public static class RecordTableExtensions
     {
-        #region Constants
-
-        #endregion
-
         #region Methods
-     
+        public static bool HasHeaders(this RecordTable table)
+        {
+            Argument.IsNotNull(() => table);
+
+            return table.Headers?.Any() ?? false;
+        }
         #endregion
     }
 }

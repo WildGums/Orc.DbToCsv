@@ -10,13 +10,12 @@ namespace Orc.DbToCsv.DatabaseManagement
     using System;
     using System.Data.Common;
     using System.Globalization;
-    using System.Linq;
     using System.Threading.Tasks;
     using Catel;
     using Catel.Logging;
     using DataAccess;
 
-    public class SqlTableReader : ReaderBase, IReader
+    public class SqlTableReader : ReaderBase
     {
         #region Fields
         private static readonly ILog Log = LogManager.GetCurrentClassLogger();
@@ -28,6 +27,7 @@ namespace Orc.DbToCsv.DatabaseManagement
         private bool _isFieldHeadersInitialized;
         private bool _isInitialized;
         private DbDataReader _reader;
+        private readonly int _totalRecordCount;
         #endregion
 
         #region Constructors
@@ -37,18 +37,17 @@ namespace Orc.DbToCsv.DatabaseManagement
         }
 
         public SqlTableReader(DatabaseSource source, int offset = 0, int fetchCount = 0)
-            : base(source.ToString())
+            : base(source.ToString(), offset, fetchCount)
         {
             Argument.IsNotNull(() => source);
 
             _databaseSource = source;
-            Offset = offset;
-            FetchCount = fetchCount;
+            _totalRecordCount = 0;
         }
         #endregion
 
         #region Properties
-        public string[] FieldHeaders
+        public override string[] FieldHeaders
         {
             get
             {
@@ -62,12 +61,11 @@ namespace Orc.DbToCsv.DatabaseManagement
             }
         }
 
-        public object this[int index] => GetValue(index);
-        public object this[string name] => GetValue(name);
-        public virtual int TotalRecordCount { get; private set; }
-        public CultureInfo Culture { get; set; }
-        public int Offset { get; set; }
-        public int FetchCount { get; set; }
+        public override object this[int index] => GetValue(index);
+        public override object this[string name] => GetValue(name);
+
+        public override int TotalRecordCount => _totalRecordCount;
+
         public int ReadCount { get; private set; } = 0;
         public int ResultIndex { get; private set; } = 0;
         public DbQueryParameters QueryParameters { get; set; }
@@ -100,7 +98,7 @@ namespace Orc.DbToCsv.DatabaseManagement
                 return false;
             }
         }
-        public bool Read()
+        public override bool Read()
         {
             try
             {
@@ -127,7 +125,7 @@ namespace Orc.DbToCsv.DatabaseManagement
             }
         }
 
-        public void Dispose()
+        public override void Dispose()
         {
             if (_reader != null)
             {
@@ -149,7 +147,7 @@ namespace Orc.DbToCsv.DatabaseManagement
         public object GetValue(int index) => _reader[index];
         public object GetValue(string name) => _reader[name];
 
-        public async Task<bool> NextResultAsync()
+        public override async Task<bool> NextResultAsync()
         {
             var result = await _reader.NextResultAsync();
             if (result)
@@ -227,7 +225,7 @@ namespace Orc.DbToCsv.DatabaseManagement
                 return;
             }
 
-            _fieldHeaders = Enumerable.Range(0, _reader.FieldCount).Select(_reader.GetName).ToArray();
+            _fieldHeaders = _reader.GetHeaders();
 
 #if DEBUG
             Log.Debug($"'{_fieldHeaders.Length}' headers of table were read");

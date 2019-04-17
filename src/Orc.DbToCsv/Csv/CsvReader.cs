@@ -7,16 +7,14 @@
 namespace Orc.DbToCsv.Csv
 {
     using System;
-    using System.Globalization;
     using System.IO;
     using Catel;
-    using Catel.Data;
     using Catel.Logging;
     using DataAccess;
     using FileSystem;
     using Orc.Csv;
 
-    public class CsvReader : ReaderBase, IReader
+    public class CsvReader : ReaderBase
     {
         #region Constants
         private static readonly ILog Log = LogManager.GetCurrentClassLogger();
@@ -47,17 +45,14 @@ namespace Orc.DbToCsv.Csv
         #endregion
 
         #region Properties
-        public string[] FieldHeaders => _reader.Context.HeaderRecord;
-        public object this[int index] => _reader[index];
-        public object this[string name] => _reader[name];
-        public int TotalRecordCount => GetRecordCount();
-        public CultureInfo Culture { get; set; }
-        public int Offset { get; set; }
-        public int FetchCount { get; set; }
+        public override string[] FieldHeaders => _reader.Context.HeaderRecord;
+        public override object this[int index] => _reader[index];
+        public override object this[string name] => _reader[name];
+        public override int TotalRecordCount => GetRecordCount();
         #endregion
 
         #region IReader Members
-        public bool Read()
+        public override bool Read()
         {
             if (ReferenceEquals(_reader, null))
             {
@@ -98,7 +93,7 @@ namespace Orc.DbToCsv.Csv
             }
         }
 
-        public void Dispose()
+        public override void Dispose()
         {
             _reader?.Dispose();
         }

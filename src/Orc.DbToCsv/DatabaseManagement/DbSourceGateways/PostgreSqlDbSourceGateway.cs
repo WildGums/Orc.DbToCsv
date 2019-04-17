@@ -40,7 +40,7 @@ namespace Orc.DbToCsv.DatabaseManagement
                             return new DbQueryParameters();
                         }
 
-                        var parameters = result.Split(',').Select(x => x.Split(' ')).Select(x => new DbQueryParameter
+                        var parameters = result.Split(',').Select(x => x.Trim().Split(' ')).Select(x => new DbQueryParameter
                         {
                             Name = x[0],
                             Type =  x[1]

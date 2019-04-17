@@ -4,20 +4,23 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
+
 namespace Orc.DbToCsv.Common
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Windows.Automation.Peers;
     using Catel.Caching;
     using Catel.Reflection;
     using DatabaseManagement;
 
     internal static class TypeCacheHelper
     {
+        #region Constants
         private static readonly CacheStorage<Type, CacheStorage<Type, HashSet<Type>>> TypeCache = new CacheStorage<Type, CacheStorage<Type, HashSet<Type>>>();
+        #endregion
 
+        #region Methods
         public static IList<Type> GetTypesByGenericArgument(Type genericType, Type genericTypeArgument)
         {
             if (!TypeCache.Contains(genericType))
@@ -41,7 +44,7 @@ namespace Orc.DbToCsv.Common
                     var genericTypeDescendants = loadedAssembly.GetTypesEx()
                         .Where(x => typeof(DbProvider)
                                         .IsAssignableFrom(x) && x.IsClass && !x.IsAbstract && !x.IsGenericType)
-                                        .ToList();
+                        .ToList();
                     foreach (var genericTypeDescendant in genericTypeDescendants)
                     {
                         var summaryGenericInterfaceType = genericTypeDescendant.GetInterfaces().FirstOrDefault(x => x.IsGenericType && x.GetGenericTypeDefinition() == genericType);
@@ -50,7 +53,7 @@ namespace Orc.DbToCsv.Common
                         {
                             continue;
                         }
-                        
+
                         var cachedTypes = genericTypeDescendantsCache.GetFromCacheOrFetch(argumentType, () => new HashSet<Type>());
                         cachedTypes.Add(genericTypeDescendant);
                     }
@@ -61,5 +64,6 @@ namespace Orc.DbToCsv.Common
                 }
             }
         }
+        #endregion
     }
 }

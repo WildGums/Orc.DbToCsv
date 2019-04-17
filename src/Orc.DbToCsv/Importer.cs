@@ -12,6 +12,7 @@ namespace Orc.DbToCsv
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
+    using Catel.Collections;
     using Catel.Logging;
     using CsvHelper;
     using DatabaseManagement;
@@ -71,7 +72,11 @@ namespace Orc.DbToCsv
                 if (File.Exists(fullFileName))
                 {
                     File.Delete(fullFileName);
-                }  
+                }
+
+                var recors = source.CreateGateway().GetRecords().ReadAll();
+                var objects = source.CreateGateway().GetObjects();
+                var parameters = source.CreateGateway().GetQueryParameters();
                 
                 using (var streamWriter = new StreamWriter(new FileStream(fullFileName, FileMode.OpenOrCreate)))
                 {
@@ -134,6 +139,53 @@ namespace Orc.DbToCsv
                 Log.Error("{0} export failed because of exception: {1}", source.Table, ex.Message);
             }
         }
+
+        private static async Task<bool> ReadAll(SqlTableReader dataReader, CsvWriter csvWriter)
+        {
+            //if (await ReadAll(dataReader, csvWriter))
+            //{
+            //    return;
+            //}
+
+            int records = 0;
+            var results = dataReader.ReadAll();
+            if (dataReader.ValidationContext.HasErrors)
+            {
+                Log.Error(dataReader.ValidationContext.ToString());
+
+                return true;
+            }
+
+            foreach (var result in results)
+            {
+                if (result.HasHeaders())
+                {
+                    result.Headers.ForEach(csvWriter.WriteField);
+                    csvWriter.NextRecord();
+                }
+
+                foreach (var record in result)
+                {
+                    foreach (var header in result.Headers)
+                    {
+                        var value = record[header];
+                        if (value is string strValue)
+                        {
+                            value = strValue.Trim(); // Remove all white spaces
+                        }
+
+                        csvWriter.WriteField(value);
+                    }
+
+                    records++;
+
+                    await csvWriter.NextRecordAsync();
+                }
+            }
+
+            return false;
+        }
+
 
         private static async Task<List<Table>> GetAvailableTablesAsync(SqlConnection sqlConnection, string outputFolder)
         {

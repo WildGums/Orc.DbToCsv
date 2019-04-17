@@ -95,11 +95,11 @@ namespace Orc.DbToCsv
             return CreateConnection(dbProvider, databaseSource.ConnectionString);
         }
 
-        public static DbSourceGateway CreateDbSourceGateway(this DbProvider dbProvider, DatabaseSource databaseSource)
+        public static DbSourceGatewayBase CreateDbSourceGateway(this DbProvider dbProvider, DatabaseSource databaseSource)
         {
             Argument.IsNotNull(() => databaseSource);
 
-            return dbProvider.CreateConnectedInstance<DbSourceGateway>(databaseSource);
+            return dbProvider.CreateConnectedInstance<DbSourceGatewayBase>(databaseSource);
         }
 
         public static DbConnection CreateAndOpenConnection(this DbProvider dbProvider, string connectionString)

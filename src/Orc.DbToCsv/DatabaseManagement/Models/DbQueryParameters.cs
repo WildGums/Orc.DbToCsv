@@ -22,7 +22,7 @@ namespace Orc.DbToCsv.DatabaseManagement
         #endregion
 
         #region Properties
-        public List<DbQueryParameter> Parameters { get; }
+        public List<DbQueryParameter> Parameters { get; set; }
         #endregion
     }
 }

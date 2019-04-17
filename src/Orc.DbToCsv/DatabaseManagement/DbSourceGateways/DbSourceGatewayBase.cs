@@ -12,7 +12,7 @@ namespace Orc.DbToCsv.DatabaseManagement
     using System.Data.Common;
     using Catel;
 
-    public abstract class DbSourceGateway
+    public abstract class DbSourceGatewayBase
     {
         #region Fields
         private DbConnection _connection;
@@ -20,7 +20,7 @@ namespace Orc.DbToCsv.DatabaseManagement
         #endregion
 
         #region Constructors
-        public DbSourceGateway(DatabaseSource source)
+        public DbSourceGatewayBase(DatabaseSource source)
         {
             Argument.IsNotNull(() => source);
 
@@ -36,7 +36,7 @@ namespace Orc.DbToCsv.DatabaseManagement
 
         #region Methods
         public abstract DbDataReader GetRecords(DbQueryParameters queryParameters = null, int offset = 0, int fetchCount = -1);
-        public abstract int GetCount(DbQueryParameters queryParameters = null);
+        public abstract long GetCount(DbQueryParameters queryParameters = null);
         public abstract DbQueryParameters GetQueryParameters();
         public abstract IList<DbObject> GetObjects();
 
@@ -46,6 +46,11 @@ namespace Orc.DbToCsv.DatabaseManagement
             if (connection == null)
             {
                 return null;
+            }
+
+            if (connection.State.HasFlag(ConnectionState.Open))
+            {
+                connection.Close();
             }
 
             if (!connection.State.HasFlag(ConnectionState.Open))

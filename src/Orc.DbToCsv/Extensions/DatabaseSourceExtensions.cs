@@ -22,7 +22,7 @@ namespace Orc.DbToCsv
             return provider?.CreateConnection(databaseSource);
         }
 
-        public static DbSourceGateway CreateGateway(this DatabaseSource databaseSource)
+        public static DbSourceGatewayBase CreateGateway(this DatabaseSource databaseSource)
         {
             Argument.IsNotNull(() => databaseSource);
 

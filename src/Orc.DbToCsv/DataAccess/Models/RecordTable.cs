@@ -5,7 +5,7 @@
 // --------------------------------------------------------------------------------------------------------------------
 
 
-namespace Orc.DbToCsv.DatabaseManagement
+namespace Orc.DbToCsv.DataAccess
 {
     using System.Collections.Generic;
 

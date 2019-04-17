@@ -42,8 +42,8 @@ namespace Orc.DbToCsv.DatabaseManagement
                         {
                             var args = new DbQueryParameter
                             {
-                                Name = (string)reader["Name"],
-                                Type = (string)reader["Type"]
+                                Name = reader.GetString(0).Replace("@", string.Empty),
+                                Type = reader.GetString(1)
                             };
 
                             queryParameters.Parameters.Add(args);

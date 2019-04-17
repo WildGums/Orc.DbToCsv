@@ -27,7 +27,7 @@ namespace Orc.DbToCsv.DatabaseManagement
             var source = Source;
             if (source.TableType == TableType.StoredProcedure)
             {
-                var query = "SELECT pg_get_function_identity_arguments('sp3'::regproc);";
+                var query = $"SELECT pg_get_function_identity_arguments('{source.Table}'::regproc);";
 
                 var connection = GetOpenedConnection();
                 using (var reader = connection.GetReaderSql(query))
@@ -35,6 +35,11 @@ namespace Orc.DbToCsv.DatabaseManagement
                     while (reader.Read())
                     {
                         var result = reader.GetString(0);
+                        if (string.IsNullOrEmpty(result))
+                        {
+                            return new DbQueryParameters();
+                        }
+
                         var parameters = result.Split(',').Select(x => x.Split(' ')).Select(x => new DbQueryParameter
                         {
                             Name = x[0],

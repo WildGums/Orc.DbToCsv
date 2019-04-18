@@ -143,9 +143,10 @@ namespace Orc.DbToCsv.DatabaseManagement
             }
         }
 
-        protected virtual IList<DbObject> ReadAllDbObjects(Func<DbConnection, DbDataReader> createReader, DbConnection connection)
+        protected virtual IList<DbObject> ReadAllDbObjects(Func<DbConnection, DbDataReader> createReader)
         {
             var dbObjects = new List<DbObject>();
+            var connection = GetOpenedConnection();
             var tableType = Source.TableType;
             using (var reader = createReader(connection))
             {

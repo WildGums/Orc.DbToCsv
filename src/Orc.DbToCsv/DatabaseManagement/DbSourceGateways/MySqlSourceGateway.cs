@@ -78,24 +78,21 @@ namespace Orc.DbToCsv.DatabaseManagement
 
                 case TableType.Table:
                 {
-                    var connection = GetOpenedConnection();
-                    var sql = $"SELECT TABLE_NAME AS NAME FROM information_schema.tables where Table_schema = '{connection.Database}' and Table_type = 'BASE TABLE';";
-                    return ReadAllDbObjects(x => x.GetReaderSql(sql), connection);
+                    var sql = $"SELECT TABLE_NAME AS NAME FROM information_schema.tables where Table_schema = database() and Table_type = 'BASE TABLE';";
+                    return ReadAllDbObjects(x => x.GetReaderSql(sql));
                 }
 
                 case TableType.View:
                 {
-                    var connection = GetOpenedConnection();
-                    var sql = $"SELECT TABLE_NAME AS NAME FROM information_schema.tables where Table_schema = '{connection.Database}' and Table_type = 'VIEW';";
-                    return ReadAllDbObjects(x => x.GetReaderSql(sql), connection);
+                    var sql = $"SELECT TABLE_NAME AS NAME FROM information_schema.tables where Table_schema = database() and Table_type = 'VIEW';";
+                    return ReadAllDbObjects(x => x.GetReaderSql(sql));
                 }
 
                 case TableType.StoredProcedure:
                 {
-                    var connection = GetOpenedConnection();
-                    var sql = $"SELECT SPECIFIC_NAME AS NAME FROM INFORMATION_SCHEMA.ROUTINES where ROUTINE_SCHEMA = '{connection.Database}' and ROUTINE_TYPE = 'PROCEDURE';";
+                    var sql = $"SELECT SPECIFIC_NAME AS NAME FROM INFORMATION_SCHEMA.ROUTINES where ROUTINE_SCHEMA = database() and ROUTINE_TYPE = 'PROCEDURE';";
 
-                    return ReadAllDbObjects(x => x.GetReaderSql(sql), connection);
+                    return ReadAllDbObjects(x => x.GetReaderSql(sql));
                 }
 
                 case TableType.Function:

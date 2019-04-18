@@ -14,6 +14,7 @@ namespace Orc.DbToCsv
     using Catel.IoC;
     using Catel.Logging;
     using CommandLine;
+    using DatabaseManagement;
 
     internal class Program
     {
@@ -23,6 +24,15 @@ namespace Orc.DbToCsv
         private static void Main(string[] args)
         {
             InitializeLogManager();
+
+            var sqLiteProviderInfo = new DbProviderInfo
+            {
+                Name = "SQLite Data Provider",
+                InvariantName = "System.Data.SQLite",
+                Description = ".NET Framework Data Provider for SQLite",
+                AssemblyQualifiedName = "System.Data.SQLite.SQLiteFactory, System.Data.SQLite, Version=1.0.110.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139"
+            };
+            DbProvider.RegisterProvider(sqLiteProviderInfo);  
 
             var commandLine = Environment.CommandLine.GetCommandLine(true);
             var options = new Options();

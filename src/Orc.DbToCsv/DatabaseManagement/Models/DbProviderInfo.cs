@@ -13,6 +13,7 @@ namespace Orc.DbToCsv.DatabaseManagement
         public string Name { get; set; }
         public string InvariantName { get; set; }
         public string Description { get; set; }
+        public string AssemblyQualifiedName { get; set; }
         #endregion
 
         #region Methods

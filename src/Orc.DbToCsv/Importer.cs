@@ -72,7 +72,7 @@ namespace Orc.DbToCsv
                 {
                     File.Delete(fullFileName);
                 }
-
+                
                 using (var streamWriter = new StreamWriter(new FileStream(fullFileName, FileMode.OpenOrCreate)))
                 {
                     using (var csvWriter = new CsvWriter(streamWriter))

@@ -19,6 +19,7 @@ namespace Orc.DbToCsv.DatabaseManagement
     {
         #region Fields
         private static readonly Dictionary<string, DbProvider> Providers = new Dictionary<string, DbProvider>();
+        private static readonly DbProviderFactoryRepository ProviderFactoryRepository = new DbProviderFactoryRepository();
 
         private static bool IsProvidersInitialized = false;
 
@@ -53,6 +54,20 @@ namespace Orc.DbToCsv.DatabaseManagement
         #endregion
 
         #region Methods
+        public static void RegisterProvider(DbProviderInfo providerInfo)
+        {
+            Argument.IsNotNull(() => providerInfo);
+
+            ProviderFactoryRepository.Add(providerInfo);
+        }
+
+        public static void UnregisterProvider(DbProviderInfo providerInfo)
+        {
+            Argument.IsNotNull(() => providerInfo);
+
+            ProviderFactoryRepository.Remove(providerInfo);
+        }
+
         public static void RegisterCustomProvider(DbProvider provider)
         {
             Argument.IsNotNull(() => provider);
@@ -80,12 +95,7 @@ namespace Orc.DbToCsv.DatabaseManagement
             }
 
             DbProviderFactories.GetFactoryClasses().Rows.OfType<DataRow>()
-                .Select(x => new DbProviderInfo
-                {
-                    Name = x["Name"]?.ToString(),
-                    Description = x["Description"]?.ToString(),
-                    InvariantName = x["InvariantName"]?.ToString(),
-                })
+                .Select(x => x.ToDbProviderInfo())
                 .OrderBy(x => x.Name)
                 .Select(x => new DbProvider(x))
                 .ForEach(x => providers[x.ProviderInvariantName] = x);
@@ -139,12 +149,7 @@ namespace Orc.DbToCsv.DatabaseManagement
                 return null;
             }
 
-            _info = new DbProviderInfo
-            {
-                Name = infoRow["Name"]?.ToString(),
-                Description = infoRow["Description"]?.ToString(),
-                InvariantName = infoRow["InvariantName"]?.ToString(),
-            };
+            _info = infoRow.ToDbProviderInfo();
 
             return _info;
         }

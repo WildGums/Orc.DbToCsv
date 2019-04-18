@@ -35,24 +35,19 @@ namespace Orc.DbToCsv.DatabaseManagement
             switch (source.TableType)
             {
                 case TableType.Table:
-                case TableType.View:
-                {
-                    var query = new Query(source.Table).Select();
-                    if (isPagingQuery)
-                    {
-                        query = query.ForPage(offset / fetchCount + 1, fetchCount);
-                    }
-
-                    command = connection.CreateCommand(query);
+                    command = CreateTableCommand(connection, queryParameters, offset, fetchCount);
                     break;
-                }
+
+                case TableType.View:
+                    command = CreateViewCommand(connection, queryParameters, offset, fetchCount);
+                    break;
 
                 case TableType.StoredProcedure:
-                    command = CreateStoredProcedureCommand(connection, queryParameters);
+                    command = CreateStoredProcedureCommand(connection, queryParameters, offset, fetchCount);
                     break;
 
                 case TableType.Function:
-                    command = CreateFunctionCommand(connection, queryParameters);
+                    command = CreateFunctionCommand(connection, queryParameters, offset, fetchCount);
                     break;
 
                 case TableType.Sql:
@@ -66,7 +61,7 @@ namespace Orc.DbToCsv.DatabaseManagement
             command.AddParameters(queryParameters);
 
             var reader = command.ExecuteReader();
-            if (isPagingQuery && (source.TableType == TableType.Sql || source.TableType == TableType.StoredProcedure))
+            if (isPagingQuery && (source.TableType == TableType.Sql || source.TableType == TableType.StoredProcedure || source.TableType == TableType.Function))
             {
                 return new SkipTakeDbReader(reader, offset, fetchCount);
             }
@@ -74,12 +69,30 @@ namespace Orc.DbToCsv.DatabaseManagement
             return reader;
         }
 
-        protected virtual DbCommand CreateStoredProcedureCommand(DbConnection connection, DataSourceParameters parameters)
+        protected virtual DbCommand CreateTableCommand(DbConnection connection, DataSourceParameters parameters, int offset, int fetchCount)
+        {
+            var isPagingQuery = offset >= 0 && fetchCount >= 0;
+
+            var query = new Query(Source.Table).Select();
+            if (isPagingQuery)
+            {
+                query = query.ForPage(offset / fetchCount + 1, fetchCount);
+            }
+
+            return connection.CreateCommand(query);
+        }
+
+        protected virtual DbCommand CreateViewCommand(DbConnection connection, DataSourceParameters parameters, int offset, int fetchCount)
+        {
+            return CreateTableCommand(connection, parameters, offset, fetchCount);
+        }
+
+        protected virtual DbCommand CreateStoredProcedureCommand(DbConnection connection, DataSourceParameters parameters, int offset, int fetchCount)
         {
             return connection.CreateCommand(Source.Table, CommandType.StoredProcedure);
         }
 
-        protected virtual DbCommand CreateFunctionCommand(DbConnection connection, DataSourceParameters parameters)
+        protected virtual DbCommand CreateFunctionCommand(DbConnection connection, DataSourceParameters parameters, int offset, int fetchCount)
         {
             return connection.CreateCommand($"select * from {Source.Table}({parameters?.ToArgsNamesString() ?? string.Empty})");
         }
@@ -130,10 +143,9 @@ namespace Orc.DbToCsv.DatabaseManagement
             }
         }
 
-        protected virtual IList<DbObject> ReadAllDbObjects(Func<DbConnection, DbDataReader> createReader)
+        protected virtual IList<DbObject> ReadAllDbObjects(Func<DbConnection, DbDataReader> createReader, DbConnection connection)
         {
             var dbObjects = new List<DbObject>();
-            var connection = GetOpenedConnection();
             var tableType = Source.TableType;
             using (var reader = createReader(connection))
             {

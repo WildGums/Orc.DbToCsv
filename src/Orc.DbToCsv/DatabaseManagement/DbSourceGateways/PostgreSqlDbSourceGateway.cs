@@ -82,13 +82,13 @@ namespace Orc.DbToCsv.DatabaseManagement
                 case TableType.Table:
                 {
                     var sql = "SELECT * FROM information_schema.tables WHERE table_schema = 'public';";
-                    return ReadAllDbObjects(x => x.GetReaderSql(sql));
+                    return ReadAllDbObjects(x => x.GetReaderSql(sql), GetOpenedConnection());
                 }
 
                 case TableType.View:
                 {
                     var sql = "SELECT * FROM information_schema.views WHERE table_schema = 'public';";
-                    return ReadAllDbObjects(x => x.GetReaderSql(sql));
+                    return ReadAllDbObjects(x => x.GetReaderSql(sql), GetOpenedConnection());
                 }
 
                 case TableType.StoredProcedure:
@@ -99,7 +99,7 @@ namespace Orc.DbToCsv.DatabaseManagement
                                 ON      p.pronamespace = n.oid
                                 WHERE   n.nspname = 'public';";
 
-                    return ReadAllDbObjects(x => x.GetReaderSql(sql));
+                    return ReadAllDbObjects(x => x.GetReaderSql(sql), GetOpenedConnection());
                 }
 
                 case TableType.Function:
@@ -113,7 +113,7 @@ JOIN     pg_proc pg_p ON pg_p.pronamespace = pg_n.oid
 AND      pg_p.proname = r.routine_name
 Where 	 r.data_type = 'record' and pg_n.nspname = 'public'";
 
-                    return ReadAllDbObjects(x => x.GetReaderSql(sql));
+                    return ReadAllDbObjects(x => x.GetReaderSql(sql), GetOpenedConnection());
                 }
 
                 default:
@@ -121,7 +121,7 @@ Where 	 r.data_type = 'record' and pg_n.nspname = 'public'";
             }
         }
 
-        protected override DbCommand CreateStoredProcedureCommand(DbConnection connection, DataSourceParameters parameters)
+        protected override DbCommand CreateStoredProcedureCommand(DbConnection connection, DataSourceParameters parameters, int offset, int fetchCount)
         {
             return connection.CreateCommand($"call {Source.Table}({parameters?.ToArgsNamesString() ?? string.Empty})");
         }

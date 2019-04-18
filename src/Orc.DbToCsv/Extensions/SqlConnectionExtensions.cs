@@ -35,10 +35,8 @@ namespace Orc.DbToCsv
         {
             Argument.IsNotNull(() => connection);
 
-            using (var command = connection.CreateCommand(sql, commandType, commandTimeout))
-            {
-                return command.ExecuteReader();
-            }
+            var command = connection.CreateCommand(sql, commandType, commandTimeout);
+            return command.ExecuteReader();
         }
 
         public static DbCommand CreateCommand(this DbConnection connection, string sql,

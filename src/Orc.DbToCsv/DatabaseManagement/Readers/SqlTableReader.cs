@@ -216,7 +216,7 @@ namespace Orc.DbToCsv.DatabaseManagement
                     }
                 }
 
-                _reader = _gateway.GetRecords(QueryParameters, Offset, FetchCount);
+                _reader = _gateway.GetRecords(queryParameters, Offset, FetchCount);
             }
             catch (Exception ex)
             {

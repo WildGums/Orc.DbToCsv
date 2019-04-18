@@ -103,7 +103,7 @@ namespace Orc.DbToCsv.DatabaseManagement
                 .Where("type", literalType)
                 .OrderBy("name");
 
-            var dbObjects = ReadAllDbObjects(x => x.ExecuteReader(query));
+            var dbObjects = ReadAllDbObjects(x => x.ExecuteReader(query), GetOpenedConnection());
 
             return dbObjects;
         }

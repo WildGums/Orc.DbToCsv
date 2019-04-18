@@ -30,7 +30,7 @@ namespace Orc.DbToCsv.DatabaseManagement
         public override IList<DbObject> GetObjects()
         {
             var tableType = Source.TableType;
-            var tableTypeStr = string.Empty;
+            string tableTypeStr;
             switch (tableType)
             {
                 case TableType.Function:

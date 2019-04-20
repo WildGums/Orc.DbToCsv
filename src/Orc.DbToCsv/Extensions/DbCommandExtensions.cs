@@ -33,6 +33,35 @@ namespace Orc.DbToCsv
 
             return dbCommand;
         }
+        public static long GetRecordsCount(this DbCommand command)
+        {
+            Argument.IsNotNull(() => command);
+
+            long count = 0;
+            using (var reader = command.ExecuteReader())
+            {
+                while (true)
+                {
+                    while (reader.Read())
+                    {
+                        count++;
+                    }
+
+                    if (!reader.NextResult())
+                    {
+                        break;
+                    }
+
+                    if (!reader.HasRows)
+                    {
+                        break;
+                    }
+                }
+            }
+
+            return count;
+        }
+
         #endregion
     }
 }

@@ -11,6 +11,7 @@ namespace Orc.DbToCsv.DatabaseManagement
     using System.Collections.Generic;
     using System.Data;
     using System.Data.Common;
+    using Catel;
     using DataAccess;
     using SqlKata;
 
@@ -97,6 +98,16 @@ namespace Orc.DbToCsv.DatabaseManagement
             return connection.CreateCommand($"select * from {Source.Table}({parameters?.ToArgsNamesString() ?? string.Empty})");
         }
 
+        protected virtual DbCommand CreateTableCountCommand(DbConnection connection)
+        {
+            return connection.CreateCommand(new Query(Source.Table).AsCount());
+        }
+
+        protected virtual DbCommand CreateViewCountCommand(DbConnection connection)
+        {
+            return CreateTableCountCommand(connection);
+        }
+
         public override long GetCount(DataSourceParameters queryParameters = null)
         {
             var source = Source;
@@ -105,41 +116,46 @@ namespace Orc.DbToCsv.DatabaseManagement
             switch (source.TableType)
             {
                 case TableType.Table:
-                case TableType.View:
-                    var res = connection.CreateCommand(new Query(source.Table).AsCount()).ExecuteScalar();
-                    return (long)res;
-
-                case TableType.StoredProcedure:
                 {
-                    var command = connection.CreateCommand(source.Table, CommandType.StoredProcedure);
+                    return Convert.ToInt64( CreateTableCountCommand(connection).ExecuteScalar() );
+                }
+
+                case TableType.View:
+                {
+                    return Convert.ToInt64( CreateViewCountCommand(connection).ExecuteScalar() );
+                }
+
+                case TableType.Function:
+                {
+                    var command = CreateFunctionCommand(connection, queryParameters, -1, -1);
                     command.AddParameters(queryParameters);
-
-                    var count = 0;
-                    using (var reader = command.ExecuteReader())
-                    {
-                        while (true)
-                        {
-                            while (reader.Read())
-                            {
-                                count++;
-                            }
-
-                            if (!reader.NextResult())
-                            {
-                                break;
-                            }
-
-                            if (!reader.HasRows)
-                            {
-                                break;
-                            }
-                        }
-                    }
+                    var count = command.GetRecordsCount();
 
                     return count;
                 }
+
+                case TableType.StoredProcedure:
+                {
+                    var command = CreateStoredProcedureCommand(connection, queryParameters, -1, -1);
+                    command.AddParameters(queryParameters);
+                    var count = command.GetRecordsCount();
+
+                    return count;
+                }
+
+                case TableType.Sql:
+                {
+                    var command = connection.CreateCommand(source.Table);
+                    command.AddParameters(queryParameters);
+                    var count = command.GetRecordsCount();
+
+                    return count;
+                }
+
                 default:
+                {
                     return 0;
+                }
             }
         }
 

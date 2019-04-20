@@ -60,7 +60,7 @@ namespace Orc.DbToCsv.DatabaseManagement
             return new DataSourceParameters();
         }
 
-        protected override DbCommand CreateFunctionCommand(DbConnection connection, DataSourceParameters parameters, int offset, int fetchCount)
+        protected override DbCommand CreateGetFunctionRecordsCommand(DbConnection connection, DataSourceParameters parameters, int offset, int fetchCount)
         {
             throw new NotSupportedException("Table valued function in MySql not supported");
         }

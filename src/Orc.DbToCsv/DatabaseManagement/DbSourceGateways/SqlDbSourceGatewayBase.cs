@@ -50,19 +50,19 @@ namespace Orc.DbToCsv.DatabaseManagement
             switch (source.TableType)
             {
                 case TableType.Table:
-                    command = CreateTableCommand(connection, queryParameters, offset, fetchCount);
+                    command = CreateGetTableRecordsCommand(connection, queryParameters, offset, fetchCount);
                     break;
 
                 case TableType.View:
-                    command = CreateViewCommand(connection, queryParameters, offset, fetchCount);
+                    command = CreateGetViewRecordsCommand(connection, queryParameters, offset, fetchCount);
                     break;
 
                 case TableType.StoredProcedure:
-                    command = CreateStoredProcedureCommand(connection, queryParameters, offset, fetchCount);
+                    command = CreateGetStoredProcedureRecordsCommand(connection, queryParameters, offset, fetchCount);
                     break;
 
                 case TableType.Function:
-                    command = CreateFunctionCommand(connection, queryParameters, offset, fetchCount);
+                    command = CreateGetFunctionRecordsCommand(connection, queryParameters, offset, fetchCount);
                     break;
 
                 case TableType.Sql:
@@ -84,7 +84,7 @@ namespace Orc.DbToCsv.DatabaseManagement
             return reader;
         }
 
-        protected virtual DbCommand CreateTableCommand(DbConnection connection, DataSourceParameters parameters, int offset, int fetchCount)
+        protected virtual DbCommand CreateGetTableRecordsCommand(DbConnection connection, DataSourceParameters parameters, int offset, int fetchCount)
         {
             var isPagingQuery = offset >= 0 && fetchCount >= 0;
 
@@ -97,17 +97,17 @@ namespace Orc.DbToCsv.DatabaseManagement
             return connection.CreateCommand(query);
         }
 
-        protected virtual DbCommand CreateViewCommand(DbConnection connection, DataSourceParameters parameters, int offset, int fetchCount)
+        protected virtual DbCommand CreateGetViewRecordsCommand(DbConnection connection, DataSourceParameters parameters, int offset, int fetchCount)
         {
-            return CreateTableCommand(connection, parameters, offset, fetchCount);
+            return CreateGetTableRecordsCommand(connection, parameters, offset, fetchCount);
         }
 
-        protected virtual DbCommand CreateStoredProcedureCommand(DbConnection connection, DataSourceParameters parameters, int offset, int fetchCount)
+        protected virtual DbCommand CreateGetStoredProcedureRecordsCommand(DbConnection connection, DataSourceParameters parameters, int offset, int fetchCount)
         {
             return connection.CreateCommand(Source.Table, CommandType.StoredProcedure);
         }
 
-        protected virtual DbCommand CreateFunctionCommand(DbConnection connection, DataSourceParameters parameters, int offset, int fetchCount)
+        protected virtual DbCommand CreateGetFunctionRecordsCommand(DbConnection connection, DataSourceParameters parameters, int offset, int fetchCount)
         {
             return connection.CreateCommand($"select * from {Source.Table}({parameters?.ToArgsNamesString() ?? string.Empty})");
         }
@@ -141,7 +141,7 @@ namespace Orc.DbToCsv.DatabaseManagement
 
                 case TableType.Function:
                 {
-                    var command = CreateFunctionCommand(connection, queryParameters, -1, -1);
+                    var command = CreateGetFunctionRecordsCommand(connection, queryParameters, -1, -1);
                     command.AddParameters(queryParameters);
                     var count = command.GetRecordsCount();
 
@@ -150,7 +150,7 @@ namespace Orc.DbToCsv.DatabaseManagement
 
                 case TableType.StoredProcedure:
                 {
-                    var command = CreateStoredProcedureCommand(connection, queryParameters, -1, -1);
+                    var command = CreateGetStoredProcedureRecordsCommand(connection, queryParameters, -1, -1);
                     command.AddParameters(queryParameters);
                     var count = command.GetRecordsCount();
 

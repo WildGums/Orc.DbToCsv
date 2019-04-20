@@ -97,7 +97,7 @@ namespace Orc.DbToCsv.DatabaseManagement
             return new DataSourceParameters();
         }
 
-        protected override DbCommand CreateStoredProcedureCommand(DbConnection connection, DataSourceParameters parameters, int offset, int fetchCount)
+        protected override DbCommand CreateGetStoredProcedureRecordsCommand(DbConnection connection, DataSourceParameters parameters, int offset, int fetchCount)
         {
             return connection.CreateCommand($"call {Source.Table}({parameters?.ToArgsNamesString() ?? string.Empty})");
         }

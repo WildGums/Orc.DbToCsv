@@ -61,7 +61,7 @@ namespace Orc.DbToCsv.DatabaseManagement
             return new DataSourceParameters();
         }
 
-        protected override DbCommand CreateTableCommand(DbConnection connection, DataSourceParameters parameters, int offset, int fetchCount)
+        protected override DbCommand CreateGetTableRecordsCommand(DbConnection connection, DataSourceParameters parameters, int offset, int fetchCount)
         {
             var isPagingQuery = offset >= 0 && fetchCount >= 0;
             var sql = $"SELECT * FROM {Source.Table}";
@@ -73,12 +73,12 @@ namespace Orc.DbToCsv.DatabaseManagement
             return connection.CreateCommand(sql);
         }
 
-        protected override DbCommand CreateStoredProcedureCommand(DbConnection connection, DataSourceParameters parameters, int offset, int fetchCount)
+        protected override DbCommand CreateGetStoredProcedureRecordsCommand(DbConnection connection, DataSourceParameters parameters, int offset, int fetchCount)
         {
             return connection.CreateCommand(Source.Table, CommandType.StoredProcedure);
         }
 
-        protected override DbCommand CreateFunctionCommand(DbConnection connection, DataSourceParameters parameters, int offset, int fetchCount)
+        protected override DbCommand CreateGetFunctionRecordsCommand(DbConnection connection, DataSourceParameters parameters, int offset, int fetchCount)
         {
             return connection.CreateCommand($"select * from table({Source.Table}({parameters?.ToArgsNamesString(":") ?? string.Empty}))");
         }

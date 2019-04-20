@@ -31,6 +31,23 @@ namespace Orc.DbToCsv.DatabaseManagement
                 {TableType.StoredProcedure, c => CreateGetObjectsCommand(c, "P")},
                 {TableType.Function, c => CreateGetObjectsCommand(c, "IF")},
             };
+
+        protected override DbCommand CreateGetTableRecordsCommand(DbConnection connection, DataSourceParameters parameters, int offset, int fetchCount, bool isPagingEnabled)
+        {
+            var source = Source;
+            var query = isPagingEnabled 
+                ? offset == 0 
+                    ? $"SELECT TOP ({fetchCount}) * FROM [{source.Table}]" 
+                    : $"SELECT * FROM (SELECT *, ROW_NUMBER() OVER (ORDER BY (SELECT 0)) AS [row_num] FROM [{source.Table}]) AS [results_wrapper] WHERE [row_num] BETWEEN {offset + 1} AND {offset + fetchCount}" 
+                : $"SELECT * FROM [{source.Table}]";
+
+            return connection.CreateCommand(query);
+        }
+
+        protected override DbCommand CreateTableCountCommand(DbConnection connection)
+        {
+            return connection.CreateCommand($"SELECT COUNT(*) AS [count] FROM [{Source.Table}]");
+        }
         #endregion
 
         #region Methods

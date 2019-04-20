@@ -11,9 +11,7 @@ namespace Orc.DbToCsv.DatabaseManagement
     using System.Collections.Generic;
     using System.Data;
     using System.Data.Common;
-    using Catel;
     using DataAccess;
-    using SqlKata;
 
     public abstract class SqlDbSourceGatewayBase : DbSourceGatewayBase
     {
@@ -84,16 +82,7 @@ namespace Orc.DbToCsv.DatabaseManagement
             return reader;
         }
 
-        protected virtual DbCommand CreateGetTableRecordsCommand(DbConnection connection, DataSourceParameters parameters, int offset, int fetchCount, bool isPagingEnabled)
-        {
-            var query = new Query(Source.Table).Select();
-            if (isPagingEnabled)
-            {
-                query = query.ForPage(offset / fetchCount + 1, fetchCount);
-            }
-
-            return connection.CreateCommand(query);
-        }
+        protected abstract DbCommand CreateGetTableRecordsCommand(DbConnection connection, DataSourceParameters parameters, int offset, int fetchCount, bool isPagingEnabled);
 
         private DbCommand CreateGetTableRecordsCommand(DbConnection connection, DataSourceParameters parameters, int offset, int fetchCount)
         {
@@ -118,13 +107,10 @@ namespace Orc.DbToCsv.DatabaseManagement
 
         protected virtual DbCommand CreateGetFunctionRecordsCommand(DbConnection connection, DataSourceParameters parameters, int offset, int fetchCount)
         {
-            return connection.CreateCommand($"select * from {Source.Table}({parameters?.ToArgsNamesString() ?? string.Empty})");
+            return connection.CreateCommand($"SELECT * FROM {Source.Table}({parameters?.ToArgsNamesString() ?? string.Empty})");
         }
 
-        protected virtual DbCommand CreateTableCountCommand(DbConnection connection)
-        {
-            return connection.CreateCommand(new Query(Source.Table).AsCount());
-        }
+        protected abstract DbCommand CreateTableCountCommand(DbConnection connection);
 
         protected virtual DbCommand CreateViewCountCommand(DbConnection connection)
         {

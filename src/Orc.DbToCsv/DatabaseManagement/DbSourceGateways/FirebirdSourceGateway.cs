@@ -31,6 +31,23 @@ namespace Orc.DbToCsv.DatabaseManagement
                 {TableType.StoredProcedure, c => c.CreateCommand("SELECT rdb$procedure_name FROM rdb$procedures;")},
                 {TableType.Function, c => c.CreateCommand($"SELECT rdb$function_name FROM rdb$functions;")},
             };
+
+        protected override DbCommand CreateGetTableRecordsCommand(DbConnection connection, DataSourceParameters parameters, int offset, int fetchCount, bool isPagingEnabled)
+        {
+            var source = Source;
+            var query = isPagingEnabled 
+                ? offset == 0 
+                    ? $"SELECT FIRST {fetchCount} * FROM \"{source.Table}\"" 
+                    : $"SELECT * FROM \"{source.Table}\" ROWS {offset + 1} TO {offset + fetchCount}" 
+                : $"SELECT * FROM \"{source.Table}\"";
+
+            return connection.CreateCommand(query);
+        }
+
+        protected override DbCommand CreateTableCountCommand(DbConnection connection)
+        {
+            return connection.CreateCommand($"SELECT COUNT(*) AS \"COUNT\" FROM \"{Source.Table}\"");
+        }
         #endregion
 
         #region Methods

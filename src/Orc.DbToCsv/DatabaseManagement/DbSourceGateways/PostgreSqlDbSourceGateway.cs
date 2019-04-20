@@ -42,9 +42,21 @@ namespace Orc.DbToCsv.DatabaseManagement
                                 JOIN     pg_namespace pg_n ON r.specific_schema = pg_n.nspname
                                 JOIN     pg_proc pg_p ON pg_p.pronamespace = pg_n.oid
                                 AND      pg_p.proname = r.routine_name
-                                Where 	 r.data_type = 'record' and pg_n.nspname = 'public'")
+                                Where 	 r.data_type = 'record' AND pg_n.nspname = 'public'")
                 },
             };
+
+        protected override DbCommand CreateGetTableRecordsCommand(DbConnection connection, DataSourceParameters parameters, int offset, int fetchCount, bool isPagingEnabled)
+        {
+            var source = Source;
+            var query = isPagingEnabled 
+                ? offset == 0 
+                    ? $"SELECT * FROM \"{source.Table}\" LIMIT {fetchCount}" 
+                    : $"SELECT * FROM \"{source.Table}\" LIMIT {fetchCount} OFFSET {offset}" 
+                : $"SELECT * FROM \"{source.Table}\"";
+
+            return connection.CreateCommand(query);
+        }
         #endregion
 
         #region Methods
@@ -100,6 +112,11 @@ namespace Orc.DbToCsv.DatabaseManagement
         protected override DbCommand CreateGetStoredProcedureRecordsCommand(DbConnection connection, DataSourceParameters parameters, int offset, int fetchCount)
         {
             return connection.CreateCommand($"call {Source.Table}({parameters?.ToArgsNamesString() ?? string.Empty})");
+        }
+
+        protected override DbCommand CreateTableCountCommand(DbConnection connection)
+        {
+            return connection.CreateCommand($"SELECT COUNT(*) AS \"count\" FROM \"{Source.Table}\"");
         }
         #endregion
     }

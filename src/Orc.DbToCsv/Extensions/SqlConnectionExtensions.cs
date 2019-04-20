@@ -14,7 +14,6 @@ namespace Orc.DbToCsv
     using Catel;
     using DataAccess;
     using DatabaseManagement;
-    using SqlKata;
 
     internal static class SqlConnectionExtensions
     {
@@ -55,42 +54,12 @@ namespace Orc.DbToCsv
             return command;
         }
 
-        internal static ISqlCompiler GetCompiler(this DbConnection connection)
-        {
-            Argument.IsNotNull(() => connection);
-
-            var provider = connection.GetDbProvider();
-            var sqlCompiler = provider.GetOrCreateConnectedInstance<ISqlCompiler>();
-
-            return sqlCompiler;
-        }
-
         public static DbProvider GetDbProvider(this DbConnection connection)
         {
             Argument.IsNotNull(() => connection);
 
             var connectionType = connection.GetType();
             return GetProviderByConnectionType(connectionType);
-        }
-
-        internal static DbCommand CreateCommand(this DbConnection connection, Query query, int? commandTimeout = null)
-        {
-            Argument.IsNotNull(() => connection);
-            Argument.IsNotNull(() => query);
-
-            var compiler = connection.GetCompiler();
-            var sql = compiler.Compile(query);
-            return connection.CreateCommand(sql, CommandType.Text, commandTimeout);
-        }
-
-        internal static DbDataReader ExecuteReader(this DbConnection connection, Query query, int? commandTimeout = null)
-        {
-            Argument.IsNotNull(() => connection);
-            Argument.IsNotNull(() => query);
-
-            var compiler = connection.GetCompiler();
-            var sql = compiler.Compile(query);
-            return connection.GetReaderSql(sql, commandTimeout);
         }
 
         public static DbCommand AddParameters(this DbCommand dbCommand, DataSourceParameters parameters)

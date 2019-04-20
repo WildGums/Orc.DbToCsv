@@ -79,7 +79,12 @@ namespace Orc.DbToCsv.DatabaseManagement
 
         protected override DbCommand CreateGetFunctionRecordsCommand(DbConnection connection, DataSourceParameters parameters, int offset, int fetchCount)
         {
-            return connection.CreateCommand($"select * from table({Source.Table}({parameters?.ToArgsNamesString(":") ?? string.Empty}))");
+            return connection.CreateCommand($"SELECT * FROM table({Source.Table}({parameters?.ToArgsNamesString(":") ?? string.Empty}))");
+        }
+
+        protected override DbCommand CreateTableCountCommand(DbConnection connection)
+        {
+            return connection.CreateCommand($"SELECT COUNT(*) \"count\" FROM \"{Source.Table}\"");
         }
         #endregion
     }

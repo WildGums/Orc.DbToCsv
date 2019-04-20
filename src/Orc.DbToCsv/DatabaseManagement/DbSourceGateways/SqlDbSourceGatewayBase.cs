@@ -84,12 +84,10 @@ namespace Orc.DbToCsv.DatabaseManagement
             return reader;
         }
 
-        protected virtual DbCommand CreateGetTableRecordsCommand(DbConnection connection, DataSourceParameters parameters, int offset, int fetchCount)
+        protected virtual DbCommand CreateGetTableRecordsCommand(DbConnection connection, DataSourceParameters parameters, int offset, int fetchCount, bool isPagingEnabled)
         {
-            var isPagingQuery = offset >= 0 && fetchCount >= 0;
-
             var query = new Query(Source.Table).Select();
-            if (isPagingQuery)
+            if (isPagingEnabled)
             {
                 query = query.ForPage(offset / fetchCount + 1, fetchCount);
             }
@@ -97,7 +95,18 @@ namespace Orc.DbToCsv.DatabaseManagement
             return connection.CreateCommand(query);
         }
 
-        protected virtual DbCommand CreateGetViewRecordsCommand(DbConnection connection, DataSourceParameters parameters, int offset, int fetchCount)
+        private DbCommand CreateGetTableRecordsCommand(DbConnection connection, DataSourceParameters parameters, int offset, int fetchCount)
+        {
+            var isPagingQuery = offset >= 0 && fetchCount >= 0;
+            return CreateGetTableRecordsCommand(connection, parameters, offset, fetchCount, isPagingQuery);
+        }
+
+        protected virtual DbCommand CreateGetViewRecordsCommand(DbConnection connection, DataSourceParameters parameters, int offset, int fetchCount, bool isPagingEnabled)
+        {
+            return CreateGetTableRecordsCommand(connection, parameters, offset, fetchCount, isPagingEnabled);
+        }
+
+        private DbCommand CreateGetViewRecordsCommand(DbConnection connection, DataSourceParameters parameters, int offset, int fetchCount)
         {
             return CreateGetTableRecordsCommand(connection, parameters, offset, fetchCount);
         }

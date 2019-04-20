@@ -61,11 +61,10 @@ namespace Orc.DbToCsv.DatabaseManagement
             return new DataSourceParameters();
         }
 
-        protected override DbCommand CreateGetTableRecordsCommand(DbConnection connection, DataSourceParameters parameters, int offset, int fetchCount)
+        protected override DbCommand CreateGetTableRecordsCommand(DbConnection connection, DataSourceParameters parameters, int offset, int fetchCount, bool isPagingEnabled)
         {
-            var isPagingQuery = offset >= 0 && fetchCount >= 0;
             var sql = $"SELECT * FROM {Source.Table}";
-            if (isPagingQuery)
+            if (isPagingEnabled)
             {
                 sql = $"SELECT * FROM {Source.Table} ORDER BY (select COLUMN_NAME from ALL_TAB_COLUMNS where TABLE_NAME='{Source.Table}' FETCH FIRST 1 ROWS ONLY) OFFSET {offset} ROWS FETCH NEXT {fetchCount} ROWS ONLY";
             }

@@ -47,7 +47,7 @@ namespace Orc.DbToCsv.DatabaseManagement
 
                             var parameters = result.Split(',').Select(x => x.Trim().Split(' ')).Select(x => new DataSourceParameter
                             {
-                                Name = x[0],
+                                Name = $"@{x[0]}",
                                 Type = x[1]
                             }).ToList();
 

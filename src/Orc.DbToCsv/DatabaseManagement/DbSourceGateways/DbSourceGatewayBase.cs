@@ -32,8 +32,8 @@ namespace Orc.DbToCsv.DatabaseManagement
 
         #region Properties
         public DatabaseSource Source { get; }
-        public DbProvider Provider => _provider ?? (_provider = Source.GetProvider());
-        public DbConnection Connection => _connection ?? (_connection = Provider?.CreateConnection(Source));
+        public virtual DbProvider Provider => _provider ?? (_provider = Source.GetProvider());
+        public virtual DbConnection Connection => _connection ?? (_connection = Provider?.CreateConnection(Source));
         #endregion
 
         #region IDisposable Members

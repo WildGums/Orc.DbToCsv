@@ -105,7 +105,6 @@ namespace Orc.DbToCsv.DatabaseManagement
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-
         }
 
         protected override DbCommand CreateTableCommand(DbConnection connection, DataSourceParameters parameters, int offset, int fetchCount)

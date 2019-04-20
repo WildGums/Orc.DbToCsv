@@ -32,13 +32,23 @@ namespace Orc.DbToCsv.DatabaseManagement
                 {TableType.Function, c => CreateGetObjectsCommand(c, "IF")},
             };
 
+        protected override Dictionary<TableType, Func<DataSourceParameters>> DataSourceParametersFactory => new Dictionary<TableType, Func<DataSourceParameters>>
+        {
+            {TableType.StoredProcedure, () => GetArgs(GetArgsQuery)},
+            {TableType.Function, () => GetArgs(GetArgsQuery)},
+        };
+
+        private string GetArgsQuery => $"SELECT [name], type_name(user_type_id) as type FROM [sys].[parameters] WHERE [object_id] = object_id('{Source.Table}')";
+        #endregion
+
+        #region Methods
         protected override DbCommand CreateGetTableRecordsCommand(DbConnection connection, DataSourceParameters parameters, int offset, int fetchCount, bool isPagingEnabled)
         {
             var source = Source;
-            var query = isPagingEnabled 
-                ? offset == 0 
-                    ? $"SELECT TOP ({fetchCount}) * FROM [{source.Table}]" 
-                    : $"SELECT * FROM (SELECT *, ROW_NUMBER() OVER (ORDER BY (SELECT 0)) AS [row_num] FROM [{source.Table}]) AS [results_wrapper] WHERE [row_num] BETWEEN {offset + 1} AND {offset + fetchCount}" 
+            var query = isPagingEnabled
+                ? offset == 0
+                    ? $"SELECT TOP ({fetchCount}) * FROM [{source.Table}]"
+                    : $"SELECT * FROM (SELECT *, ROW_NUMBER() OVER (ORDER BY (SELECT 0)) AS [row_num] FROM [{source.Table}]) AS [results_wrapper] WHERE [row_num] BETWEEN {offset + 1} AND {offset + fetchCount}"
                 : $"SELECT * FROM [{source.Table}]";
 
             return connection.CreateCommand(query);
@@ -47,36 +57,6 @@ namespace Orc.DbToCsv.DatabaseManagement
         protected override DbCommand CreateTableCountCommand(DbConnection connection)
         {
             return connection.CreateCommand($"SELECT COUNT(*) AS [count] FROM [{Source.Table}]");
-        }
-        #endregion
-
-        #region Methods
-        public override DataSourceParameters GetQueryParameters()
-        {
-            var source = Source;
-            switch (source.TableType)
-            {
-                case TableType.Sql:
-                    return new DataSourceParameters();
-
-                case TableType.StoredProcedure:
-                case TableType.Function:
-                {
-                    var query = $"SELECT [name], type_name(user_type_id) as type FROM [sys].[parameters] WHERE [object_id] = object_id('{source.Table}')";
-                    return ReadParametersFromQuery(query);
-                }
-
-                case TableType.Table:
-                    break;
-
-                case TableType.View:
-                    break;
-
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-
-            return new DataSourceParameters();
         }
 
         private DbCommand CreateGetObjectsCommand(DbConnection connection, string commandParameter)

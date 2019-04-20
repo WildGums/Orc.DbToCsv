@@ -30,46 +30,26 @@ namespace Orc.DbToCsv.DatabaseManagement
                 {TableType.StoredProcedure, c => c.CreateCommand($"SELECT SPECIFIC_NAME AS NAME FROM INFORMATION_SCHEMA.ROUTINES where ROUTINE_SCHEMA = database() and ROUTINE_TYPE = 'PROCEDURE';")},
             };
 
-        protected override DbCommand CreateGetTableRecordsCommand(DbConnection connection, DataSourceParameters parameters, int offset, int fetchCount, bool isPagingEnabled)
+        protected override Dictionary<TableType, Func<DataSourceParameters>> DataSourceParametersFactory => new Dictionary<TableType, Func<DataSourceParameters>>
         {
-            var source = Source;
-            var query = isPagingEnabled 
-                ? offset == 0 
-                    ? $"SELECT * FROM `{source.Table}` LIMIT {fetchCount}" 
-                    : $"SELECT * FROM `{source.Table}` LIMIT {fetchCount} OFFSET {offset}" 
-                : $"SELECT * FROM `{source.Table}`";
+            {TableType.StoredProcedure, () => GetArgs(GetArgsQuery)},
+            {TableType.Function, () => GetArgs(GetArgsQuery)},
+        };
 
-            return connection.CreateCommand(query);
-        }
+        private string GetArgsQuery => $"SELECT PARAMETER_NAME AS NAME, DATA_TYPE AS TYPE FROM information_schema.parameters WHERE SPECIFIC_NAME = '{Source.Table}' and PARAMETER_MODE = 'IN';";
         #endregion
 
         #region Methods
-        public override DataSourceParameters GetQueryParameters()
+        protected override DbCommand CreateGetTableRecordsCommand(DbConnection connection, DataSourceParameters parameters, int offset, int fetchCount, bool isPagingEnabled)
         {
             var source = Source;
-            switch (source.TableType)
-            {
-                case TableType.Table:
-                    break;
+            var query = isPagingEnabled
+                ? offset == 0
+                    ? $"SELECT * FROM `{source.Table}` LIMIT {fetchCount}"
+                    : $"SELECT * FROM `{source.Table}` LIMIT {fetchCount} OFFSET {offset}"
+                : $"SELECT * FROM `{source.Table}`";
 
-                case TableType.View:
-                    break;
-
-                case TableType.Sql:
-                    return new DataSourceParameters();
-
-                case TableType.StoredProcedure:
-                case TableType.Function:
-                {
-                    var query = $"SELECT PARAMETER_NAME AS NAME, DATA_TYPE AS TYPE FROM information_schema.parameters WHERE SPECIFIC_NAME = '{source.Table}' and PARAMETER_MODE = 'IN';";
-                    return ReadParametersFromQuery(query);
-                }
-
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-
-            return new DataSourceParameters();
+            return connection.CreateCommand(query);
         }
 
         protected override DbCommand CreateGetFunctionRecordsCommand(DbConnection connection, DataSourceParameters parameters, int offset, int fetchCount)

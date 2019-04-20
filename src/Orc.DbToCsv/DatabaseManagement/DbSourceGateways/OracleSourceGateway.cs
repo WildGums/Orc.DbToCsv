@@ -32,6 +32,14 @@ namespace Orc.DbToCsv.DatabaseManagement
                 {TableType.StoredProcedure, c => c.CreateCommand($"SELECT * FROM User_Procedures WHERE OBJECT_TYPE = 'PROCEDURE'")},
                 {TableType.Function, c => c.CreateCommand($"SELECT * FROM User_Procedures WHERE OBJECT_TYPE = 'FUNCTION'")},
             };
+
+        protected override Dictionary<TableType, Func<DataSourceParameters>> DataSourceParametersFactory => new Dictionary<TableType, Func<DataSourceParameters>>
+        {
+            {TableType.StoredProcedure, () => GetArgs(GetArgsQuery)},
+            {TableType.Function, () => GetArgs(GetArgsQuery)},
+        };
+
+        private string GetArgsQuery => $"SELECT ARGUMENT_NAME AS NAME, DATA_TYPE AS TYPE FROM USER_ARGUMENTS WHERE OBJECT_NAME = UPPER('{Source.Table}') AND IN_OUT = 'IN'";
         #endregion
 
         #region Methods
@@ -51,7 +59,7 @@ namespace Orc.DbToCsv.DatabaseManagement
                 case TableType.Function:
                 {
                     var query = $"SELECT ARGUMENT_NAME AS NAME, DATA_TYPE AS TYPE FROM USER_ARGUMENTS WHERE OBJECT_NAME = UPPER('{Source.Table}') AND IN_OUT = 'IN'";
-                    return ReadParametersFromQuery(query);
+                    return GetArgs(query);
                 }
 
                 default:

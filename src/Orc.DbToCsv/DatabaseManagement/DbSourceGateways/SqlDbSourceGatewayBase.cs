@@ -22,7 +22,12 @@ namespace Orc.DbToCsv.DatabaseManagement
         }
         #endregion
 
+        #region Properties
         protected virtual Dictionary<TableType, Func<DbConnection, DbCommand>> GetObjectListCommandsFactory => new Dictionary<TableType, Func<DbConnection, DbCommand>>();
+        protected virtual Dictionary<TableType, Func<DataSourceParameters>> DataSourceParametersFactory => new Dictionary<TableType, Func<DataSourceParameters>>();
+        #endregion
+
+        #region Methods
         public override IList<DbObject> GetObjects()
         {
             var source = Source;
@@ -36,7 +41,17 @@ namespace Orc.DbToCsv.DatabaseManagement
             return ReadAllDbObjects(command);
         }
 
-        #region Methods
+        public override DataSourceParameters GetQueryParameters()
+        {
+            var source = Source;
+            if (!DataSourceParametersFactory.TryGetValue(source.TableType, out var parametersFactory))
+            {
+                return new DataSourceParameters();
+            }
+
+            return parametersFactory();
+        }
+
         public override DbDataReader GetRecords(DataSourceParameters queryParameters = null, int offset = 0, int fetchCount = -1)
         {
             var connection = GetOpenedConnection();
@@ -126,12 +141,12 @@ namespace Orc.DbToCsv.DatabaseManagement
             {
                 case TableType.Table:
                 {
-                    return Convert.ToInt64( CreateTableCountCommand(connection).ExecuteScalar() );
+                    return Convert.ToInt64(CreateTableCountCommand(connection).ExecuteScalar());
                 }
 
                 case TableType.View:
                 {
-                    return Convert.ToInt64( CreateViewCountCommand(connection).ExecuteScalar() );
+                    return Convert.ToInt64(CreateViewCountCommand(connection).ExecuteScalar());
                 }
 
                 case TableType.Function:
@@ -172,7 +187,7 @@ namespace Orc.DbToCsv.DatabaseManagement
         {
             var dbObjects = new List<DbObject>();
             var tableType = Source.TableType;
-            
+
             using (var reader = command.ExecuteReader())
             {
                 while (reader.Read())
@@ -185,7 +200,7 @@ namespace Orc.DbToCsv.DatabaseManagement
             return dbObjects;
         }
 
-        protected DataSourceParameters ReadParametersFromQuery(string query)
+        protected DataSourceParameters GetArgs(string query)
         {
             var connection = GetOpenedConnection();
             var queryParameters = new DataSourceParameters();

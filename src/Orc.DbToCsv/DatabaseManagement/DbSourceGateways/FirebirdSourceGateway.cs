@@ -32,13 +32,21 @@ namespace Orc.DbToCsv.DatabaseManagement
                 {TableType.Function, c => c.CreateCommand($"SELECT rdb$function_name FROM rdb$functions;")},
             };
 
+        protected override Dictionary<TableType, Func<DataSourceParameters>> DataSourceParametersFactory => new Dictionary<TableType, Func<DataSourceParameters>>()
+        {
+            {TableType.StoredProcedure, () => GetArgs($"SELECT rdb$parameter_name, rdb$parameter_type FROM rdb$procedure_parameters WHERE rdb$procedure_name = '{Source.Table}'")},
+            {TableType.Function, () => GetArgs($"SELECT rdb$argument_name, rdb$field_type FROM rdb$procedure_parameters WHERE rdb$procedure_name = '{Source.Table}'")},
+        };
+        #endregion
+
+        #region Methods
         protected override DbCommand CreateGetTableRecordsCommand(DbConnection connection, DataSourceParameters parameters, int offset, int fetchCount, bool isPagingEnabled)
         {
             var source = Source;
-            var query = isPagingEnabled 
-                ? offset == 0 
-                    ? $"SELECT FIRST {fetchCount} * FROM \"{source.Table}\"" 
-                    : $"SELECT * FROM \"{source.Table}\" ROWS {offset + 1} TO {offset + fetchCount}" 
+            var query = isPagingEnabled
+                ? offset == 0
+                    ? $"SELECT FIRST {fetchCount} * FROM \"{source.Table}\""
+                    : $"SELECT * FROM \"{source.Table}\" ROWS {offset + 1} TO {offset + fetchCount}"
                 : $"SELECT * FROM \"{source.Table}\"";
 
             return connection.CreateCommand(query);
@@ -47,39 +55,6 @@ namespace Orc.DbToCsv.DatabaseManagement
         protected override DbCommand CreateTableCountCommand(DbConnection connection)
         {
             return connection.CreateCommand($"SELECT COUNT(*) AS \"COUNT\" FROM \"{Source.Table}\"");
-        }
-        #endregion
-
-        #region Methods
-        public override DataSourceParameters GetQueryParameters()
-        {
-            var source = Source;
-            switch (source.TableType)
-            {
-                case TableType.Table:
-                    break;
-                case TableType.View:
-                    break;
-                case TableType.Sql:
-                    break;
-
-                case TableType.StoredProcedure:
-                {
-                    var query = $"SELECT rdb$parameter_name, rdb$parameter_type FROM rdb$procedure_parameters WHERE rdb$procedure_name = '{Source.Table}'";
-                    return ReadParametersFromQuery(query);
-                }
-
-                case TableType.Function:
-                {
-                    var query = $"SELECT rdb$argument_name, rdb$field_type FROM rdb$procedure_parameters WHERE rdb$procedure_name = '{Source.Table}'";
-                    return ReadParametersFromQuery(query);
-                }
-
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-
-            return new DataSourceParameters();
         }
         #endregion
     }

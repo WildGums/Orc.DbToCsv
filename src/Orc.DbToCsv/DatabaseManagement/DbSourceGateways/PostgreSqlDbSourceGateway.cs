@@ -29,13 +29,15 @@ namespace Orc.DbToCsv.DatabaseManagement
             {
                 {TableType.Table, c => c.CreateCommand($"SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';")},
                 {TableType.View, c => c.CreateCommand($"SELECT table_name FROM information_schema.views WHERE table_schema = 'public';")},
-                {TableType.StoredProcedure, c => c.CreateCommand(@"SELECT  p.proname
+                {
+                    TableType.StoredProcedure, c => c.CreateCommand(@"SELECT  p.proname
                                 FROM    pg_catalog.pg_namespace n
                                 JOIN    pg_catalog.pg_proc p
                                 ON      p.pronamespace = n.oid
                                 WHERE   n.nspname = 'public';")
                 },
-                {TableType.Function, c => c.CreateCommand(@"SELECT   distinct  r.routine_name
+                {
+                    TableType.Function, c => c.CreateCommand(@"SELECT   distinct  r.routine_name
                                 FROM     information_schema.routines r
                                 JOIN     information_schema.parameters p
                                 USING   (specific_catalog, specific_schema, specific_name)
@@ -45,21 +47,21 @@ namespace Orc.DbToCsv.DatabaseManagement
                                 Where 	 r.data_type = 'record' AND pg_n.nspname = 'public'")
                 },
             };
+        #endregion
 
+        #region Methods
         protected override DbCommand CreateGetTableRecordsCommand(DbConnection connection, DataSourceParameters parameters, int offset, int fetchCount, bool isPagingEnabled)
         {
             var source = Source;
-            var query = isPagingEnabled 
-                ? offset == 0 
-                    ? $"SELECT * FROM \"{source.Table}\" LIMIT {fetchCount}" 
-                    : $"SELECT * FROM \"{source.Table}\" LIMIT {fetchCount} OFFSET {offset}" 
+            var query = isPagingEnabled
+                ? offset == 0
+                    ? $"SELECT * FROM \"{source.Table}\" LIMIT {fetchCount}"
+                    : $"SELECT * FROM \"{source.Table}\" LIMIT {fetchCount} OFFSET {offset}"
                 : $"SELECT * FROM \"{source.Table}\"";
 
             return connection.CreateCommand(query);
         }
-        #endregion
 
-        #region Methods
         public override DataSourceParameters GetQueryParameters()
         {
             var source = Source;

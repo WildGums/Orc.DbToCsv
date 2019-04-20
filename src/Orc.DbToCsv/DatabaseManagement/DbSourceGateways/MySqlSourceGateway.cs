@@ -69,7 +69,6 @@ namespace Orc.DbToCsv.DatabaseManagement
 
         public override IList<DbObject> GetObjects()
         {
-            //SELECT table_name FROM information_schema.tables;
             var source = Source;
             switch (source.TableType)
             {

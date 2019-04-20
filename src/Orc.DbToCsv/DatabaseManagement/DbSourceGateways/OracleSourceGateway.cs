@@ -72,7 +72,40 @@ namespace Orc.DbToCsv.DatabaseManagement
 
         public override IList<DbObject> GetObjects()
         {
-            return new List<DbObject>();
+            var source = Source;
+            switch (source.TableType)
+            {
+                case TableType.Sql:
+                    return new List<DbObject>();
+
+                case TableType.Table:
+                {
+                    var sql = $"SELECT table_name FROM user_tables";
+                    return ReadAllDbObjects(x => x.GetReaderSql(sql));
+                }
+
+                case TableType.View:
+                {
+                    var sql = $"select view_name from user_views";
+                    return ReadAllDbObjects(x => x.GetReaderSql(sql));
+                }
+
+                case TableType.StoredProcedure:
+                {
+                    var sql = $"SELECT * FROM User_Procedures WHERE OBJECT_TYPE = 'PROCEDURE'";
+                    return ReadAllDbObjects(x => x.GetReaderSql(sql));
+                }
+
+                case TableType.Function:
+                {
+                    var sql = $"SELECT * FROM User_Procedures WHERE OBJECT_TYPE = 'FUNCTION'";
+                    return ReadAllDbObjects(x => x.GetReaderSql(sql));
+                }
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
         }
 
         protected override DbCommand CreateTableCommand(DbConnection connection, DataSourceParameters parameters, int offset, int fetchCount)

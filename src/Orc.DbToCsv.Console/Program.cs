@@ -32,7 +32,17 @@ namespace Orc.DbToCsv
                 Description = ".NET Framework Data Provider for SQLite",
                 AssemblyQualifiedName = "System.Data.SQLite.SQLiteFactory, System.Data.SQLite, Version=1.0.110.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139"
             };
-            DbProvider.RegisterProvider(sqLiteProviderInfo);  
+            DbProvider.RegisterProvider(sqLiteProviderInfo);
+
+            var oracleProviderInfo = new DbProviderInfo
+            {
+                Name = "ODP.NET, Managed Driver",
+                InvariantName = "Oracle.ManagedDataAccess.Client",
+                Description = "Oracle Data Provider for .NET, Managed Driver",
+                AssemblyQualifiedName = "Oracle.ManagedDataAccess.Client.OracleClientFactory, Oracle.ManagedDataAccess, Version=4.121.2.0, Culture=neutral, PublicKeyToken=89b483f429c47342"
+            };
+            DbProvider.RegisterProvider(oracleProviderInfo);
+
 
             var commandLine = Environment.CommandLine.GetCommandLine(true);
             var options = new Options();

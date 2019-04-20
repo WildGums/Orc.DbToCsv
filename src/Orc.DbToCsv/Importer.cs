@@ -8,6 +8,8 @@
 namespace Orc.DbToCsv
 {
     using System;
+    using System.Collections.Generic;
+    using System.Data;
     using System.Data.SqlClient;
     using System.IO;
     using System.Linq;
@@ -15,6 +17,7 @@ namespace Orc.DbToCsv
     using Catel.Logging;
     using CsvHelper;
     using DatabaseManagement;
+    using Oracle.ManagedDataAccess.Client;
 
     public static class Importer
     {
@@ -72,7 +75,7 @@ namespace Orc.DbToCsv
                 {
                     File.Delete(fullFileName);
                 }
-                
+
                 using (var streamWriter = new StreamWriter(new FileStream(fullFileName, FileMode.OpenOrCreate)))
                 {
                     using (var csvWriter = new CsvWriter(streamWriter))

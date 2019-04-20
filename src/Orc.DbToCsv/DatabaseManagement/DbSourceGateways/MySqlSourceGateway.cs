@@ -37,6 +37,12 @@ namespace Orc.DbToCsv.DatabaseManagement
             var source = Source;
             switch (source.TableType)
             {
+                case TableType.Table:
+                    break;
+
+                case TableType.View:
+                    break;
+
                 case TableType.Sql:
                     return new DataSourceParameters();
 
@@ -44,31 +50,8 @@ namespace Orc.DbToCsv.DatabaseManagement
                 case TableType.Function:
                 {
                     var query = $"SELECT PARAMETER_NAME AS NAME, DATA_TYPE AS TYPE FROM information_schema.parameters WHERE SPECIFIC_NAME = '{source.Table}' and PARAMETER_MODE = 'IN';";
-
-                    var connection = GetOpenedConnection();
-                    var queryParameters = new DataSourceParameters();
-                    using (var reader = connection.GetReader(query))
-                    {
-                        while (reader.Read())
-                        {
-                            var args = new DataSourceParameter
-                            {
-                                Name = reader.GetString(0),
-                                Type = reader.GetString(1)
-                            };
-
-                            queryParameters.Parameters.Add(args);
-                        }
-                    }
-
-                    return queryParameters;
+                    return ReadParametersFromQuery(query);
                 }
-
-                case TableType.Table:
-                    break;
-
-                case TableType.View:
-                    break;
 
                 default:
                     throw new ArgumentOutOfRangeException();

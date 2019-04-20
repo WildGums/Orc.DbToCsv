@@ -34,6 +34,7 @@ namespace Orc.DbToCsv.DatabaseManagement
         #region Methods
         public override DataSourceParameters GetQueryParameters()
         {
+            //Not supported by SqLite
             return new DataSourceParameters();
         }
         #endregion

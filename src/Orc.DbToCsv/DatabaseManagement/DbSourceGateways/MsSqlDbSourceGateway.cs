@@ -46,24 +46,7 @@ namespace Orc.DbToCsv.DatabaseManagement
                 case TableType.Function:
                 {
                     var query = $"SELECT [name], type_name(user_type_id) as type FROM [sys].[parameters] WHERE [object_id] = object_id('{source.Table}')";
-
-                    var connection = GetOpenedConnection();
-                    var queryParameters = new DataSourceParameters();
-                    using (var reader = connection.GetReader(query))
-                    {
-                        while (reader.Read())
-                        {
-                            var args = new DataSourceParameter
-                            {
-                                Name = reader.GetString(0),
-                                Type = reader.GetString(1)
-                            };
-
-                            queryParameters.Parameters.Add(args);
-                        }
-                    }
-
-                    return queryParameters;
+                    return ReadParametersFromQuery(query);
                 }
 
                 case TableType.Table:

@@ -53,6 +53,14 @@ namespace Orc.DbToCsv.DatabaseManagement
             var source = Source;
             switch (source.TableType)
             {
+                case TableType.Table:
+                    break;
+                case TableType.View:
+                    break;
+                case TableType.Sql:
+                    //TODO: parse sql string
+                    break;
+
                 case TableType.StoredProcedure:
                 case TableType.Function:
                 {
@@ -81,13 +89,7 @@ namespace Orc.DbToCsv.DatabaseManagement
 
                     return new DataSourceParameters();
                 }
-                case TableType.Table:
-                    break;
-                case TableType.View:
-                    break;
-                case TableType.Sql:
-                    //TODO: parce sql string
-                    break;
+
                 default:
                     return new DataSourceParameters();
             }

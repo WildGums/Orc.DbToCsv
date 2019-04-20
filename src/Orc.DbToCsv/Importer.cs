@@ -75,6 +75,7 @@ namespace Orc.DbToCsv
 
                 var gateway = source.CreateGateway();
                 var objects = gateway.GetObjects();
+                var parameters = gateway.GetQueryParameters();
 
                 using (var streamWriter = new StreamWriter(new FileStream(fullFileName, FileMode.OpenOrCreate)))
                 {

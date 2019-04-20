@@ -102,42 +102,6 @@ namespace Orc.DbToCsv
             return dbProvider.CreateConnectedInstance<DbSourceGatewayBase>(databaseSource);
         }
 
-        public static DbConnection CreateAndOpenConnection(this DbProvider dbProvider, string connectionString)
-        {
-            Argument.IsNotNull(() => dbProvider);
-
-            var connection = dbProvider.CreateConnection(connectionString);
-            if (connection == null)
-            {
-                return null;
-            }
-
-            if (!connection.State.HasFlag(ConnectionState.Open))
-            {
-                connection.Open();
-            }
-
-            return null;
-        }
-
-        public static DbConnection CreateAndOpenConnection(this DbProvider dbProvider, DatabaseSource databaseSource)
-        {
-            Argument.IsNotNull(() => dbProvider);
-
-            var connection = dbProvider.CreateConnection(databaseSource);
-            if (connection == null)
-            {
-                return null;
-            }
-
-            if (!connection.State.HasFlag(ConnectionState.Open))
-            {
-                connection.Open();
-            }
-
-            return null;
-        }
-
         public static DbConnection CreateConnection(this DbProvider dbProvider, string connectionString)
         {
             Argument.IsNotNull(() => dbProvider);

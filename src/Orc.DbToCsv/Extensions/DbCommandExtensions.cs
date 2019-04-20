@@ -14,6 +14,15 @@ namespace Orc.DbToCsv
     public static class DbCommandExtensions
     {
         #region Methods
+        public static DbCommand AddParameters(this DbCommand dbCommand, DataSourceParameters parameters)
+        {
+            Argument.IsNotNull(() => dbCommand);
+
+            parameters?.Parameters?.ForEach(x => dbCommand.AddParameter(x));
+
+            return dbCommand;
+        }
+
         public static DbCommand AddParameter(this DbCommand dbCommand, DataSourceParameter parameter)
         {
             Argument.IsNotNull(() => dbCommand);

@@ -62,15 +62,6 @@ namespace Orc.DbToCsv
             return GetProviderByConnectionType(connectionType);
         }
 
-        public static DbCommand AddParameters(this DbCommand dbCommand, DataSourceParameters parameters)
-        {
-            Argument.IsNotNull(() => dbCommand);
-
-            parameters?.Parameters?.ForEach(x => dbCommand.AddParameter(x));
-
-            return dbCommand;
-        }
-
         private static DbProvider GetProviderByConnectionType(Type connectionType)
         {
             Argument.IsNotNull(() => connectionType);

@@ -8,7 +8,6 @@
 namespace Orc.DbToCsv
 {
     using System;
-    using System.Collections.Generic;
     using System.Data;
     using System.Data.SqlClient;
     using System.IO;
@@ -17,7 +16,6 @@ namespace Orc.DbToCsv
     using Catel.Logging;
     using CsvHelper;
     using DatabaseManagement;
-    using Oracle.ManagedDataAccess.Client;
 
     public static class Importer
     {

@@ -94,7 +94,7 @@ namespace Orc.DbToCsv.DatabaseManagement
 
         protected override DbCommand CreateFunctionCommand(DbConnection connection, DataSourceParameters parameters, int offset, int fetchCount)
         {
-            return connection.CreateCommand($"select * from table({Source.Table}({parameters?.ToArgsNamesString() ?? string.Empty}))");
+            return connection.CreateCommand($"select * from table({Source.Table}({parameters?.ToArgsNamesString(":") ?? string.Empty}))");
         }
         #endregion
     }

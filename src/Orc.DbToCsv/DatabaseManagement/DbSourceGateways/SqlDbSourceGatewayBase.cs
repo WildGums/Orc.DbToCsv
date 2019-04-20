@@ -24,6 +24,20 @@ namespace Orc.DbToCsv.DatabaseManagement
         }
         #endregion
 
+        protected virtual Dictionary<TableType, Func<DbConnection, DbCommand>> GetObjectListCommandsFactory => new Dictionary<TableType, Func<DbConnection, DbCommand>>();
+        public override IList<DbObject> GetObjects()
+        {
+            var source = Source;
+            if (!GetObjectListCommandsFactory.TryGetValue(source.TableType, out var commandFactory))
+            {
+                return new List<DbObject>();
+            }
+
+            var connection = GetOpenedConnection();
+            var command = commandFactory(connection);
+            return ReadAllDbObjects(command);
+        }
+
         #region Methods
         public override DbDataReader GetRecords(DataSourceParameters queryParameters = null, int offset = 0, int fetchCount = -1)
         {
@@ -159,12 +173,12 @@ namespace Orc.DbToCsv.DatabaseManagement
             }
         }
 
-        protected virtual IList<DbObject> ReadAllDbObjects(Func<DbConnection, DbDataReader> createReader)
+        protected virtual IList<DbObject> ReadAllDbObjects(DbCommand command)
         {
             var dbObjects = new List<DbObject>();
-            var connection = GetOpenedConnection();
             var tableType = Source.TableType;
-            using (var reader = createReader(connection))
+            
+            using (var reader = command.ExecuteReader())
             {
                 while (reader.Read())
                 {
@@ -174,6 +188,27 @@ namespace Orc.DbToCsv.DatabaseManagement
             }
 
             return dbObjects;
+        }
+
+        protected DataSourceParameters ReadParametersFromQuery(string query)
+        {
+            var connection = GetOpenedConnection();
+            var queryParameters = new DataSourceParameters();
+            using (var reader = connection.GetReader(query))
+            {
+                while (reader.Read())
+                {
+                    var args = new DataSourceParameter
+                    {
+                        Name = reader.GetValue(0)?.ToString(),
+                        Type = reader.GetValue(1)?.ToString()
+                    };
+
+                    queryParameters.Parameters.Add(args);
+                }
+            }
+
+            return queryParameters;
         }
         #endregion
     }

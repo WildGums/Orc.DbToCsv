@@ -21,6 +21,16 @@ namespace Orc.DbToCsv.DatabaseManagement
         }
         #endregion
 
+        #region Properties
+        protected override Dictionary<TableType, Func<DbConnection, DbCommand>> GetObjectListCommandsFactory =>
+            new Dictionary<TableType, Func<DbConnection, DbCommand>>
+            {
+                {TableType.Table, c => c.CreateCommand($"SELECT TABLE_NAME AS NAME FROM information_schema.tables where Table_schema = database() and Table_type = 'BASE TABLE';")},
+                {TableType.View, c => c.CreateCommand($"SELECT TABLE_NAME AS NAME FROM information_schema.tables where Table_schema = database() and Table_type = 'VIEW';")},
+                {TableType.StoredProcedure, c => c.CreateCommand($"SELECT SPECIFIC_NAME AS NAME FROM INFORMATION_SCHEMA.ROUTINES where ROUTINE_SCHEMA = database() and ROUTINE_TYPE = 'PROCEDURE';")},
+            };
+        #endregion
+
         #region Methods
         public override DataSourceParameters GetQueryParameters()
         {
@@ -65,44 +75,6 @@ namespace Orc.DbToCsv.DatabaseManagement
             }
 
             return new DataSourceParameters();
-        }
-
-        public override IList<DbObject> GetObjects()
-        {
-            var source = Source;
-            switch (source.TableType)
-            {
-                case TableType.Sql:
-                    return new List<DbObject>();
-
-                case TableType.Table:
-                {
-                    var sql = $"SELECT TABLE_NAME AS NAME FROM information_schema.tables where Table_schema = database() and Table_type = 'BASE TABLE';";
-                    return ReadAllDbObjects(x => x.GetReaderSql(sql));
-                }
-
-                case TableType.View:
-                {
-                    var sql = $"SELECT TABLE_NAME AS NAME FROM information_schema.tables where Table_schema = database() and Table_type = 'VIEW';";
-                    return ReadAllDbObjects(x => x.GetReaderSql(sql));
-                }
-
-                case TableType.StoredProcedure:
-                {
-                    var sql = $"SELECT SPECIFIC_NAME AS NAME FROM INFORMATION_SCHEMA.ROUTINES where ROUTINE_SCHEMA = database() and ROUTINE_TYPE = 'PROCEDURE';";
-
-                    return ReadAllDbObjects(x => x.GetReaderSql(sql));
-                }
-
-                case TableType.Function:
-                {
-                    //Vladimir: MySQL has no functions returning table value
-                    return new List<DbObject>();
-                }
-
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
         }
 
         protected override DbCommand CreateFunctionCommand(DbConnection connection, DataSourceParameters parameters, int offset, int fetchCount)

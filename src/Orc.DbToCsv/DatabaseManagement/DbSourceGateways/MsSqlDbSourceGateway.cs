@@ -9,8 +9,8 @@ namespace Orc.DbToCsv.DatabaseManagement
 {
     using System;
     using System.Collections.Generic;
+    using System.Data.Common;
     using DataAccess;
-    using SqlKata;
 
     [ConnectToProvider("System.Data.SqlClient")]
     public class MsSqlDbSourceGateway : SqlDbSourceGatewayBase
@@ -20,6 +20,17 @@ namespace Orc.DbToCsv.DatabaseManagement
             : base(source)
         {
         }
+        #endregion
+
+        #region Properties
+        protected override Dictionary<TableType, Func<DbConnection, DbCommand>> GetObjectListCommandsFactory =>
+            new Dictionary<TableType, Func<DbConnection, DbCommand>>
+            {
+                {TableType.Table, c => CreateGetObjectsCommand(c, "U")},
+                {TableType.View, c => CreateGetObjectsCommand(c, "V")},
+                {TableType.StoredProcedure, c => CreateGetObjectsCommand(c, "P")},
+                {TableType.Function, c => CreateGetObjectsCommand(c, "IF")},
+            };
         #endregion
 
         #region Methods
@@ -68,44 +79,9 @@ namespace Orc.DbToCsv.DatabaseManagement
             return new DataSourceParameters();
         }
 
-        public override IList<DbObject> GetObjects()
+        private DbCommand CreateGetObjectsCommand(DbConnection connection, string commandParameter)
         {
-            string literalType;
-            var tableType = Source.TableType;
-            switch (tableType)
-            {
-                case TableType.StoredProcedure:
-                    literalType = "P";
-                    break;
-
-                case TableType.Function:
-                    literalType = "IF";
-                    break;
-
-                case TableType.Table:
-                    literalType = "U";
-                    break;
-
-                case TableType.View:
-                    literalType = "V";
-                    break;
-
-                case TableType.Sql:
-                    return new List<DbObject>();
-
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(tableType), tableType, null);
-            }
-
-            var query = new Query("dbo.sysobjects")
-                .Select("name")
-                .Where("uid", 1)
-                .Where("type", literalType)
-                .OrderBy("name");
-
-            var dbObjects = ReadAllDbObjects(x => x.ExecuteReader(query));
-
-            return dbObjects;
+            return connection.CreateCommand($"SELECT name FROM dbo.sysobjects WHERE uid = 1 AND type = '{commandParameter}' ORDER BY name;");
         }
         #endregion
     }

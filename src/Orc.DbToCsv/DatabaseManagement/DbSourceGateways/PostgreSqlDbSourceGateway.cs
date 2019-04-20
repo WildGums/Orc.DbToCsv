@@ -23,6 +23,30 @@ namespace Orc.DbToCsv.DatabaseManagement
         }
         #endregion
 
+        #region Properties
+        protected override Dictionary<TableType, Func<DbConnection, DbCommand>> GetObjectListCommandsFactory =>
+            new Dictionary<TableType, Func<DbConnection, DbCommand>>
+            {
+                {TableType.Table, c => c.CreateCommand($"SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';")},
+                {TableType.View, c => c.CreateCommand($"SELECT table_name FROM information_schema.views WHERE table_schema = 'public';")},
+                {TableType.StoredProcedure, c => c.CreateCommand(@"SELECT  p.proname
+                                FROM    pg_catalog.pg_namespace n
+                                JOIN    pg_catalog.pg_proc p
+                                ON      p.pronamespace = n.oid
+                                WHERE   n.nspname = 'public';")
+                },
+                {TableType.Function, c => c.CreateCommand(@"SELECT   distinct  r.routine_name
+                                FROM     information_schema.routines r
+                                JOIN     information_schema.parameters p
+                                USING   (specific_catalog, specific_schema, specific_name)
+                                JOIN     pg_namespace pg_n ON r.specific_schema = pg_n.nspname
+                                JOIN     pg_proc pg_p ON pg_p.pronamespace = pg_n.oid
+                                AND      pg_p.proname = r.routine_name
+                                Where 	 r.data_type = 'record' and pg_n.nspname = 'public'")
+                },
+            };
+        #endregion
+
         #region Methods
         public override DataSourceParameters GetQueryParameters()
         {
@@ -69,56 +93,6 @@ namespace Orc.DbToCsv.DatabaseManagement
             }
 
             return new DataSourceParameters();
-        }
-
-        public override IList<DbObject> GetObjects()
-        {
-            var source = Source;
-            switch (source.TableType)
-            {
-                case TableType.Sql:
-                    return new List<DbObject>();
-
-                case TableType.Table:
-                {
-                    var sql = "SELECT * FROM information_schema.tables WHERE table_schema = 'public';";
-                    return ReadAllDbObjects(x => x.GetReaderSql(sql));
-                }
-
-                case TableType.View:
-                {
-                    var sql = "SELECT * FROM information_schema.views WHERE table_schema = 'public';";
-                    return ReadAllDbObjects(x => x.GetReaderSql(sql));
-                }
-
-                case TableType.StoredProcedure:
-                {
-                    var sql = @"SELECT  p.proname
-                                FROM    pg_catalog.pg_namespace n
-                                JOIN    pg_catalog.pg_proc p
-                                ON      p.pronamespace = n.oid
-                                WHERE   n.nspname = 'public';";
-
-                    return ReadAllDbObjects(x => x.GetReaderSql(sql));
-                }
-
-                case TableType.Function:
-                {
-                    var sql = @"SELECT   distinct  r.routine_name
-FROM     information_schema.routines r
-JOIN     information_schema.parameters p
-USING   (specific_catalog, specific_schema, specific_name)
-JOIN     pg_namespace pg_n ON r.specific_schema = pg_n.nspname
-JOIN     pg_proc pg_p ON pg_p.pronamespace = pg_n.oid
-AND      pg_p.proname = r.routine_name
-Where 	 r.data_type = 'record' and pg_n.nspname = 'public'";
-
-                    return ReadAllDbObjects(x => x.GetReaderSql(sql));
-                }
-
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
         }
 
         protected override DbCommand CreateStoredProcedureCommand(DbConnection connection, DataSourceParameters parameters, int offset, int fetchCount)

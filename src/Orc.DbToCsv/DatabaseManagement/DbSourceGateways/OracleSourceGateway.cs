@@ -12,16 +12,26 @@ namespace Orc.DbToCsv.DatabaseManagement
     using System.Data;
     using System.Data.Common;
     using DataAccess;
-    using SqlKata;
 
     [ConnectToProvider("Oracle.ManagedDataAccess.Client")]
     public class OracleSourceGateway : SqlDbSourceGatewayBase
     {
         #region Constructors
-        public OracleSourceGateway(DatabaseSource source) 
+        public OracleSourceGateway(DatabaseSource source)
             : base(source)
         {
         }
+        #endregion
+
+        #region Properties
+        protected override Dictionary<TableType, Func<DbConnection, DbCommand>> GetObjectListCommandsFactory =>
+            new Dictionary<TableType, Func<DbConnection, DbCommand>>
+            {
+                {TableType.Table, c => c.CreateCommand($"SELECT table_name FROM user_tables")},
+                {TableType.View, c => c.CreateCommand($"SELECT view_name from user_views")},
+                {TableType.StoredProcedure, c => c.CreateCommand($"SELECT * FROM User_Procedures WHERE OBJECT_TYPE = 'PROCEDURE'")},
+                {TableType.Function, c => c.CreateCommand($"SELECT * FROM User_Procedures WHERE OBJECT_TYPE = 'FUNCTION'")},
+            };
         #endregion
 
         #region Methods
@@ -68,43 +78,6 @@ namespace Orc.DbToCsv.DatabaseManagement
             }
 
             return new DataSourceParameters();
-        }
-
-        public override IList<DbObject> GetObjects()
-        {
-            var source = Source;
-            switch (source.TableType)
-            {
-                case TableType.Sql:
-                    return new List<DbObject>();
-
-                case TableType.Table:
-                {
-                    var sql = $"SELECT table_name FROM user_tables";
-                    return ReadAllDbObjects(x => x.GetReaderSql(sql));
-                }
-
-                case TableType.View:
-                {
-                    var sql = $"select view_name from user_views";
-                    return ReadAllDbObjects(x => x.GetReaderSql(sql));
-                }
-
-                case TableType.StoredProcedure:
-                {
-                    var sql = $"SELECT * FROM User_Procedures WHERE OBJECT_TYPE = 'PROCEDURE'";
-                    return ReadAllDbObjects(x => x.GetReaderSql(sql));
-                }
-
-                case TableType.Function:
-                {
-                    var sql = $"SELECT * FROM User_Procedures WHERE OBJECT_TYPE = 'FUNCTION'";
-                    return ReadAllDbObjects(x => x.GetReaderSql(sql));
-                }
-
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
         }
 
         protected override DbCommand CreateTableCommand(DbConnection connection, DataSourceParameters parameters, int offset, int fetchCount)

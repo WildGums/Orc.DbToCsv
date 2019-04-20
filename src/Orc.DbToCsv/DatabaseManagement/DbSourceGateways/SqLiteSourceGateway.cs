@@ -9,6 +9,7 @@ namespace Orc.DbToCsv.DatabaseManagement
 {
     using System;
     using System.Collections.Generic;
+    using System.Data.Common;
     using DataAccess;
 
     [ConnectToProvider("System.Data.SQLite")]
@@ -21,39 +22,19 @@ namespace Orc.DbToCsv.DatabaseManagement
         }
         #endregion
 
+        #region Properties
+        protected override Dictionary<TableType, Func<DbConnection, DbCommand>> GetObjectListCommandsFactory =>
+            new Dictionary<TableType, Func<DbConnection, DbCommand>>
+            {
+                {TableType.Table, c => c.CreateCommand($"SELECT name FROM sqlite_master WHERE type ='table' AND name NOT LIKE 'sqlite_%';")},
+                {TableType.View, c => c.CreateCommand($"SELECT name FROM sqlite_master WHERE type ='view' AND name NOT LIKE 'sqlite_%';")}
+            };
+        #endregion
+
         #region Methods
         public override DataSourceParameters GetQueryParameters()
         {
             return new DataSourceParameters();
-        }
-
-        public override IList<DbObject> GetObjects()
-        {
-            var tableType = Source.TableType;
-            string tableTypeStr;
-            switch (tableType)
-            {
-                case TableType.Function:
-                case TableType.Sql:
-                case TableType.StoredProcedure:
-                    return new List<DbObject>();
-
-                case TableType.Table:
-                    tableTypeStr = "table";
-                    break;
-
-                case TableType.View:
-                    tableTypeStr = "view";
-                    break;
-
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-
-            var query = $"SELECT name FROM sqlite_master WHERE type ='{tableTypeStr}' AND name NOT LIKE 'sqlite_%';";
-            var dbObjects = ReadAllDbObjects(x => x.GetReaderSql(query));
-
-            return dbObjects;
         }
         #endregion
     }

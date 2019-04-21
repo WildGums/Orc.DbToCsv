@@ -44,11 +44,32 @@ namespace Orc.DbToCsv.Csv
         #endregion
 
         #region Properties
-        public override string[] FieldHeaders => _reader.Context.HeaderRecord;
+        public override string[] FieldHeaders
+        {
+            get
+            {
+                if (_isFieldHeaderInitialized)
+                {
+                    return _reader.Context.HeaderRecord;
+                }
+
+                if (_reader.Read())
+                {
+                    _reader.ReadHeader();
+
+                    _isFieldHeaderInitialized = true;
+                }
+
+                return _reader.Context.HeaderRecord;
+            }
+        }
+
         public override object this[int index] => _reader[index];
         public override object this[string name] => _reader[name];
         public override int TotalRecordCount => GetRecordCount();
         #endregion
+
+        private bool _isFieldHeaderInitialized = false;
 
         #region Methods
         public override bool Read()
@@ -56,11 +77,6 @@ namespace Orc.DbToCsv.Csv
             if (ReferenceEquals(_reader, null))
             {
                 return false;
-            }
-
-            if (_reader.Context.HeaderRecord == null && _reader.Read())
-            {
-                _reader.ReadHeader();
             }
 
             try

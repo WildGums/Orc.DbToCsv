@@ -19,6 +19,8 @@ namespace Orc.DbToCsv.DatabaseManagement
         #region Fields
         private DbConnection _connection;
         private DbProvider _provider;
+
+        private List<DbConnection> _openedConnections = new List<DbConnection>();
         #endregion
 
         #region Constructors
@@ -39,7 +41,14 @@ namespace Orc.DbToCsv.DatabaseManagement
         #region IDisposable Members
         public void Dispose()
         {
+            Close();
+
             Connection?.Dispose();
+
+            foreach (var openedConnection in _openedConnections)
+            {
+                openedConnection.Dispose();
+            }
         }
         #endregion
 
@@ -59,7 +68,11 @@ namespace Orc.DbToCsv.DatabaseManagement
 
             if (connection.State.HasFlag(ConnectionState.Open))
             {
-                connection.Close();
+                var newConnection = Provider?.CreateConnection(Source);
+                newConnection?.Open();
+
+                _openedConnections.Add(newConnection);
+                return newConnection;
             }
 
             if (!connection.State.HasFlag(ConnectionState.Open))
@@ -73,6 +86,11 @@ namespace Orc.DbToCsv.DatabaseManagement
         public void Close()
         {
             Connection?.Close();
+
+            foreach (var openedConnection in _openedConnections)
+            {
+                openedConnection.Close();
+            }
         }
         #endregion
     }

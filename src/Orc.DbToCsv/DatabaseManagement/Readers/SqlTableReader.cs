@@ -8,6 +8,7 @@
 namespace Orc.DbToCsv.DatabaseManagement
 {
     using System;
+    using System.Collections.Generic;
     using System.Data.Common;
     using System.Linq;
     using System.Threading.Tasks;
@@ -21,13 +22,15 @@ namespace Orc.DbToCsv.DatabaseManagement
         private static readonly ILog Log = LogManager.GetCurrentClassLogger();
 
         private readonly DatabaseSource _databaseSource;
-        private readonly int _totalRecordCount;
+        
+        private DbSourceGatewayBase _gateway;
+        private DbDataReader _reader;
 
         private string[] _fieldHeaders = new string[0];
-        private DbSourceGatewayBase _gateway;
         private bool _isFieldHeadersInitialized;
         private bool _isInitialized;
-        private DbDataReader _reader;
+        private bool _isTotalRecordCountInitialized = false;
+        private int _totalRecordCount;
         #endregion
 
         #region Constructors
@@ -65,7 +68,26 @@ namespace Orc.DbToCsv.DatabaseManagement
         public override object this[int index] => GetValue(index);
         public override object this[string name] => GetValue(name);
 
-        public override int TotalRecordCount => _totalRecordCount;
+        public override int TotalRecordCount
+        {
+            get
+            {
+                if (_isTotalRecordCountInitialized)
+                {
+                    return _totalRecordCount;
+                }
+
+                if (!_isInitialized)
+                {
+                    Initialize();
+                }
+
+                _totalRecordCount = (int)_gateway.GetCount(QueryParameters);
+
+                _isTotalRecordCountInitialized = true;
+                return _totalRecordCount;
+            }
+        }
 
         public int ReadCount { get; private set; } = 0;
         public int ResultIndex { get; private set; } = 0;
@@ -206,7 +228,7 @@ namespace Orc.DbToCsv.DatabaseManagement
         {
             try
             {
-                var userParameters = QueryParameters.Parameters.ToDictionary(x => x.Name);
+                var userParameters = QueryParameters?.Parameters.ToDictionary(x => x.Name) ?? new Dictionary<string, DataSourceParameter>();
                 var queryParameters = _gateway.GetQueryParameters();
                 foreach (var parameter in queryParameters.Parameters)
                 {

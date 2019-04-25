@@ -18,13 +18,17 @@ namespace Orc.DbToCsv.DatabaseManagement
 
     public class DbConnectionString : ModelBase
     {
+        #region Fields
+        private readonly DbConnectionStringBuilder _connectionStringBuilder;
+        #endregion
+
         #region Constructors
         public DbConnectionString(DbConnectionStringBuilder connectionStringBuilder, DbProviderInfo dbProvider)
         {
             Argument.IsNotNull(() => connectionStringBuilder);
             Argument.IsNotNull(() => dbProvider);
 
-            ConnectionStringBuilder = connectionStringBuilder;
+            _connectionStringBuilder = connectionStringBuilder;
             DbProvider = dbProvider;
 
             UpdateProperties();
@@ -32,55 +36,63 @@ namespace Orc.DbToCsv.DatabaseManagement
         #endregion
 
         #region Properties
-        public DbConnectionStringBuilder ConnectionStringBuilder { get; }
-
         public IReadOnlyDictionary<string, DbConnectionStringProperty> Properties { get; private set; }
 
         public DbProviderInfo DbProvider { get; }
+
+        public DbConnectionStringBuilder ConnectionStringBuilder => _connectionStringBuilder;
         #endregion
 
         #region Methods
         private void UpdateProperties()
         {
-            var connectionStringBuilder = ConnectionStringBuilder;
-            var sensitiveProperties = TypeDescriptor.GetProperties(connectionStringBuilder, new Attribute[] {PasswordPropertyTextAttribute.Yes})
+            if (_connectionStringBuilder == null)
+            {
+                Properties = null;
+                return;
+            }
+
+            var sensitiveProperties = TypeDescriptor.GetProperties(_connectionStringBuilder, new Attribute[] {PasswordPropertyTextAttribute.Yes})
                 .OfType<PropertyDescriptor>()
-                .Select(x => x.DisplayName);
+                .Select(x => x.DisplayName.ToUpperInvariant());
 
             var sensitivePropertiesHashSet = new HashSet<string>();
             sensitivePropertiesHashSet.AddRange(sensitiveProperties);
 
-            Properties = connectionStringBuilder.Keys.OfType<string>()
-                .ToDictionary(x => x, x =>
+            
+            var propDescriptor = _connectionStringBuilder as ICustomTypeDescriptor;
+            var props = propDescriptor.GetProperties().OfType<PropertyDescriptor>().Where(x => x.GetType().Name =="DbConnectionStringBuilderDescriptor").ToList();
+
+            Properties = props
+                .ToDictionary(x => x.DisplayName.ToUpperInvariant(), x =>
                 {
-                    var isSensitive = sensitivePropertiesHashSet.Contains(x);
-                    return new DbConnectionStringProperty(x, isSensitive, connectionStringBuilder);
+                    var isSensitive = sensitivePropertiesHashSet.Contains(x.DisplayName.ToUpperInvariant());
+                    return new DbConnectionStringProperty(isSensitive, _connectionStringBuilder, x);
                 });
         }
 
         public virtual string ToDisplayString()
         {
-            var connectionStringBuilder = ConnectionStringBuilder;
             var sensitiveProperties = Properties.Values.Where(x => x.IsSensitive);
 
             var removedProperties = new List<Tuple<string, object>>();
             foreach (var sensitiveProperty in sensitiveProperties)
             {
                 var propertyName = sensitiveProperty.Name;
-                if (!connectionStringBuilder.ShouldSerialize(propertyName))
+                if (!_connectionStringBuilder.ShouldSerialize(propertyName))
                 {
                     continue;
                 }
 
-                removedProperties.Add(new Tuple<string, object>(propertyName, connectionStringBuilder[propertyName]));
-                connectionStringBuilder.Remove(propertyName);
+                removedProperties.Add(new Tuple<string, object>(propertyName, _connectionStringBuilder[propertyName]));
+                _connectionStringBuilder.Remove(propertyName);
             }
 
-            var displayConnectionString = connectionStringBuilder.ConnectionString;
+            var displayConnectionString = _connectionStringBuilder.ConnectionString;
 
-            foreach (var (key, value) in removedProperties.Where(prop => prop.Item2 != null))
+            foreach (var prop in removedProperties.Where(prop => prop.Item2 != null))
             {
-                connectionStringBuilder[key] = value;
+                _connectionStringBuilder[prop.Item1] = prop.Item2;
             }
 
             return displayConnectionString;
@@ -88,8 +100,9 @@ namespace Orc.DbToCsv.DatabaseManagement
 
         public override string ToString()
         {
-            return ConnectionStringBuilder.ConnectionString;
+            return _connectionStringBuilder.ConnectionString;
         }
         #endregion
+
     }
 }

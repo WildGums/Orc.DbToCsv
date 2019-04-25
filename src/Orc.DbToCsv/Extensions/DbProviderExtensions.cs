@@ -112,7 +112,7 @@ namespace Orc.DbToCsv
                 return null;
             }
 
-            connection.ConnectionString = connectionString.DecryptConnectionString(dbProvider.ProviderInvariantName);
+            connection.ConnectionString = connectionString;//.DecryptConnectionString(dbProvider.ProviderInvariantName);
 
             return connection;
         }

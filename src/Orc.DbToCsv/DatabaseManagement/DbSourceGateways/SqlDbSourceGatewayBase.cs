@@ -49,6 +49,12 @@ namespace Orc.DbToCsv.DatabaseManagement
                 return new DataSourceParameters();
             }
 
+            var parameters = parametersFactory();
+            foreach (var dataSourceParameter in parameters.Parameters)
+            {
+                dataSourceParameter.Name = dataSourceParameter.Name;
+            }
+
             return parametersFactory();
         }
 

@@ -228,8 +228,9 @@ namespace Orc.DbToCsv.DatabaseManagement
         {
             try
             {
-                var userParameters = QueryParameters?.Parameters.ToDictionary(x => x.Name) ?? new Dictionary<string, DataSourceParameter>();
+                var userParameters = QueryParameters?.Parameters.ToDictionary(x => x.Name.ToUpperInvariant()) ?? new Dictionary<string, DataSourceParameter>();
                 var queryParameters = _gateway.GetQueryParameters();
+                queryParameters.Parameters.ForEach(x =>x.Name = x.Name.ToUpperInvariant());
                 foreach (var parameter in queryParameters.Parameters)
                 {
                     if (userParameters.TryGetValue(parameter.Name, out var userParameter))

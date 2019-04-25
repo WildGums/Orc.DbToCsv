@@ -34,7 +34,7 @@ namespace Orc.DbToCsv.DatabaseManagement
                                 FROM    pg_catalog.pg_namespace n
                                 JOIN    pg_catalog.pg_proc p
                                 ON      p.pronamespace = n.oid
-                                WHERE   n.nspname = 'public';")
+                                WHERE   n.nspname = 'public' AND prokind = 'p'")
                 },
                 {
                     TableType.Function, c => c.CreateCommand(@"SELECT   distinct  r.routine_name

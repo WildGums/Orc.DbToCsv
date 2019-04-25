@@ -7,6 +7,7 @@
 
 namespace Orc.DbToCsv.DatabaseManagement
 {
+    using System.ComponentModel;
     using System.Data.Common;
     using Catel;
     using Catel.Data;
@@ -15,15 +16,18 @@ namespace Orc.DbToCsv.DatabaseManagement
     {
         #region Fields
         private readonly DbConnectionStringBuilder _dbConnectionStringBuilder;
+        private readonly PropertyDescriptor _propertyDescriptor;
         #endregion
 
         #region Constructors
-        public DbConnectionStringProperty(string name, bool isSensitive, DbConnectionStringBuilder dbConnectionStringBuilder)
+        public DbConnectionStringProperty(bool isSensitive, DbConnectionStringBuilder dbConnectionStringBuilder, PropertyDescriptor propertyDescriptor)
         {
             Argument.IsNotNull(() => dbConnectionStringBuilder);
+            Argument.IsNotNull(() => propertyDescriptor);
 
             _dbConnectionStringBuilder = dbConnectionStringBuilder;
-            Name = name;
+            _propertyDescriptor = propertyDescriptor;
+            Name = propertyDescriptor.DisplayName.ToUpperInvariant();
             IsSensitive = isSensitive;
         }
         #endregion
@@ -34,17 +38,17 @@ namespace Orc.DbToCsv.DatabaseManagement
 
         public object Value
         {
-            get => _dbConnectionStringBuilder[Name];
+            get => _propertyDescriptor.GetValue(_dbConnectionStringBuilder);
 
             set
             {
-                var name = Name;
-                if (_dbConnectionStringBuilder[name] == value)
+                var currentValue = _propertyDescriptor.GetValue(_dbConnectionStringBuilder);
+                if (Equals(currentValue, value))
                 {
                     return;
                 }
 
-                _dbConnectionStringBuilder[name] = value;
+                _propertyDescriptor.SetValue(_dbConnectionStringBuilder, value);
                 RaisePropertyChanged(nameof(Value));
             }
         }

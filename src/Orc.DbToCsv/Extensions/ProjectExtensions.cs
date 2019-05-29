@@ -13,7 +13,7 @@ namespace Orc.DbToCsv
     using System.Threading.Tasks;
     using Catel;
     using DataAccess;
-    using DatabaseManagement;
+    using DataAccess.Database;
 
     public static class ProjectExtensions
     {

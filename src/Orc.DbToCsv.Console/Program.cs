@@ -14,7 +14,7 @@ namespace Orc.DbToCsv
     using Catel.IoC;
     using Catel.Logging;
     using CommandLine;
-    using DatabaseManagement;
+    using DataAccess.Database;
 
     internal class Program
     {

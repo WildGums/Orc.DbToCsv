@@ -8,7 +8,7 @@
 namespace Orc.DbToCsv
 {
     using DataAccess;
-    using DatabaseManagement;
+    using DataAccess.Database;
 
     public class DbToCsvExportDescription
     {

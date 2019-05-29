@@ -14,6 +14,7 @@ namespace Orc.DbToCsv
     using System.Windows.Markup;
     using System.Xaml;
     using Catel.Logging;
+    using DataAccess;
 
     [ContentProperty("Properties")]
     public class Project

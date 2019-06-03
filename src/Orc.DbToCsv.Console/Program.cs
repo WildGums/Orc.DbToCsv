@@ -45,18 +45,15 @@ namespace Orc.DbToCsv
 
             var commandLine = Environment.CommandLine.GetCommandLine(true);
             var options = new Options();
-
-            options.OutputFolder = "F:\\output";
-            options.Project = "F:\\Sample1.iprj";
             
             var serviceLocator = ServiceLocator.Default;
             var commandLineParser = serviceLocator.ResolveType<ICommandLineParser>();
-    //        var validationContext = commandLineParser.Parse(commandLine, options);
-         //   if (validationContext.HasErrors)
-      //      {
-     //           Console.WriteLine(validationContext.GetErrors().First().Message);
-   //             Environment.Exit(1);
-    //        }
+            var validationContext = commandLineParser.Parse(commandLine, options);
+            if (validationContext.HasErrors)
+            {
+                Console.WriteLine(validationContext.GetErrors().First().Message);
+                Environment.Exit(1);
+            }
 
             if (options.IsHelp)
             {

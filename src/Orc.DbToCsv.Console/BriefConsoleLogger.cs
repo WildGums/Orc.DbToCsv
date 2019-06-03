@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------------------------------------------------------
+﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="BriefConsoleLogger.cs" company="WildGums">
 //   Copyright (c) 2008 - 2016 WildGums. All rights reserved.
 // </copyright>
@@ -20,17 +20,19 @@ namespace Orc.DbToCsv
                 return;
             }
 
-            if (logEvent == LogEvent.Error)
+            switch (logEvent)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-            }
-            else if (logEvent == LogEvent.Warning)
-            {
-                Console.ForegroundColor = ConsoleColor.Yellow;
-            }
-            else
-            {
-                Console.ForegroundColor = ConsoleColor.White;
+                case LogEvent.Error:
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    break;
+
+                case LogEvent.Warning:
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    break;
+
+                default:
+                    Console.ForegroundColor = ConsoleColor.White;
+                    break;
             }
             Console.WriteLine("{0}", message);
         }

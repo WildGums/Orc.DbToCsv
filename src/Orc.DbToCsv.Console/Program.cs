@@ -14,25 +14,49 @@ namespace Orc.DbToCsv
     using Catel.IoC;
     using Catel.Logging;
     using CommandLine;
+    using DataAccess.Database;
 
     internal class Program
     {
         private static readonly ILog Log = LogManager.GetCurrentClassLogger();
+
         #region Methods
         private static void Main(string[] args)
         {
             InitializeLogManager();
+
+            var sqLiteProviderInfo = new DbProviderInfo
+            {
+                Name = "SQLite Data Provider",
+                InvariantName = "System.Data.SQLite",
+                Description = ".NET Framework Data Provider for SQLite",
+                AssemblyQualifiedName = "System.Data.SQLite.SQLiteFactory, System.Data.SQLite, Version=1.0.110.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139"
+            };
+            DbProvider.RegisterProvider(sqLiteProviderInfo);
+
+            var oracleProviderInfo = new DbProviderInfo
+            {
+                Name = "ODP.NET, Managed Driver",
+                InvariantName = "Oracle.ManagedDataAccess.Client",
+                Description = "Oracle Data Provider for .NET, Managed Driver",
+                AssemblyQualifiedName = "Oracle.ManagedDataAccess.Client.OracleClientFactory, Oracle.ManagedDataAccess, Version=4.121.2.0, Culture=neutral, PublicKeyToken=89b483f429c47342"
+            };
+            DbProvider.RegisterProvider(oracleProviderInfo);
+
             var commandLine = Environment.CommandLine.GetCommandLine(true);
             var options = new Options();
+
+            options.OutputFolder = "F:\\output";
+            options.Project = "F:\\Sample1.iprj";
             
             var serviceLocator = ServiceLocator.Default;
             var commandLineParser = serviceLocator.ResolveType<ICommandLineParser>();
-            var validationContext = commandLineParser.Parse(commandLine, options);
-            if (validationContext.HasErrors)
-            {
-                Console.WriteLine(validationContext.GetErrors().First().Message);
-                Environment.Exit(1);
-            }
+    //        var validationContext = commandLineParser.Parse(commandLine, options);
+         //   if (validationContext.HasErrors)
+      //      {
+     //           Console.WriteLine(validationContext.GetErrors().First().Message);
+   //             Environment.Exit(1);
+    //        }
 
             if (options.IsHelp)
             {
@@ -45,16 +69,9 @@ namespace Orc.DbToCsv
                 return;
             }
 
-            Project project = null;
-
-            if (!string.IsNullOrEmpty(options.Project))
-            {
-                project = Project.LoadAsync(options.Project).GetAwaiter().GetResult();
-            }
-            else
-            {
-                project = TryGetProjectAutomaticallyAsync().GetAwaiter().GetResult();
-            }
+            var project = !string.IsNullOrEmpty(options.Project) 
+                ? Project.LoadAsync(options.Project).GetAwaiter().GetResult()
+                : TryGetProjectAutomaticallyAsync().GetAwaiter().GetResult();
 
             if (project == null)
             {
@@ -66,9 +83,7 @@ namespace Orc.DbToCsv
                 options.OutputFolder = project.OutputFolder.Value;
             }
 
-            var outputFolder = string.IsNullOrEmpty(options.OutputFolder) ? Directory.GetCurrentDirectory() : options.OutputFolder;
-
-            Importer.ProcessProjectAsync(project).GetAwaiter().GetResult();
+            project.ExportAsync().GetAwaiter().GetResult();
         }
 
         private static async Task<Project> TryGetProjectAutomaticallyAsync()

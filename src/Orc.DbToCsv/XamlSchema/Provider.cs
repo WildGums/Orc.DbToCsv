@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="MaximumRowsInTable.cs" company="WildGums">
+// <copyright file="Provider.cs" company="WildGums">
 //   Copyright (c) 2008 - 2019 WildGums. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
@@ -7,7 +7,7 @@
 
 namespace Orc.DbToCsv
 {
-    public class MaximumRowsInTable : Int32ProjectProperty
+    public class Provider : StringProjectProperty
     {
     }
 }

@@ -96,7 +96,7 @@ namespace Orc.DbToCsv
                                         csvWriter.WriteField(field);
                                     }
 
-                                    csvWriter.NextRecord();
+                                    await csvWriter.NextRecordAsync();
                                 }
 
                                 while (await dataReader.ReadAsync())

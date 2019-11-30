@@ -34,6 +34,7 @@ namespace Orc.DbToCsv
             {
                 var databaseSource = new DatabaseSource
                 {
+                    Schema = string.IsNullOrWhiteSpace(table.Schema) ? project.Schema.Value : table.Schema,
                     Table = table.Name,
                     ConnectionString = string.IsNullOrWhiteSpace(table.ConnectionString) ? project.ConnectionString.Value : table.ConnectionString,
                     ProviderName = string.IsNullOrWhiteSpace(table.Provider) ? project.Provider.Value : table.Provider

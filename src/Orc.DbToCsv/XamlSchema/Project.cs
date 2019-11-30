@@ -25,9 +25,8 @@ namespace Orc.DbToCsv
 
         #region Fields
         private ConnectionString _connectionString;
-
+        private Schema _schema;
         private MaximumRowsInTable _maximumRowsInTable;
-
         private OutputFolder _outputFolder;
         private Provider _provider;
         #endregion
@@ -44,6 +43,11 @@ namespace Orc.DbToCsv
         public Provider Provider
         {
             get { return _provider ?? (_provider = Properties.FindTypeOrCreateNew(() => new Provider())); }
+        }
+
+        public Schema Schema
+        {
+            get { return _schema ?? (_schema = Properties.FindTypeOrCreateNew(() => new Schema())); }
         }
 
         public ConnectionString ConnectionString

@@ -19,6 +19,7 @@ namespace Orc.DbToCsv
         #endregion
 
         #region Properties
+        public string Schema { get; set; }
         public string TableType { get; set; }
         public string Name { get; set; }
         public string Csv { get; set; }

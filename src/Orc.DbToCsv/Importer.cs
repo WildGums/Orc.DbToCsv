@@ -134,11 +134,11 @@ namespace Orc.DbToCsv
                     }
                 }
 
-                Log.Info("{0} records of '{1}' table successfully exported to {2}.", records, source.Table, fullFileName);
+                Log.Info($"{records} records of '{source.Schema}' '{source.Table}' table successfully exported to {fullFileName}.");
             }
             catch (Exception ex)
             {
-                Log.Error("{0} export failed because of exception: {1}", source.Table, ex.Message);
+                Log.Error($"{source.Table} export failed because of exception: {ex.Message}");
             }
         }
         #endregion

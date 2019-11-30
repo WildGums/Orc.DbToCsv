@@ -11,10 +11,12 @@ namespace Orc.DbToCsv
     {
         public ConnectionString() { }
     }
-    public class static ICollectionExtensions
+    public class DbToCsvExportDescription
     {
-        public static TTarget FindTypeOrCreateNew<T, TTarget>(this System.Collections.Generic.ICollection<T> collection, System.Func<TTarget> func)
-            where TTarget : T { }
+        public DbToCsvExportDescription() { }
+        public string CsvFilePath { get; set; }
+        public Orc.DataAccess.DataSourceParameters Parameters { get; set; }
+        public Orc.DataAccess.Database.DatabaseSource Source { get; set; }
     }
     public class static Importer
     {
@@ -35,6 +37,12 @@ namespace Orc.DbToCsv
     {
         public OutputFolder() { }
     }
+    public class Parameter
+    {
+        public Parameter() { }
+        public string Name { get; set; }
+        public string Value { get; set; }
+    }
     [System.Windows.Markup.ContentPropertyAttribute("Properties")]
     public class Project
     {
@@ -43,14 +51,29 @@ namespace Orc.DbToCsv
         public Orc.DbToCsv.MaximumRowsInTable MaximumRowsInTable { get; }
         public Orc.DbToCsv.OutputFolder OutputFolder { get; }
         public System.Collections.Generic.List<Orc.DbToCsv.ProjectProperty> Properties { get; set; }
+        public Orc.DbToCsv.Provider Provider { get; }
+        public Orc.DbToCsv.Schema Schema { get; }
         public System.Collections.Generic.List<Orc.DbToCsv.Table> Tables { get; set; }
         public static System.Threading.Tasks.Task<Orc.DbToCsv.Project> LoadAsync(string path = "project.iprj") { }
         public static Orc.DbToCsv.Project Parse(string xaml) { }
         public void Validate() { }
     }
+    public class static ProjectExtensions
+    {
+        public static System.Threading.Tasks.Task ExportAsync(this Orc.DbToCsv.Project project) { }
+        public static System.Collections.Generic.IList<Orc.DbToCsv.DbToCsvExportDescription> GetDbToCsvExportDescriptions(this Orc.DbToCsv.Project project) { }
+    }
     public class ProjectProperty
     {
         public ProjectProperty() { }
+    }
+    public class Provider : Orc.DbToCsv.StringProjectProperty
+    {
+        public Provider() { }
+    }
+    public class Schema : Orc.DbToCsv.StringProjectProperty
+    {
+        public Schema() { }
     }
     [System.Windows.Markup.ContentPropertyAttribute("Value")]
     public class StringProjectProperty : Orc.DbToCsv.ProjectProperty
@@ -61,8 +84,13 @@ namespace Orc.DbToCsv
     public class Table
     {
         public Table() { }
+        public string ConnectionString { get; set; }
         public string Csv { get; set; }
         public string Name { get; set; }
         public string Output { get; set; }
+        public System.Collections.Generic.List<Orc.DbToCsv.Parameter> Parameters { get; set; }
+        public string Provider { get; set; }
+        public string Schema { get; set; }
+        public string TableType { get; set; }
     }
 }

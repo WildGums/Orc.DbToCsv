@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="Project.cs" company="WildGums">
-//   Copyright (c) 2008 - 2016 WildGums. All rights reserved.
+//   Copyright (c) 2008 - 2019 WildGums. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -14,6 +14,7 @@ namespace Orc.DbToCsv
     using System.Windows.Markup;
     using System.Xaml;
     using Catel.Logging;
+    using DataAccess;
 
     [ContentProperty("Properties")]
     public class Project
@@ -24,10 +25,10 @@ namespace Orc.DbToCsv
 
         #region Fields
         private ConnectionString _connectionString;
-
+        private Schema _schema;
         private MaximumRowsInTable _maximumRowsInTable;
-
         private OutputFolder _outputFolder;
+        private Provider _provider;
         #endregion
 
         #region Constructors
@@ -39,6 +40,16 @@ namespace Orc.DbToCsv
         #endregion
 
         #region Properties
+        public Provider Provider
+        {
+            get { return _provider ?? (_provider = Properties.FindTypeOrCreateNew(() => new Provider())); }
+        }
+
+        public Schema Schema
+        {
+            get { return _schema ?? (_schema = Properties.FindTypeOrCreateNew(() => new Schema())); }
+        }
+
         public ConnectionString ConnectionString
         {
             get { return _connectionString ?? (_connectionString = Properties.FindTypeOrCreateNew(() => new ConnectionString())); }
@@ -77,7 +88,7 @@ namespace Orc.DbToCsv
 
         public static Project Parse(string xaml)
         {
-            var result = (Project) XamlServices.Parse(xaml);
+            var result = (Project)XamlServices.Parse(xaml);
             return result;
         }
 
@@ -135,7 +146,7 @@ namespace Orc.DbToCsv
 
         private static string ExtractTableName(string tableName)
         {
-            int ndx = tableName.LastIndexOf('.');
+            var ndx = tableName.LastIndexOf('.');
             return tableName.Substring(ndx + 1).Replace("[", string.Empty).Replace("]", string.Empty);
         }
         #endregion

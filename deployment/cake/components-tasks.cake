@@ -2,197 +2,323 @@
 
 #addin "nuget:?package=Cake.FileHelpers&version=3.0.0"
 
-//-------------------------------------------------------------
-
-private bool HasComponents()
-{
-    return Components != null && Components.Length > 0;
-}
+using System.Xml.Linq;
 
 //-------------------------------------------------------------
 
-private void UpdateInfoForComponents()
+public class ComponentsProcessor : ProcessorBase
 {
-    if (!HasComponents())
+    public ComponentsProcessor(BuildContext buildContext)
+        : base(buildContext)
     {
-        return;
-    }
-
-    foreach (var component in Components)
-    {
-        Information("Updating version for component '{0}'", component);
-
-        var projectFileName = GetProjectFileName(component);
-
-        TransformConfig(projectFileName, new TransformationCollection 
-        {
-            { "Project/PropertyGroup/PackageVersion", VersionNuGet }
-        });
-    }
-}
-
-//-------------------------------------------------------------
-
-private void BuildComponents()
-{
-    if (!HasComponents())
-    {
-        return;
-    }
-    
-    foreach (var component in Components)
-    {
-        Information("Building component '{0}'", component);
-
-        var projectFileName = GetProjectFileName(component);
         
-        var msBuildSettings = new MSBuildSettings {
-            Verbosity = Verbosity.Quiet, // Verbosity.Diagnostic
-            ToolVersion = MSBuildToolVersion.VS2017,
-            Configuration = ConfigurationName,
-            MSBuildPlatform = MSBuildPlatform.x86, // Always require x86, see platform for actual target platform
-            PlatformTarget = PlatformTarget.MSIL
-        };
-
-        // Note: we need to set OverridableOutputPath because we need to be able to respect
-        // AppendTargetFrameworkToOutputPath which isn't possible for global properties (which
-        // are properties passed in using the command line)
-        var outputDirectory = string.Format("{0}/{1}/", OutputRootDirectory, component);
-        Information("Output directory: '{0}'", outputDirectory);
-        msBuildSettings.WithProperty("OverridableOutputPath", outputDirectory);
-        msBuildSettings.WithProperty("PackageOutputPath", OutputRootDirectory);
-
-        // TODO: Enable GitLink / SourceLink, see RepositoryUrl, RepositoryBranchName, RepositoryCommitId variables
-
-        MSBuild(projectFileName, msBuildSettings);
-    }
-}
-
-//-------------------------------------------------------------
-
-private void PackageComponents()
-{
-    if (!HasComponents())
-    {
-        return;
     }
 
-    foreach (var component in Components)
+    public override bool HasItems()
     {
-        Information("Packaging component '{0}'", component);
+        return BuildContext.Components.Items.Count > 0;
+    }
 
-        var projectFileName = string.Format("./src/{0}/{0}.csproj", component);
+    private string GetComponentNuGetRepositoryUrl(string projectName)
+    {
+        // Allow per project overrides via "NuGetRepositoryUrlFor[ProjectName]"
+        return GetProjectSpecificConfigurationValue(BuildContext, projectName, "NuGetRepositoryUrlFor", BuildContext.Components.NuGetRepositoryUrl);
+    }
 
-        // Note: we have a bug where UAP10.0 cannot be packaged, for details see 
-        // https://github.com/dotnet/cli/issues/9303
-        // 
-        // Therefore we will use VS instead for packing and lose the ability to sign
-        var useDotNetPack = true;
+    private string GetComponentNuGetRepositoryApiKey(string projectName)
+    {
+        // Allow per project overrides via "NuGetRepositoryApiKeyFor[ProjectName]"
+        return GetProjectSpecificConfigurationValue(BuildContext, projectName, "NuGetRepositoryApiKeyFor", BuildContext.Components.NuGetRepositoryApiKey);
+    }
 
-        var projectFileContents = FileReadText(projectFileName);
-        if (!string.IsNullOrWhiteSpace(projectFileContents))
+    public override async Task PrepareAsync()
+    {
+        if (!HasItems())
         {
-            useDotNetPack = !projectFileContents.ToLower().Contains("uap10.0");
+            return;
         }
 
-        var outputDirectory = string.Format("{0}/{1}/", OutputRootDirectory, component);
-        Information("Output directory: '{0}'", outputDirectory);
-
-        if (useDotNetPack)
+        // Check whether projects should be processed, `.ToList()` 
+        // is required to prevent issues with foreach
+        foreach (var component in BuildContext.Components.Items.ToList())
         {
-            Information("Using 'dotnet pack' to package '{0}'", component);
-
-            var msBuildSettings = new DotNetCoreMSBuildSettings();
-
-            // Note: we need to set OverridableOutputPath because we need to be able to respect
-            // AppendTargetFrameworkToOutputPath which isn't possible for global properties (which
-            // are properties passed in using the command line)
-            msBuildSettings.WithProperty("OverridableOutputPath", outputDirectory);
-            msBuildSettings.WithProperty("PackageOutputPath", OutputRootDirectory);
-            msBuildSettings.WithProperty("ConfigurationName", ConfigurationName);
-            msBuildSettings.WithProperty("PackageVersion", VersionNuGet);
-
-            var packSettings = new DotNetCorePackSettings
+            if (!ShouldProcessProject(BuildContext, component))
             {
-                MSBuildSettings = msBuildSettings,
-                OutputDirectory = OutputRootDirectory,
-                Configuration = ConfigurationName,
-                NoBuild = true,
-            };
-
-            DotNetCorePack(projectFileName, packSettings);
+                BuildContext.Components.Items.Remove(component);
+            }
         }
-        else
-        {
-            Warning("Using Visual Studio to pack instead of 'dotnet pack' for '{0}' because UAP 10.0 project was detected. Unfortunately assemblies will not be signed inside the NuGet package", component);
 
+        if (BuildContext.General.IsLocalBuild && BuildContext.General.Target.ToLower().Contains("packagelocal"))
+        {
+            foreach (var component in BuildContext.Components.Items)
+            {
+                var cacheDirectory = Environment.ExpandEnvironmentVariables(string.Format("%userprofile%/.nuget/packages/{0}/{1}", component, BuildContext.General.Version.NuGet));
+
+                CakeContext.Information("Checking for existing local NuGet cached version at '{0}'", cacheDirectory);
+
+                var retryCount = 3;
+
+                while (retryCount > 0)
+                {
+                    if (!CakeContext.DirectoryExists(cacheDirectory))
+                    {
+                        break;
+                    }
+
+                    CakeContext.Information("Deleting already existing NuGet cached version from '{0}'", cacheDirectory);
+                    
+                    CakeContext.DeleteDirectory(cacheDirectory, new DeleteDirectorySettings
+                    {
+                        Force = true,
+                        Recursive = true
+                    });
+
+                    await System.Threading.Tasks.Task.Delay(1000);
+
+                    retryCount--;
+                }            
+            }
+        }        
+    }
+
+    public override async Task UpdateInfoAsync()
+    {
+        if (!HasItems())
+        {
+            return;
+        }
+
+        foreach (var component in BuildContext.Components.Items)
+        {
+            CakeContext.Information("Updating version for component '{0}'", component);
+
+            var projectFileName = GetProjectFileName(BuildContext, component);
+
+            CakeContext.TransformConfig(projectFileName, new TransformationCollection 
+            {
+                { "Project/PropertyGroup/PackageVersion", BuildContext.General.Version.NuGet }
+            });
+        }        
+    }
+
+    public override async Task BuildAsync()
+    {
+        if (!HasItems())
+        {
+            return;
+        }
+        
+        foreach (var component in BuildContext.Components.Items)
+        {
+            BuildContext.CakeContext.LogSeparator("Building component '{0}'", component);
+
+            var projectFileName = GetProjectFileName(BuildContext, component);
+            
             var msBuildSettings = new MSBuildSettings 
             {
-                Verbosity = Verbosity.Minimal, // Verbosity.Diagnostic
-                ToolVersion = MSBuildToolVersion.VS2017,
-                Configuration = ConfigurationName,
+                Verbosity = Verbosity.Quiet,
+                //Verbosity = Verbosity.Diagnostic,
+                ToolVersion = MSBuildToolVersion.Default,
+                Configuration = BuildContext.General.Solution.ConfigurationName,
                 MSBuildPlatform = MSBuildPlatform.x86, // Always require x86, see platform for actual target platform
                 PlatformTarget = PlatformTarget.MSIL
             };
 
+            ConfigureMsBuild(BuildContext, msBuildSettings, component);
+            
             // Note: we need to set OverridableOutputPath because we need to be able to respect
             // AppendTargetFrameworkToOutputPath which isn't possible for global properties (which
             // are properties passed in using the command line)
+            var outputDirectory = GetProjectOutputDirectory(BuildContext, component);
+            CakeContext.Information("Output directory: '{0}'", outputDirectory);
+            msBuildSettings.WithProperty("OverridableOutputRootPath", BuildContext.General.OutputRootDirectory);
             msBuildSettings.WithProperty("OverridableOutputPath", outputDirectory);
-            msBuildSettings.WithProperty("PackageOutputPath", OutputRootDirectory);
-            msBuildSettings.WithProperty("ConfigurationName", ConfigurationName);
-            msBuildSettings.WithProperty("PackageVersion", VersionNuGet);
-            msBuildSettings = msBuildSettings.WithTarget("pack");
+            msBuildSettings.WithProperty("PackageOutputPath", BuildContext.General.OutputRootDirectory);
 
-            MSBuild(projectFileName, msBuildSettings);
-        }
+            // SourceLink specific stuff
+            if (IsSourceLinkSupported(BuildContext, projectFileName))
+            {
+                var repositoryUrl = BuildContext.General.Repository.Url;
+                var repositoryCommitId = BuildContext.General.Repository.CommitId;
+                if (!BuildContext.General.SourceLink.IsDisabled && 
+                    !BuildContext.General.IsLocalBuild && 
+                    !string.IsNullOrWhiteSpace(repositoryUrl))
+                {       
+                    CakeContext.Information("Repository url is specified, enabling SourceLink to commit '{0}/commit/{1}'", 
+                        repositoryUrl, repositoryCommitId);
+
+                    // TODO: For now we are assuming everything is git, we might need to change that in the future
+                    // See why we set the values at https://github.com/dotnet/sourcelink/issues/159#issuecomment-427639278
+                    msBuildSettings.WithProperty("EnableSourceLink", "true");
+                    msBuildSettings.WithProperty("EnableSourceControlManagerQueries", "false");
+                    msBuildSettings.WithProperty("PublishRepositoryUrl", "true");
+                    msBuildSettings.WithProperty("RepositoryType", "git");
+                    msBuildSettings.WithProperty("RepositoryUrl", repositoryUrl);
+                    msBuildSettings.WithProperty("RevisionId", repositoryCommitId);
+
+                    InjectSourceLinkInProjectFile(BuildContext, projectFileName);
+                }
+            }
+
+            CakeContext.MSBuild(projectFileName, msBuildSettings);
+        }        
     }
 
-    var codeSign = (!IsCiBuild && !string.IsNullOrWhiteSpace(CodeSignCertificateSubjectName));
-    if (codeSign)
+    public override async Task PackageAsync()
     {
-        // For details, see https://docs.microsoft.com/en-us/nuget/create-packages/sign-a-package
-        // nuget sign MyPackage.nupkg -CertificateSubjectName <MyCertSubjectName> -Timestamper <TimestampServiceURL>
-        var filesToSign = GetFiles(string.Format("{0}/*.nupkg", OutputRootDirectory));
-
-        foreach (var fileToSign in filesToSign)
+        if (!HasItems())
         {
-            Information("Signing NuGet package '{0}'", fileToSign);
+            return;
+        }
 
-            var exitCode = StartProcess(NuGetExe, new ProcessSettings
+        var configurationName = BuildContext.General.Solution.ConfigurationName;
+
+        foreach (var component in BuildContext.Components.Items)
+        {
+            BuildContext.CakeContext.LogSeparator("Packaging component '{0}'", component);
+
+            var projectDirectory = string.Format("./src/{0}", component);
+            var projectFileName = string.Format("{0}/{1}.csproj", projectDirectory, component);
+            var outputDirectory = GetProjectOutputDirectory(BuildContext, component);
+            CakeContext.Information("Output directory: '{0}'", outputDirectory);
+
+            // Step 1: remove intermediate files to ensure we have the same results on the build server, somehow NuGet 
+            // targets tries to find the resource assemblies in [ProjectName]\obj\Release\net46\de\[ProjectName].resources.dll',
+            // we won't run a clean on the project since it will clean out the actual output (which we still need for packaging)
+
+            CakeContext.Information("Cleaning intermediate files for component '{0}'", component);
+
+            var binFolderPattern = string.Format("{0}/bin/{1}/**.dll", projectDirectory, configurationName);
+
+            CakeContext.Information("Deleting 'bin' directory contents using '{0}'", binFolderPattern);
+
+            var binFiles = CakeContext.GetFiles(binFolderPattern);
+            CakeContext.DeleteFiles(binFiles);
+
+            var objFolderPattern = string.Format("{0}/obj/{1}/**.dll", projectDirectory, configurationName);
+
+            CakeContext.Information("Deleting 'bin' directory contents using '{0}'", objFolderPattern);
+
+            var objFiles = CakeContext.GetFiles(objFolderPattern);
+            CakeContext.DeleteFiles(objFiles);
+
+            CakeContext.Information(string.Empty);
+
+            // Step 2: Go packaging!
+            CakeContext.Information("Using 'msbuild' to package '{0}'", component);
+
+            var msBuildSettings = new MSBuildSettings {
+                Verbosity = Verbosity.Quiet,
+                //Verbosity = Verbosity.Diagnostic,
+                ToolVersion = MSBuildToolVersion.Default,
+                Configuration = configurationName,
+                MSBuildPlatform = MSBuildPlatform.x86, // Always require x86, see platform for actual target platform
+                PlatformTarget = PlatformTarget.MSIL
+            };
+
+            ConfigureMsBuild(BuildContext, msBuildSettings, component, "pack");
+
+            // Note: we need to set OverridableOutputPath because we need to be able to respect
+            // AppendTargetFrameworkToOutputPath which isn't possible for global properties (which
+            // are properties passed in using the command line)
+            msBuildSettings.WithProperty("OverridableOutputRootPath", BuildContext.General.OutputRootDirectory);
+            msBuildSettings.WithProperty("OverridableOutputPath", outputDirectory);
+            msBuildSettings.WithProperty("PackageOutputPath", BuildContext.General.OutputRootDirectory);
+            msBuildSettings.WithProperty("ConfigurationName", configurationName);
+            msBuildSettings.WithProperty("PackageVersion", BuildContext.General.Version.NuGet);
+
+            // SourceLink specific stuff
+            var repositoryUrl = BuildContext.General.Repository.Url;
+            var repositoryCommitId = BuildContext.General.Repository.CommitId;
+            if (!BuildContext.General.SourceLink.IsDisabled && 
+                !BuildContext.General.IsLocalBuild && 
+                !string.IsNullOrWhiteSpace(repositoryUrl))
+            {       
+                CakeContext.Information("Repository url is specified, adding commit specific data to package");
+
+                // TODO: For now we are assuming everything is git, we might need to change that in the future
+                // See why we set the values at https://github.com/dotnet/sourcelink/issues/159#issuecomment-427639278
+                msBuildSettings.WithProperty("PublishRepositoryUrl", "true");
+                msBuildSettings.WithProperty("RepositoryType", "git");
+                msBuildSettings.WithProperty("RepositoryUrl", repositoryUrl);
+                msBuildSettings.WithProperty("RevisionId", repositoryCommitId);
+            }
+            
+            // Fix for .NET Core 3.0, see https://github.com/dotnet/core-sdk/issues/192, it
+            // uses obj/release instead of [outputdirectory]
+            msBuildSettings.WithProperty("DotNetPackIntermediateOutputPath", outputDirectory);
+            
+            msBuildSettings.WithProperty("NoBuild", "true");
+            msBuildSettings.Targets.Add("Pack");
+
+            CakeContext.MSBuild(projectFileName, msBuildSettings);
+
+            BuildContext.CakeContext.LogSeparator();
+        }
+
+        var codeSign = (!BuildContext.General.IsCiBuild && 
+                        !BuildContext.General.IsLocalBuild && 
+                        !string.IsNullOrWhiteSpace(BuildContext.General.CodeSign.CertificateSubjectName));
+        if (codeSign)
+        {
+            // For details, see https://docs.microsoft.com/en-us/nuget/create-packages/sign-a-package
+            // nuget sign MyPackage.nupkg -CertificateSubjectName <MyCertSubjectName> -Timestamper <TimestampServiceURL>
+            var filesToSign = CakeContext.GetFiles(string.Format("{0}/*.nupkg", BuildContext.General.OutputRootDirectory));
+
+            foreach (var fileToSign in filesToSign)
             {
-                Arguments = string.Format("sign \"{0}\" -CertificateSubjectName \"{1}\" -Timestamper \"{2}\"", fileToSign, CodeSignCertificateSubjectName, CodeSignTimeStampUri)
+                CakeContext.Information("Signing NuGet package '{0}' using certificate subject '{1}'", fileToSign, BuildContext.General.CodeSign.CertificateSubjectName);
+
+                var exitCode = CakeContext.StartProcess(BuildContext.General.NuGet.Executable, new ProcessSettings
+                {
+                    Arguments = string.Format("sign \"{0}\" -CertificateSubjectName \"{1}\" -Timestamper \"{2}\"", 
+                        fileToSign, BuildContext.General.CodeSign.CertificateSubjectName, BuildContext.General.CodeSign.TimeStampUri)
+                });
+
+                CakeContext.Information("Signing NuGet package exited with '{0}'", exitCode);
+            }
+        }        
+    }
+
+    public override async Task DeployAsync()
+    {
+        if (!HasItems())
+        {
+            return;
+        }
+
+        foreach (var component in BuildContext.Components.Items)
+        {
+            if (!ShouldDeployProject(BuildContext, component))
+            {
+                CakeContext.Information("Component '{0}' should not be deployed", component);
+                continue;
+            }
+
+            BuildContext.CakeContext.LogSeparator("Deploying component '{0}'", component);
+
+            var packageToPush = string.Format("{0}/{1}.{2}.nupkg", BuildContext.General.OutputRootDirectory, component, BuildContext.General.Version.NuGet);
+            var nuGetRepositoryUrl = GetComponentNuGetRepositoryUrl(component);
+            var nuGetRepositoryApiKey = GetComponentNuGetRepositoryApiKey(component);
+
+            if (string.IsNullOrWhiteSpace(nuGetRepositoryUrl))
+            {
+                throw new Exception("NuGet repository is empty, as a protection mechanism this must *always* be specified to make sure packages aren't accidentally deployed to the default public NuGet feed");
+            }
+
+            CakeContext.NuGetPush(packageToPush, new NuGetPushSettings
+            {
+                Source = nuGetRepositoryUrl,
+                ApiKey = nuGetRepositoryApiKey,
+                ArgumentCustomization = args => args.Append("-SkipDuplicate")
             });
 
-            Information("Signing NuGet package exited with '{0}'", exitCode);
-        }
+            await BuildContext.Notifications.NotifyAsync(component, string.Format("Deployed to NuGet store"), TargetType.Component);
+        }        
+    }
+
+    public override async Task FinalizeAsync()
+    {
+
     }
 }
-
-//-------------------------------------------------------------
-
-Task("UpdateInfoForComponents")
-    .IsDependentOn("Clean")
-    .Does(() =>
-{
-    UpdateSolutionAssemblyInfo();
-    UpdateInfoForComponents();
-});
-
-//-------------------------------------------------------------
-
-Task("BuildComponents")
-    .IsDependentOn("UpdateInfoForComponents")
-    .Does(() =>
-{
-    BuildComponents();
-});
-
-//-------------------------------------------------------------
-
-Task("PackageComponents")
-    .IsDependentOn("BuildComponents")
-    .Does(() =>
-{
-    PackageComponents();
-});

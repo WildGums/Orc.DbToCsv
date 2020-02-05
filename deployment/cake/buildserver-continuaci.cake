@@ -1,60 +1,86 @@
-#addin nuget:?package=MagicChunks&version=2.0.0.119
-
-using System.Runtime.InteropServices;
-
-[DllImport("kernel32.dll", CharSet=CharSet.Unicode)]
-static extern uint GetPrivateProfileString(
-   string lpAppName, 
-   string lpKeyName,
-   string lpDefault, 
-   StringBuilder lpReturnedString, 
-   uint nSize,
-   string lpFileName);
-
-//-------------------------------------------------------------
-
-public string GetContinuaCIVariable(string variableName, string defaultValue)
+public class ContinuaCIBuildServer : IBuildServer
 {
-    var argumentValue = Argument(variableName, "non-existing");
-    if (argumentValue != "non-existing")
+    public ContinuaCIBuildServer(ICakeContext cakeContext)
     {
-        Information("Variable '{0}' is specified via an argument", variableName);
-    
-        return argumentValue;
+        CakeContext = cakeContext;
     }
 
-    if (ContinuaCI.IsRunningOnContinuaCI)
+    public ICakeContext CakeContext { get; private set; }
+
+    public void PinBuild(string comment)
     {
-        var buildServerVariables = ContinuaCI.Environment.Variable;
+        var continuaCIContext = GetContinuaCIContext();
+        if (!continuaCIContext.IsRunningOnContinuaCI)
+        {
+            return;
+        }
+
+        CakeContext.Information("Pinning build in Continua CI");
+
+        var message = string.Format("@@continua[pinBuild comment='{0}' appendComment='{1}']", 
+            comment, !string.IsNullOrWhiteSpace(comment));
+        WriteIntegration(message);
+    }
+
+    public void SetVersion(string version)
+    {
+        var continuaCIContext = GetContinuaCIContext();
+        if (!continuaCIContext.IsRunningOnContinuaCI)
+        {
+            return;
+        }
+
+        CakeContext.Information("Setting version '{0}' in Continua CI", version);
+
+        var message = string.Format("@@continua[setBuildVersion value='{0}']", version);
+        WriteIntegration(message);
+    }
+
+    public void SetVariable(string variableName, string value)
+    {
+        var continuaCIContext = GetContinuaCIContext();
+        if (!continuaCIContext.IsRunningOnContinuaCI)
+        {
+            return;
+        }
+
+        CakeContext.Information("Setting variable '{0}' to '{1}' in Continua CI", variableName, value);
+    
+        var message = string.Format("@@continua[setVariable name='{0}' value='{1}' skipIfNotDefined='true']", variableName, value);
+        WriteIntegration(message);
+    }
+
+    public Tuple<bool, string> GetVariable(string variableName, string defaultValue)
+    {
+        var continuaCIContext = GetContinuaCIContext();
+        if (!continuaCIContext.IsRunningOnContinuaCI)
+        {
+            return new Tuple<bool, string>(false, string.Empty);
+        }
+
+        var exists = false;
+        var value = string.Empty;
+
+        var buildServerVariables = continuaCIContext.Environment.Variable;
         if (buildServerVariables.ContainsKey(variableName))
         {
-            Information("Variable '{0}' is specified via Continua CI", variableName);
+            CakeContext.Information("Variable '{0}' is specified via Continua CI", variableName);
         
-            return buildServerVariables[variableName];
+            exists = true;
+            value = buildServerVariables[variableName];
         }
-    }
-    
-    var overrideFile = "./build.cakeoverrides";
-    if (System.IO.File.Exists(overrideFile))
-    {
-        var sb = new StringBuilder(string.Empty, 128);
-        var lengthRead = GetPrivateProfileString("General", variableName, null, sb, (uint)sb.Capacity, overrideFile);
-        if (lengthRead > 0)
-        {
-            Information("Variable '{0}' is specified via build.cakeoverrides", variableName);
         
-            return sb.ToString();
-        }
+        return new Tuple<bool, string>(exists, value);
     }
-    
-    if (HasEnvironmentVariable(variableName))
+
+    private IContinuaCIProvider GetContinuaCIContext()
     {
-        Information("Variable '{0}' is specified via an environment variable", variableName);
-    
-        return EnvironmentVariable(variableName);
+        return CakeContext.ContinuaCI();
     }
-    
-    Information("Variable '{0}' is not specified, returning default value", variableName);    
-    
-    return defaultValue;
+
+    private void WriteIntegration(string message)
+    {
+        // Must be Console.WriteLine
+        CakeContext.Information(message);
+    }
 }

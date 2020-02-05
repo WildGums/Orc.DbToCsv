@@ -1,10 +1,211 @@
 ﻿<Project xmlns="http://wildgums/2015">
   <ConnectionString>Data Source=.\SQLExpress;Initial Catalog=RanttSaaS;Integrated Security=True;Pooling=False</ConnectionString>
   <MaximumRowsInTable>500</MaximumRowsInTable>
-  <OutputFolder>C:\Temp\CustomPath</OutputFolder>
+  <OutputFolder>F:\output</OutputFolder>
+  <Provider>System.Data.SqlClient</Provider>
   
   <Project.Tables>
-    <Table Name="MyTable1" Csv="Table.csv"/>
-    <Table Name="MyTable1" Csv="Table1.csv" Output="C:\Temp\Xa"/>
+  
+<!-- FIREBIRD -->
+			   
+  		<Table Name="Firebird_DbTable"
+			   TableType="Table"
+			   Csv="Firebird_Table.csv"
+			   Output="F:\output\firebird\"
+			   ConnectionString="Database=C:\Program Files\Firebird\Firebird_3_0\examples\empbuild\EMPLOYEE.FDB;Data Source=localhost;Port=3050;Dialect=3;User=user;Password=pass;"
+			   Provider="FirebirdSql.Data.FirebirdClient"/>
+			   
+		<Table Name="Firebird_DbView"
+			   TableType="View"
+			   Csv="Firebird_View.csv"
+			   Output="F:\output\firebird\"
+			   ConnectionString="Database=C:\Program Files\Firebird\Firebird_3_0\examples\empbuild\EMPLOYEE.FDB;Data Source=localhost;Port=3050;Dialect=3;User=user;Password=pass;"
+			   Provider="FirebirdSql.Data.FirebirdClient"/>			  
+  
+<!-- ORACLE --> 
+		<Table Name="Oracle_DbTable"
+			   TableType="Table"
+			   Csv="Oracle_Table.csv"
+			   Output="F:\output\oracle\"
+			   ConnectionString="Data Source=localhost:1521/XE;User Id=c##user;password=pass;"
+			   Provider="Oracle.ManagedDataAccess.Client"/>
+			   
+		<Table Name="Oracle_DbView"
+			   TableType="View"
+			   Csv="Oracle_View.csv"
+			   Output="F:\output\oracle\"
+			   ConnectionString="Data Source=localhost:1521/XE;User Id=c##user;password=pass;"
+			   Provider="Oracle.ManagedDataAccess.Client"/>  
+			   
+		<Table Name="Oracle_DbSP"
+			   TableType="StoredProcedure"
+			   Csv="Oracle_StoredProcedure.csv"
+			   Output="F:\output\oracle\"
+			   ConnectionString="Data Source=localhost:1521/XE;User Id=c##user;password=pass;"
+			   Provider="Oracle.ManagedDataAccess.Client">
+			<Table.Parameters>
+				<Parameter Name="in_rating" Value="10"/>
+			</Table.Parameters>
+		</Table>
+		
+		<Table Name="Oracle_DbFn"
+			   TableType="Function"
+			   Csv="Oracle_Function.csv"
+			   Output="F:\output\oracle\"
+			   ConnectionString="Data Source=localhost:1521/XE;User Id=c##user;password=pass;"
+			   Provider="Oracle.ManagedDataAccess.Client">
+			<Table.Parameters>
+				<Parameter Name="P_VAL" Value="1"/>
+			</Table.Parameters>
+		</Table>  
+  
+		<Table Name="select * from Oracle_DbTable where RATING > 9"
+			   TableType="Sql"
+			   Csv="Oracle_Query.csv"
+			   Output="F:\output\oracle\"
+			   ConnectionString="Data Source=localhost:1521/XE;User Id=c##user;password=pass;"
+			   Provider="Oracle.ManagedDataAccess.Client"/>
+
+
+<!-- SQLite --> 		
+		<Table Name="SqLite_DbTable"
+			   TableType="Table"
+			   Csv="SqLite_Table.csv"
+			   Output="F:\output\sqLite\"
+			   ConnectionString="Data Source=F:\dbs\sqlite_test.db3"
+			   Provider="System.Data.SQLite"/>	
+			   
+		<Table Name="SqLite_DbView"
+			   TableType="View"
+			   Csv="SqLite_View.csv"
+			   Output="F:\output\sqLite\"
+			   ConnectionString="Data Source=F:\dbs\sqlite_test.db3"
+			   Provider="System.Data.SQLite"/>	
+			   
+		<Table Name="select * from SqLite_DbTable"
+			   TableType="Sql"
+			   Csv="SqLite_Query.csv"
+			   Output="F:\output\sqLite\"
+			   ConnectionString="Data Source=F:\dbs\sqlite_test.db3"
+			   Provider="System.Data.SQLite"/>	
+			   
+			   
+<!-- MySql --> 	 
+  		<Table Name="MySql_DbTable"
+			   TableType="Table"
+			   Csv="MySql_Table.csv"
+			   Output="F:\output\mySql\"
+			   ConnectionString="Server=localhost;Database=dbName;Uid=user;Pwd=pass;"
+			   Provider="MySql.Data.MySqlClient"/>		
+  
+    	<Table Name="MySql_DbView"
+			   TableType="View"
+			   Csv="MySql_View.csv"
+			   Output="F:\output\mySql\"
+			   ConnectionString="Server=localhost;Database=dbName;Uid=user;Pwd=pass;"
+			   Provider="MySql.Data.MySqlClient"/>
+			   
+		<Table Name="MySql_DbSP"
+			   TableType="StoredProcedure"
+			   Csv="MySql_StoredProcedure.csv"
+			   Output="F:\output\mySql\"
+			   ConnectionString="Server=localhost;Database=dbName;Uid=user;Pwd=pass;"
+			   Provider="MySql.Data.MySqlClient">
+			<Table.Parameters>
+				<Parameter Name="arg1" Value="1"/>
+			</Table.Parameters>
+		</Table>
+  <!-- Function no supported-->
+      	<!--<Table Name="MySql_DbSP"
+			   TableType="Function"
+			   Csv="MySql_Function.csv"
+			   Output="F:\output\mySql\"
+			   ConnectionString="Server=localhost;Database=dbName;Uid=user;Pwd=pass;"
+			   Provider="MySql.Data.MySqlClient"/>-->		
+			   
+		<Table Name="select * from `MySql_DbTable`"
+			   TableType="Sql"
+			   Csv="MySql_Query.csv"
+			   Output="F:\output\mySql\"
+			   ConnectionString="Server=localhost;Database=dbName;Uid=user;Pwd=pass;"
+			   Provider="MySql.Data.MySqlClient"/>		
+			   
+			   
+<!-- MSSql --> 				   			   
+		<Table Name="MsSQL_DbTable"
+			   TableType="Table" 
+			   Csv="MsSQL_Table.csv" 
+			   Output="F:\output\msSql\"/>
+			   
+		<Table Name="MsSQL_DbView"
+			   TableType="View" 
+			   Csv="MsSQL_View.csv" 
+			   Output="F:\output\msSql\"/>
+			   
+		<Table Name="MsSQL_DbSP"
+			   TableType="StoredProcedure" 
+			   Csv="MsSQL_StoredProcedure.csv" 
+			   Output="F:\output\msSql\">
+			<Table.Parameters>
+				<Parameter Name="@arg1" Value="0"/>
+			</Table.Parameters>
+		</Table>  	  
+
+		<Table Name="MsSQL_DbFn"
+			   TableType="Function" 
+			   Csv="MsSQL_Function.csv" 
+			   Output="F:\output\msSql\">
+			<Table.Parameters>
+				<Parameter Name="@arg1" Value="0"/>
+			</Table.Parameters>
+		</Table>			
+			   
+		<Table Name="select * from MsSQL_DbTable"
+			   TableType="Sql" 
+			   Csv="MsSQL_Query.csv" 
+			   Output="F:\output\msSql\"/>
+			   
+			   
+<!-- PostgreSQL --> 				   
+		<Table Name="PostgreSQL_DbTable"
+			   TableType="Table" 
+			   Csv="PostgreSQL_Table.csv" 
+			   Output="F:\output\PostgreSQL\" 
+			   ConnectionString="Server=127.0.0.1;Port=5432;Database=dbName;User Id=user;Password=pass;"
+			   Provider="Npgsql"/>		      
+
+		<Table Name="PostgreSQL_DbView"
+			   TableType="View" 
+			   Csv="PostgreSQL_View.csv" 
+			   Output="F:\output\PostgreSQL\" 
+			   ConnectionString="Server=127.0.0.1;Port=5432;Database=dbName;User Id=user;Password=pass;"
+			   Provider="Npgsql"/>	
+			   
+		<Table Name="PostgreSQL_DbSP"
+			   TableType="StoredProcedure" 
+			   Csv="PostgreSQL_StoredProcedure.csv" 
+			   Output="F:\output\PostgreSQL\" 
+			   ConnectionString="Server=127.0.0.1;Port=5432;Database=dbName;User Id=user;Password=pass;"
+			   Provider="Npgsql"/>	
+			    
+        <Table Name="PostgreSQL_DbFn"
+			   TableType="Function" 
+			   Csv="PostgreSQL_Function.csv" 
+			   Output="F:\output\PostgreSQL\" 
+			   ConnectionString="Server=127.0.0.1;Port=5432;Database=dbName;User Id=user;Password=pass;"
+			   Provider="Npgsql">
+			<Table.Parameters>
+				<Parameter Name="@v1" Value="0"/>
+			</Table.Parameters>
+		</Table>
+		
+		<Table Name="select * from PostgreSQL_DbTable"
+			   TableType="Sql" 
+			   Csv="PostgreSQL_Query.csv" 
+			   Output="F:\output\PostgreSQL\" 
+			   ConnectionString="Server=127.0.0.1;Port=5432;Database=dbName;User Id=user;Password=pass;"
+			   Provider="Npgsql"/>			   
+		
+  
   </Project.Tables>
 </Project>

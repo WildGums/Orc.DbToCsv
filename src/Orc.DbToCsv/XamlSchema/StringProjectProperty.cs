@@ -9,7 +9,7 @@ namespace Orc.DbToCsv
 {
     using System.Windows.Markup;
 
-    [ContentProperty("Value")]
+    [ContentProperty(nameof(Value))]
     public class StringProjectProperty : ProjectProperty
     {
         #region Properties

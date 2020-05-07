@@ -1,7 +1,7 @@
-﻿[assembly: System.Runtime.Versioning.TargetFrameworkAttribute(".NETFramework,Version=v4.6", FrameworkDisplayName=".NET Framework 4.6")]
-[assembly: System.Windows.Markup.XmlnsDefinitionAttribute("http://wildgums/2015", "Orc.DbToCsv")]
-[assembly: System.Windows.Markup.XmlnsPrefixAttribute("http://wildgums/2015", "orc")]
-public class static ModuleInitializer
+﻿[assembly: System.Runtime.Versioning.TargetFramework(".NETFramework,Version=v4.7", FrameworkDisplayName=".NET Framework 4.7")]
+[assembly: System.Windows.Markup.XmlnsDefinition("http://wildgums/2015", "Orc.DbToCsv")]
+[assembly: System.Windows.Markup.XmlnsPrefix("http://wildgums/2015", "orc")]
+public static class ModuleInitializer
 {
     public static void Initialize() { }
 }
@@ -18,12 +18,12 @@ namespace Orc.DbToCsv
         public Orc.DataAccess.DataSourceParameters Parameters { get; set; }
         public Orc.DataAccess.Database.DatabaseSource Source { get; set; }
     }
-    public class static Importer
+    public static class Importer
     {
-        public static System.Threading.Tasks.Task ProcessProjectAsync(string projectFilePath, string outputFolderPath) { }
         public static System.Threading.Tasks.Task ProcessProjectAsync(Orc.DbToCsv.Project project) { }
+        public static System.Threading.Tasks.Task ProcessProjectAsync(string projectFilePath, string outputFolderPath) { }
     }
-    [System.Windows.Markup.ContentPropertyAttribute("Value")]
+    [System.Windows.Markup.ContentProperty("Value")]
     public class Int32ProjectProperty : Orc.DbToCsv.ProjectProperty
     {
         public Int32ProjectProperty() { }
@@ -43,7 +43,7 @@ namespace Orc.DbToCsv
         public string Name { get; set; }
         public string Value { get; set; }
     }
-    [System.Windows.Markup.ContentPropertyAttribute("Properties")]
+    [System.Windows.Markup.ContentProperty("Properties")]
     public class Project
     {
         public Project() { }
@@ -54,11 +54,11 @@ namespace Orc.DbToCsv
         public Orc.DbToCsv.Provider Provider { get; }
         public Orc.DbToCsv.Schema Schema { get; }
         public System.Collections.Generic.List<Orc.DbToCsv.Table> Tables { get; set; }
+        public void Validate() { }
         public static System.Threading.Tasks.Task<Orc.DbToCsv.Project> LoadAsync(string path = "project.iprj") { }
         public static Orc.DbToCsv.Project Parse(string xaml) { }
-        public void Validate() { }
     }
-    public class static ProjectExtensions
+    public static class ProjectExtensions
     {
         public static System.Threading.Tasks.Task ExportAsync(this Orc.DbToCsv.Project project) { }
         public static System.Collections.Generic.IList<Orc.DbToCsv.DbToCsvExportDescription> GetDbToCsvExportDescriptions(this Orc.DbToCsv.Project project) { }
@@ -75,7 +75,7 @@ namespace Orc.DbToCsv
     {
         public Schema() { }
     }
-    [System.Windows.Markup.ContentPropertyAttribute("Value")]
+    [System.Windows.Markup.ContentProperty("Value")]
     public class StringProjectProperty : Orc.DbToCsv.ProjectProperty
     {
         public StringProjectProperty() { }

@@ -30,7 +30,7 @@
     <PackageReference Include="Orc.DataAccess" Version="3.0.0-alpha0184" />
     <PackageReference Include="Orc.ProjectManagement" Version="3.3.0" />    
     <PackageReference Include="System.Data.SqlClient" Version="4.5.1" />
-    <PackageReference Include="WpfAnalyzers" Version="2.2.0.2" PrivateAssets="all" />
+    <PackageReference Include="WpfAnalyzers" Version="2.4.5" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>

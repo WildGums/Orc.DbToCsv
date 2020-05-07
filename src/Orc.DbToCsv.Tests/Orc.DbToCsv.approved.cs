@@ -1,6 +1,6 @@
-﻿[assembly: System.Runtime.Versioning.TargetFramework(".NETFramework,Version=v4.7", FrameworkDisplayName=".NET Framework 4.7")]
-[assembly: System.Windows.Markup.XmlnsDefinition("http://wildgums/2015", "Orc.DbToCsv")]
-[assembly: System.Windows.Markup.XmlnsPrefix("http://wildgums/2015", "orc")]
+﻿[assembly: System.Runtime.Versioning.TargetFramework(".NETCoreApp,Version=v3.1", FrameworkDisplayName="")]
+[assembly: System.Windows.Markup.XmlnsDefinition("http://schemas.wildgums.com/orc/dbtocsv", "Orc.DbToCsv")]
+[assembly: System.Windows.Markup.XmlnsPrefix("http://schemas.wildgums.com/orc/dbtocsv", "orcdbtocsv")]
 public static class ModuleInitializer
 {
     public static void Initialize() { }

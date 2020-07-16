@@ -16,7 +16,7 @@ namespace Orc.DbToCsv
     using Catel.Logging;
     using DataAccess;
 
-    [ContentProperty("Properties")]
+    [ContentProperty(nameof(Properties))]
     public class Project
     {
         #region Constants

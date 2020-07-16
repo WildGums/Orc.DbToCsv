@@ -9,6 +9,7 @@ namespace Orc.DbToCsv
 {
     using System;
     using System.Data.SqlClient;
+    using System.Globalization;
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
@@ -75,7 +76,7 @@ namespace Orc.DbToCsv
 
                 using (var streamWriter = new StreamWriter(new FileStream(fullFileName, FileMode.OpenOrCreate)))
                 {
-                    using (var csvWriter = new CsvWriter(streamWriter))
+                    using (var csvWriter = new CsvWriter(streamWriter, CultureInfo.CurrentCulture))
                     {
                         using (var dataReader = new SqlTableReader(source.ToString(), 0, project.MaximumRowsInTable.Value, exportDescription.Parameters))
                         {

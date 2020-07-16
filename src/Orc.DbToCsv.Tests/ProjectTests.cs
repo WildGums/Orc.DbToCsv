@@ -17,7 +17,7 @@ namespace Orc.DbToCsv.Tests
         public void GeneralTest()
         {
             var xaml = @"
-<Project xmlns='http://wildgums/2015'>
+<Project xmlns='http://schemas.wildgums.com/orc/dbtocsv'>
   <ConnectionString>Data Source=.\SQLExpress;Initial Catalog=RanttSaaS;Integrated Security=True;Pooling=False</ConnectionString>
   <MaximumRowsInTable>500</MaximumRowsInTable>
   <OutputFolder>C:\Temp\CustomPath</OutputFolder>
@@ -44,7 +44,7 @@ namespace Orc.DbToCsv.Tests
         public void GeneralTest_NoOutputPath()
         {
             var xaml = @"
-<Project xmlns='http://wildgums/2015'>
+<Project xmlns='http://schemas.wildgums.com/orc/dbtocsv'>
   <ConnectionString>Data Source=.\SQLExpress;Initial Catalog=RanttSaaS;Integrated Security=True;Pooling=False</ConnectionString>
   <MaximumRowsInTable>500</MaximumRowsInTable>
   <Project.Tables>
@@ -69,7 +69,7 @@ namespace Orc.DbToCsv.Tests
         public void GeneralTest_NoSpecificFileName()
         {
             var xaml = @"
-<Project xmlns='http://wildgums/2015'>
+<Project xmlns='http://schemas.wildgums.com/orc/dbtocsv'>
   <ConnectionString>Data Source=.\SQLExpress;Initial Catalog=RanttSaaS;Integrated Security=True;Pooling=False</ConnectionString>
   <MaximumRowsInTable>500</MaximumRowsInTable>
   <Project.Tables>

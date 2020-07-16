@@ -43,7 +43,7 @@ namespace Orc.DbToCsv
             };
             DbProvider.RegisterProvider(oracleProviderInfo);
 
-            var commandLine = Environment.CommandLine.GetCommandLine(true);
+            var commandLine = Environment.GetCommandLineArgs();
             var options = new Options();
             
             var serviceLocator = ServiceLocator.Default;

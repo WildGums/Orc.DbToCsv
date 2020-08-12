@@ -28,7 +28,7 @@
     <PackageReference Include="Orc.Csv" Version="4.0.0" />    
     <PackageReference Include="Orc.DataAccess" Version="4.0.0" />
     <PackageReference Include="Orc.ProjectManagement" Version="4.0.2" />    
-    <PackageReference Include="System.Data.SqlClient" Version="4.8.1" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.2" />
   </ItemGroup>
 
   <ItemGroup>

@@ -96,7 +96,7 @@ namespace Orc.DbToCsv
         {
             try
             {
-                var xaml = File.ReadAllText(path);
+                var xaml = await File.ReadAllTextAsync(path);
                 var result = Parse(xaml);
 
                 result.Validate();

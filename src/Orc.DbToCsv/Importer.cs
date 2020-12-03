@@ -74,64 +74,58 @@ namespace Orc.DbToCsv
                     File.Delete(fullFileName);
                 }
 
-                using (var streamWriter = new StreamWriter(new FileStream(fullFileName, FileMode.OpenOrCreate)))
+                await using var streamWriter = new StreamWriter(new FileStream(fullFileName, FileMode.OpenOrCreate));
+                await using var csvWriter = new CsvWriter(streamWriter, CultureInfo.CurrentCulture);
+                using var dataReader = new SqlTableReader(source.ToString(), 0, project.MaximumRowsInTable.Value, exportDescription.Parameters);
+                while (true)
                 {
-                    using (var csvWriter = new CsvWriter(streamWriter, CultureInfo.CurrentCulture))
+                    var headers = dataReader.FieldHeaders;
+                    if (dataReader.ValidationContext.HasErrors)
                     {
-                        using (var dataReader = new SqlTableReader(source.ToString(), 0, project.MaximumRowsInTable.Value, exportDescription.Parameters))
+                        Log.Error(dataReader.ValidationContext.ToString());
+
+                        return;
+                    }
+
+                    if (headers.Any())
+                    {
+                        foreach (var field in headers)
                         {
-                            while (true)
-                            {
-                                var headers = dataReader.FieldHeaders;
-                                if (dataReader.ValidationContext.HasErrors)
-                                {
-                                    Log.Error(dataReader.ValidationContext.ToString());
-
-                                    return;
-                                }
-
-                                if (headers.Any())
-                                {
-                                    foreach (var field in headers)
-                                    {
-                                        csvWriter.WriteField(field);
-                                    }
-
-                                    await csvWriter.NextRecordAsync();
-                                }
-
-                                while (await dataReader.ReadAsync())
-                                {
-                                    for (var i = 0; i < headers.Length; i++)
-                                    {
-                                        var value = dataReader.GetValue(i);
-
-                                        if (value is string strValue)
-                                        {
-                                            value = strValue.Trim(); // Remove all white spaces
-                                        }
-
-                                        csvWriter.WriteField(value);
-                                    }
-
-                                    records++;
-
-                                    await csvWriter.NextRecordAsync();
-                                }
-
-                                if (dataReader.ValidationContext.HasErrors)
-                                {
-                                    Log.Error(dataReader.ValidationContext.ToString());
-
-                                    return;
-                                }
-
-                                if (!await dataReader.NextResultAsync())
-                                {
-                                    break;
-                                }
-                            }
+                            csvWriter.WriteField(field);
                         }
+
+                        await csvWriter.NextRecordAsync();
+                    }
+
+                    while (await dataReader.ReadAsync())
+                    {
+                        for (var i = 0; i < headers.Length; i++)
+                        {
+                            var value = dataReader.GetValue(i);
+
+                            if (value is string strValue)
+                            {
+                                value = strValue.Trim(); // Remove all white spaces
+                            }
+
+                            csvWriter.WriteField(value);
+                        }
+
+                        records++;
+
+                        await csvWriter.NextRecordAsync();
+                    }
+
+                    if (dataReader.ValidationContext.HasErrors)
+                    {
+                        Log.Error(dataReader.ValidationContext.ToString());
+
+                        return;
+                    }
+
+                    if (!await dataReader.NextResultAsync())
+                    {
+                        break;
                     }
                 }
 

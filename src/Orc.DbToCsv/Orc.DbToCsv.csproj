@@ -27,7 +27,7 @@
     <PackageReference Include="Obsolete.Fody" Version="5.2.1" PrivateAssets="all" />
     <PackageReference Include="Orc.Csv" Version="4.3.2" />    
     <PackageReference Include="Orc.DataAccess" Version="4.2.2" />
-    <PackageReference Include="Orc.ProjectManagement" Version="4.2.2" />    
+    <PackageReference Include="Orc.ProjectManagement" Version="4.3.0" />    
     <PackageReference Include="System.Data.SqlClient" Version="4.8.3" />
   </ItemGroup>
 

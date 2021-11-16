@@ -118,7 +118,7 @@ namespace Orc.DbToCsv
                         table.Csv = ExtractTableName(table.Name) + ".csv";
                     }
 
-                    if (table.Output == null)
+                    if (table.Output is null)
                     {
                         table.Output = string.Empty;
                     }

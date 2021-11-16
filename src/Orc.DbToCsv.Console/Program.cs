@@ -70,7 +70,7 @@ namespace Orc.DbToCsv
                 ? Project.LoadAsync(options.Project).GetAwaiter().GetResult()
                 : TryGetProjectAutomaticallyAsync().GetAwaiter().GetResult();
 
-            if (project == null)
+            if (project is null)
             {
                 Log.Warning("Unable to locate the project to process.");
                 Environment.Exit(1);

@@ -26,8 +26,8 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="PublicApiGenerator" Version="10.2.0" PrivateAssets="all" />
-    <PackageReference Include="PublicApiGenerator" Version="10.0.2" PrivateAssets="all" />
+    <PackageReference Include="PublicApiGenerator" Version="10.3.0" PrivateAssets="all" />
+    <PackageReference Include="PublicApiGenerator" Version="10.3.0" PrivateAssets="all" />
     <PackageReference Include="WpfAnalyzers" Version="2.4.5" PrivateAssets="all" />
   </ItemGroup>
 

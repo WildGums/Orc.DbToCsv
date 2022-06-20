@@ -1,7 +1,5 @@
 #l "dependencies-variables.cake"
 
-#addin "nuget:?package=Cake.FileHelpers&version=3.0.0"
-
 using System.Xml.Linq;
 
 //-------------------------------------------------------------
@@ -30,8 +28,11 @@ public class DependenciesProcessor : ProcessorBase
         // is required to prevent issues with foreach
         foreach (var dependency in BuildContext.Dependencies.Items.ToList())
         {
-            if (!ShouldProcessProject(BuildContext, dependency))
+            if (!BuildContext.Dependencies.ShouldBuildDependency(dependency))
             {
+                BuildContext.CakeContext.Information("Skipping dependency '{0}' because no dependent projects are included", dependency);
+
+                BuildContext.Dependencies.Dependencies.Remove(dependency);
                 BuildContext.Dependencies.Items.Remove(dependency);
             }
         }
@@ -65,7 +66,7 @@ public class DependenciesProcessor : ProcessorBase
         }
         
         foreach (var dependency in BuildContext.Dependencies.Items)
-        {
+        {  
             BuildContext.CakeContext.LogSeparator("Building dependency '{0}'", dependency);
 
             var projectFileName = GetProjectFileName(BuildContext, dependency);
@@ -80,7 +81,7 @@ public class DependenciesProcessor : ProcessorBase
                 PlatformTarget = PlatformTarget.MSIL
             };
 
-            ConfigureMsBuild(BuildContext, msBuildSettings, dependency);
+            ConfigureMsBuild(BuildContext, msBuildSettings, dependency, "build");
             
             // Note: we need to set OverridableOutputPath because we need to be able to respect
             // AppendTargetFrameworkToOutputPath which isn't possible for global properties (which
@@ -93,38 +94,47 @@ public class DependenciesProcessor : ProcessorBase
                 msBuildSettings.PlatformTarget = PlatformTarget.Win32;
             }
 
-            var outputDirectory = GetProjectOutputDirectory(BuildContext, dependency);
-            CakeContext.Information("Output directory: '{0}'", outputDirectory);
-            msBuildSettings.WithProperty("OverridableOutputRootPath", BuildContext.General.OutputRootDirectory);
-            msBuildSettings.WithProperty("OverridableOutputPath", outputDirectory);
-            msBuildSettings.WithProperty("PackageOutputPath", BuildContext.General.OutputRootDirectory);
-
             // SourceLink specific stuff
-            if (IsSourceLinkSupported(BuildContext, projectFileName))
+            if (IsSourceLinkSupported(BuildContext, dependency, projectFileName))
             {
                 var repositoryUrl = BuildContext.General.Repository.Url;
                 var repositoryCommitId = BuildContext.General.Repository.CommitId;
-                if (!BuildContext.General.SourceLink.IsDisabled && 
-                    !BuildContext.General.IsLocalBuild && 
-                    !string.IsNullOrWhiteSpace(repositoryUrl))
-                {       
-                    CakeContext.Information("Repository url is specified, enabling SourceLink to commit '{0}/commit/{1}'", 
-                        repositoryUrl, repositoryCommitId);
+  
+                CakeContext.Information("Repository url is specified, enabling SourceLink to commit '{0}/commit/{1}'", 
+                    repositoryUrl, repositoryCommitId);
 
-                    // TODO: For now we are assuming everything is git, we might need to change that in the future
-                    // See why we set the values at https://github.com/dotnet/sourcelink/issues/159#issuecomment-427639278
-                    msBuildSettings.WithProperty("EnableSourceLink", "true");
-                    msBuildSettings.WithProperty("EnableSourceControlManagerQueries", "false");
-                    msBuildSettings.WithProperty("PublishRepositoryUrl", "true");
-                    msBuildSettings.WithProperty("RepositoryType", "git");
-                    msBuildSettings.WithProperty("RepositoryUrl", repositoryUrl);
-                    msBuildSettings.WithProperty("RevisionId", repositoryCommitId);
+                // TODO: For now we are assuming everything is git, we might need to change that in the future
+                // See why we set the values at https://github.com/dotnet/sourcelink/issues/159#issuecomment-427639278
+                msBuildSettings.WithProperty("EnableSourceLink", "true");
+                msBuildSettings.WithProperty("EnableSourceControlManagerQueries", "false");
+                msBuildSettings.WithProperty("PublishRepositoryUrl", "true");
+                msBuildSettings.WithProperty("RepositoryType", "git");
+                msBuildSettings.WithProperty("RepositoryUrl", repositoryUrl);
+                msBuildSettings.WithProperty("RevisionId", repositoryCommitId);
 
-                    InjectSourceLinkInProjectFile(BuildContext, projectFileName);
-                }
+                InjectSourceLinkInProjectFile(BuildContext, dependency, projectFileName);
             }
 
-            RunMsBuild(BuildContext, dependency, projectFileName, msBuildSettings);
+            // Specific code signing, requires the following MSBuild properties:
+            // * CodeSignEnabled
+            // * CodeSignCommand
+            //
+            // This feature is built to allow projects that have post-build copy
+            // steps (e.g. for assets) to be signed correctly before being embedded
+            if (ShouldSignImmediately(BuildContext, dependency))
+            {
+                var codeSignToolFileName = FindSignToolFileName(BuildContext);
+                var codeSignVerifyCommand = $"verify /pa";
+                var codeSignCommand = string.Format("sign /a /t {0} /n {1}", BuildContext.General.CodeSign.TimeStampUri, 
+                    BuildContext.General.CodeSign.CertificateSubjectName);
+
+                msBuildSettings.WithProperty("CodeSignToolFileName", codeSignToolFileName);
+                msBuildSettings.WithProperty("CodeSignVerifyCommand", codeSignVerifyCommand);
+                msBuildSettings.WithProperty("CodeSignCommand", codeSignCommand);
+                msBuildSettings.WithProperty("CodeSignEnabled", "true");
+            }
+
+            RunMsBuild(BuildContext, dependency, projectFileName, msBuildSettings, "build");
         }
     }
 

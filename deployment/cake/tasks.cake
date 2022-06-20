@@ -1,4 +1,7 @@
+#pragma warning disable CS1998
+
 #l "lib-generic.cake"
+#l "lib-logging.cake"
 #l "lib-msbuild.cake"
 #l "lib-nuget.cake"
 #l "lib-signing.cake"
@@ -11,6 +14,7 @@
 #l "apps-uwp-tasks.cake"
 #l "apps-web-tasks.cake"
 #l "apps-wpf-tasks.cake"
+#l "codesigning-tasks.cake"
 #l "components-tasks.cake"
 #l "dependencies-tasks.cake"
 #l "tools-tasks.cake"
@@ -18,15 +22,18 @@
 #l "github-pages-tasks.cake"
 #l "vsextensions-tasks.cake"
 #l "tests.cake"
+#l "templates-tasks.cake"
 
-#addin "nuget:?package=System.Net.Http&version=4.3.3"
-#addin "nuget:?package=Newtonsoft.Json&version=11.0.2"
-#addin "nuget:?package=Cake.Sonar&version=1.1.25"
+#addin "nuget:?package=Cake.FileHelpers&version=5.0.0"
+#addin "nuget:?package=Cake.Sonar&version=1.1.30"
+#addin "nuget:?package=MagicChunks&version=2.0.0.119"
+#addin "nuget:?package=Newtonsoft.Json&version=13.0.1"
+#addin "nuget:?package=System.Net.Http&version=4.3.4"
 
 // Note: the SonarQube tool must be installed as a global .NET tool:
 // `dotnet tool install --global dotnet-sonarscanner --ignore-failed-sources`
 //#tool "nuget:?package=MSBuild.SonarQube.Runner.Tool&version=4.8.0"
-#tool "nuget:?package=dotnet-sonarscanner&version=5.0.4"
+#tool "nuget:?package=dotnet-sonarscanner&version=5.6.0"
 
 //-------------------------------------------------------------
 // BACKWARDS COMPATIBILITY CODE - START
@@ -67,11 +74,13 @@ public class BuildContext : BuildContextBase
     {
         Processors = new List<IProcessor>();
         AllProjects = new List<string>();
+        Variables = new Dictionary<string, string>();  
     }
 
     public List<IProcessor> Processors { get; private set; }
     public Dictionary<string, object> Parameters { get; set; }
-
+    public Dictionary<string, string> Variables { get; private set; }
+    
     // Integrations
     public BuildServerIntegration BuildServer { get; set; }
     public IssueTrackerIntegration IssueTracker { get; set; }
@@ -84,10 +93,12 @@ public class BuildContext : BuildContextBase
     public GeneralContext General { get; set; }
     public TestsContext Tests { get; set; }
 
+    public CodeSigningContext CodeSigning { get; set; }
     public ComponentsContext Components { get; set; }
     public DependenciesContext Dependencies { get; set; }
     public DockerImagesContext DockerImages { get; set; }
     public GitHubPagesContext GitHubPages { get; set; }
+    public TemplatesContext Templates { get; set; }
     public ToolsContext Tools { get; set; }
     public UwpContext Uwp { get; set; }
     public VsExtensionsContext VsExtensions { get; set; }
@@ -122,33 +133,24 @@ Setup<BuildContext>(setupContext =>
 
     //  Important: build server first so other integrations can read values from config
     buildContext.BuildServer = GetBuildServerIntegration();
+    buildContext.BuildServer.SetBuildContext(buildContext);
 
     setupContext.LogSeparator("Creating build context");
 
     buildContext.General = InitializeGeneralContext(buildContext, buildContext);
     buildContext.Tests = InitializeTestsContext(buildContext, buildContext);
 
+    buildContext.CodeSigning = InitializeCodeSigningContext(buildContext, buildContext);
     buildContext.Components = InitializeComponentsContext(buildContext, buildContext);
     buildContext.Dependencies = InitializeDependenciesContext(buildContext, buildContext);
     buildContext.DockerImages = InitializeDockerImagesContext(buildContext, buildContext);
     buildContext.GitHubPages = InitializeGitHubPagesContext(buildContext, buildContext);
+    buildContext.Templates = InitializeTemplatesContext(buildContext, buildContext);
     buildContext.Tools = InitializeToolsContext(buildContext, buildContext);
     buildContext.Uwp = InitializeUwpContext(buildContext, buildContext);
     buildContext.VsExtensions = InitializeVsExtensionsContext(buildContext, buildContext);
     buildContext.Web = InitializeWebContext(buildContext, buildContext);
     buildContext.Wpf = InitializeWpfContext(buildContext, buildContext);
-
-    // All projects, but dependencies first & tests last
-    buildContext.AllProjects.AddRange(buildContext.Dependencies.Items);
-    buildContext.AllProjects.AddRange(buildContext.Components.Items);
-    buildContext.AllProjects.AddRange(buildContext.DockerImages.Items);
-    buildContext.AllProjects.AddRange(buildContext.GitHubPages.Items);
-    buildContext.AllProjects.AddRange(buildContext.Tools.Items);
-    buildContext.AllProjects.AddRange(buildContext.Uwp.Items);
-    buildContext.AllProjects.AddRange(buildContext.VsExtensions.Items);
-    buildContext.AllProjects.AddRange(buildContext.Web.Items);
-    buildContext.AllProjects.AddRange(buildContext.Wpf.Items);
-    buildContext.AllProjects.AddRange(buildContext.Tests.Items);
 
     // Other integrations last
     buildContext.IssueTracker = new IssueTrackerIntegration(buildContext);
@@ -163,7 +165,8 @@ Setup<BuildContext>(setupContext =>
 
     setupContext.LogSeparator("Creating processors");
 
-    // Note: always put dependencies processor first (it's a dependency after all)
+    // Note: always put templates and dependencies processor first (it's a dependency after all)
+    buildContext.Processors.Add(new TemplatesProcessor(buildContext));
     buildContext.Processors.Add(new DependenciesProcessor(buildContext));
     buildContext.Processors.Add(new ComponentsProcessor(buildContext));
     buildContext.Processors.Add(new DockerImagesProcessor(buildContext));
@@ -173,6 +176,14 @@ Setup<BuildContext>(setupContext =>
     buildContext.Processors.Add(new VsExtensionsProcessor(buildContext));
     buildContext.Processors.Add(new WebProcessor(buildContext));
     buildContext.Processors.Add(new WpfProcessor(buildContext));
+    // !!! Note: we add test projects *after* preparing all the other processors, see Prepare task !!!
+
+    setupContext.LogSeparator("Registering variables for templates");
+
+    // Preparing variables for templates
+    buildContext.Variables["GitVersion_MajorMinorPatch"] = buildContext.General.Version.MajorMinorPatch;
+    buildContext.Variables["GitVersion_FullSemVer"] = buildContext.General.Version.FullSemVer;
+    buildContext.Variables["GitVersion_NuGetVersion"] = buildContext.General.Version.NuGet;
 
     setupContext.LogSeparator("Build context is ready, displaying state info");
 
@@ -186,6 +197,8 @@ Setup<BuildContext>(setupContext =>
 Task("Initialize")
     .Does<BuildContext>(async buildContext =>
 {
+    await buildContext.BuildServer.BeforeInitializeAsync();
+
     buildContext.CakeContext.LogSeparator("Writing special values back to build server");
 
     var displayVersion = buildContext.General.Version.FullSemVer;
@@ -194,7 +207,7 @@ Task("Initialize")
         displayVersion += " ci";
     }
 
-    buildContext.BuildServer.SetVersion(displayVersion);
+    await buildContext.BuildServer.SetVersionAsync(displayVersion);
 
     var variablesToUpdate = new Dictionary<string, string>();
     variablesToUpdate["channel"] = buildContext.Wpf.Channel;
@@ -211,8 +224,10 @@ Task("Initialize")
 
     foreach (var variableToUpdate in variablesToUpdate)
     {
-        buildContext.BuildServer.SetVariable(variableToUpdate.Key, variableToUpdate.Value);
+        await buildContext.BuildServer.SetVariableAsync(variableToUpdate.Key, variableToUpdate.Value);
     }
+
+    await buildContext.BuildServer.AfterInitializeAsync();
 });
 
 //-------------------------------------------------------------
@@ -220,10 +235,43 @@ Task("Initialize")
 Task("Prepare")
     .Does<BuildContext>(async buildContext =>
 {
+    await buildContext.BuildServer.BeforePrepareAsync();
+
     foreach (var processor in buildContext.Processors)
     {
         await processor.PrepareAsync();
     }
+
+    // Now add all projects, but dependencies first & tests last
+    buildContext.AllProjects.AddRange(buildContext.Dependencies.Items);
+    buildContext.AllProjects.AddRange(buildContext.Components.Items);
+    buildContext.AllProjects.AddRange(buildContext.DockerImages.Items);
+    buildContext.AllProjects.AddRange(buildContext.GitHubPages.Items);
+    buildContext.AllProjects.AddRange(buildContext.Tools.Items);
+    buildContext.AllProjects.AddRange(buildContext.Uwp.Items);
+    buildContext.AllProjects.AddRange(buildContext.VsExtensions.Items);
+    buildContext.AllProjects.AddRange(buildContext.Web.Items);
+    buildContext.AllProjects.AddRange(buildContext.Wpf.Items);
+
+    // Once we know all the projects that will be built, we calculate which
+    // test projects need to be built as well
+
+    var testProcessor = new TestProcessor(buildContext);
+
+    await testProcessor.PrepareAsync();
+
+    buildContext.Processors.Add(testProcessor);
+
+    buildContext.AllProjects.AddRange(buildContext.Tests.Items);
+
+    buildContext.CakeContext.LogSeparator("Final projects to process");
+
+    foreach (var item in buildContext.AllProjects.ToList())
+    {
+        buildContext.CakeContext.Information($"- {item}");
+    }
+    
+    await buildContext.BuildServer.AfterPrepareAsync();
 });
 
 //-------------------------------------------------------------
@@ -232,12 +280,16 @@ Task("UpdateInfo")
     .IsDependentOn("Prepare")
     .Does<BuildContext>(async buildContext =>
 {
+    await buildContext.BuildServer.BeforeUpdateInfoAsync();
+
     UpdateSolutionAssemblyInfo(buildContext);
     
     foreach (var processor in buildContext.Processors)
     {
         await processor.UpdateInfoAsync();
     }
+
+    await buildContext.BuildServer.AfterUpdateInfoAsync();
 });
 
 //-------------------------------------------------------------
@@ -250,11 +302,14 @@ Task("Build")
     .IsDependentOn("CleanupCode")
     .Does<BuildContext>(async buildContext =>
 {
+    await buildContext.BuildServer.BeforeBuildAsync();
+
     await buildContext.SourceControl.MarkBuildAsPendingAsync("Build");
     
     var sonarUrl = buildContext.General.SonarQube.Url;
 
     var enableSonar = !buildContext.General.SonarQube.IsDisabled && 
+                      buildContext.General.IsCiBuild && // Only build on CI (all projects need to be included)
                       !string.IsNullOrWhiteSpace(sonarUrl);
     if (enableSonar)
     {
@@ -325,6 +380,12 @@ Task("Build")
 
         foreach (var processor in buildContext.Processors)
         {
+            if (processor is TestProcessor)
+            {
+                // Build test projects *after* SonarQube (not part of SQ analysis)
+                continue;
+            }
+
             await processor.BuildAsync();
         }
     }
@@ -370,35 +431,32 @@ Task("Build")
                 var failedDescription = $"SonarQube failed, please visit '{projectSpecificSonarUrl}' for more details";
 
                 await buildContext.SourceControl.MarkBuildAsFailedAsync("SonarQube", failedDescription);
+
                 throw;
             }
         }
     }
 
-    var buildTestProjects = true;
-
-    if (buildContext.General.IsLocalBuild && buildContext.General.MaximizePerformance)
+    var testProcessor = buildContext.Processors.FirstOrDefault(x => x is TestProcessor) as TestProcessor;
+    if (testProcessor is not null)
     {
-        Information("Local build with maximized performance detected, skipping test project(s) build");
-
-        buildTestProjects = false;
-    }
-
-    // Build test projects *after* SonarQube (not part of SQ analysis). Unfortunately, because of this, we cannot yet mark
-    // the build as succeeded once we end the SQ session. Therefore, if SQ fails, both the SQ *and* build checks
-    // will be marked as failed if SQ fails.
-    if (buildTestProjects)
-    {
-        BuildTestProjects(buildContext);
+        // Build test projects *after* SonarQube (not part of SQ analysis). Unfortunately, because of this, we cannot yet mark
+        // the build as succeeded once we end the SQ session. Therefore, if SQ fails, both the SQ *and* build checks
+        // will be marked as failed if SQ fails.
+        await testProcessor.BuildAsync();
     }
 
     await buildContext.SourceControl.MarkBuildAsSucceededAsync("Build");
 
     Information("Completed build for version '{0}'", buildContext.General.Version.NuGet);
+
+    await buildContext.BuildServer.AfterBuildAsync(); 
 })
-.OnError<BuildContext>((ex, buildContext) => 
+.OnError<BuildContext>(async (ex, buildContext) => 
 {
-    buildContext.SourceControl.MarkBuildAsFailedAsync("Build").Wait();
+    await buildContext.SourceControl.MarkBuildAsFailedAsync("Build");
+
+    await buildContext.BuildServer.OnBuildFailedAsync(); 
 
     throw ex;
 });
@@ -406,9 +464,12 @@ Task("Build")
 //-------------------------------------------------------------
 
 Task("Test")
+    .IsDependentOn("Prepare")
     // Note: no dependency on 'build' since we might have already built the solution
     .Does<BuildContext>(async buildContext =>
-{    
+{
+    await buildContext.BuildServer.BeforeTestAsync(); 
+
     await buildContext.SourceControl.MarkBuildAsPendingAsync("Test");
     
     foreach (var testProject in buildContext.Tests.Items)
@@ -421,10 +482,14 @@ Task("Test")
     await buildContext.SourceControl.MarkBuildAsSucceededAsync("Test");
 
     Information("Completed tests for version '{0}'", buildContext.General.Version.NuGet);
+
+    await buildContext.BuildServer.AfterTestAsync(); 
 })
-.OnError<BuildContext>((ex, buildContext) => 
+.OnError<BuildContext>(async (ex, buildContext) => 
 {
-    buildContext.SourceControl.MarkBuildAsFailedAsync("Test").Wait();
+    await buildContext.SourceControl.MarkBuildAsFailedAsync("Test");
+
+    await buildContext.BuildServer.OnTestFailedAsync(); 
 
     throw ex;
 });
@@ -432,6 +497,8 @@ Task("Test")
 //-------------------------------------------------------------
 
 Task("Package")
+    // Make sure to update info so our SolutionAssemblyInfo.cs is up to date
+    .IsDependentOn("UpdateInfo")
     // Note: no dependency on 'build' since we might have already built the solution
     // Make sure we have the temporary "project.assets.json" in case we need to package with Visual Studio
     .IsDependentOn("RestorePackages")
@@ -440,12 +507,16 @@ Task("Package")
     .IsDependentOn("CodeSign")
     .Does<BuildContext>(async buildContext =>
 {
+    await buildContext.BuildServer.BeforePackageAsync(); 
+
     foreach (var processor in buildContext.Processors)
     {
         await processor.PackageAsync();
     }
 
     Information("Completed packaging for version '{0}'", buildContext.General.Version.NuGet);
+
+    await buildContext.BuildServer.AfterPackageAsync(); 
 });
 
 //-------------------------------------------------------------
@@ -454,6 +525,8 @@ Task("PackageLocal")
     .IsDependentOn("Package")
     .Does<BuildContext>(buildContext =>
 {
+    // Note: no build server integration calls since this is *local*
+
     // For now only package components, we might need to move this to components-tasks.cake in the future
     if (buildContext.Components.Items.Count == 0 && 
         buildContext.Tools.Items.Count == 0)
@@ -496,10 +569,14 @@ Task("Deploy")
     .IsDependentOn("RestorePackages")
     .Does<BuildContext>(async buildContext =>
 {
+    await buildContext.BuildServer.BeforeDeployAsync(); 
+
     foreach (var processor in buildContext.Processors)
     {
         await processor.DeployAsync();
     }
+    
+    await buildContext.BuildServer.AfterDeployAsync(); 
 });
 
 //-------------------------------------------------------------
@@ -508,6 +585,8 @@ Task("Finalize")
     // Note: no dependency on 'deploy' since we might have already deployed the solution
     .Does<BuildContext>(async buildContext =>
 {
+    await buildContext.BuildServer.BeforeFinalizeAsync(); 
+
     Information("Finalizing release '{0}'", buildContext.General.Version.FullSemVer);
 
     foreach (var processor in buildContext.Processors)
@@ -517,10 +596,12 @@ Task("Finalize")
 
     if (buildContext.General.IsOfficialBuild)
     {
-        buildContext.BuildServer.PinBuild("Official build");
+        await buildContext.BuildServer.PinBuildAsync("Official build");
     }
 
     await buildContext.IssueTracker.CreateAndReleaseVersionAsync();
+
+    await buildContext.BuildServer.AfterFinalizeAsync(); 
 });
 
 //-------------------------------------------------------------

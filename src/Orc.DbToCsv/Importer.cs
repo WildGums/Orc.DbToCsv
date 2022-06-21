@@ -58,6 +58,7 @@ namespace Orc.DbToCsv
         private static async Task ProcessTableAsync(DbToCsvExportDescription exportDescription, Project project)
         {
             var fullFileName = exportDescription.CsvFilePath;
+            var fullBackupFileName = $"{fullFileName}.bak";
             var outputFolderPath = Path.GetDirectoryName(fullFileName);
             if (!Directory.Exists(outputFolderPath))
             {
@@ -67,13 +68,21 @@ namespace Orc.DbToCsv
             var records = 0;
             var source = exportDescription.Source;
 
+            if (File.Exists(fullBackupFileName))
+            {
+                File.Delete(fullBackupFileName);
+            }
+
+            if (File.Exists(fullFileName))
+            {
+                File.Copy(fullFileName, fullBackupFileName);
+                File.Delete(fullFileName);
+            }
+
+            var success = true;
+
             try
             {
-                if (File.Exists(fullFileName))
-                {
-                    File.Delete(fullFileName);
-                }
-
                 await using var streamWriter = new StreamWriter(new FileStream(fullFileName, FileMode.OpenOrCreate));
                 await using var csvWriter = new CsvWriter(streamWriter, CultureInfo.CurrentCulture);
                 using var dataReader = new SqlTableReader(source.ToString(), 0, project.MaximumRowsInTable.Value, exportDescription.Parameters);
@@ -83,7 +92,7 @@ namespace Orc.DbToCsv
                     if (dataReader.ValidationContext.HasErrors)
                     {
                         Log.Error(dataReader.ValidationContext.ToString());
-
+                        success = false;
                         return;
                     }
 
@@ -134,6 +143,24 @@ namespace Orc.DbToCsv
             catch (Exception ex)
             {
                 Log.Error($"{source.Table} export failed because of exception: {ex.Message}");
+                success = false;
+            }
+            finally
+            {
+                if (!success && File.Exists(fullFileName))
+                {
+                    File.Delete(fullFileName);
+                }
+
+                if (File.Exists(fullBackupFileName) && !File.Exists(fullFileName))
+                {
+                    File.Copy(fullBackupFileName, fullFileName);
+                }
+                
+                if (File.Exists(fullBackupFileName))
+                {
+                    File.Delete(fullBackupFileName);
+                }
             }
         }
         #endregion

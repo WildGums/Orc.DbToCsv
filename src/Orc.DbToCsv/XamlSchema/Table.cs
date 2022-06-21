@@ -25,7 +25,7 @@ namespace Orc.DbToCsv
         public string Csv { get; set; }
         public string Output { get; set; }
         public string ConnectionString { get; set; }
-        public string Provider { get; set; } = "System.Data.SqlClient";
+        public string Provider { get; set; } //= "System.Data.SqlClient";
         public List<Parameter> Parameters { get; set; }
         #endregion
     }

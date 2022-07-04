@@ -24,9 +24,13 @@ Parameters["UseVisualStudioPrerelease"] = "false";
 // DEFINE COMPONENTS TO BUILD / PACKAGE
 //=======================================================
 
-Components.Add(string.Format("{0}", GetBuildServerVariable("SolutionName")));
+// Note: required for console
+Dependencies.Add("Orc.DbToCsv");
+Dependencies.Add("Orc.DbToCsv.Console");
 
-TestProjects.Add(string.Format("{0}.Tests", GetBuildServerVariable("SolutionName")));
+Components.Add("Orc.DbToCsv");
+
+TestProjects.Add("Orc.DbToCsv.Tests");
 
 //=======================================================
 // REQUIRED INITIALIZATION, DO NOT CHANGE

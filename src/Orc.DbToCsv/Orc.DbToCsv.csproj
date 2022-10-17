@@ -28,7 +28,7 @@
     <PackageReference Include="Orc.Csv" Version="4.4.0" />
     <PackageReference Include="Orc.DataAccess" Version="4.4.0" />
     <PackageReference Include="Orc.ProjectManagement" Version="4.4.0" />
-    <PackageReference Include="System.Data.SqlClient" Version="4.8.3" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.4" />
   </ItemGroup>
 
   <Import Project="$(MSBuildProjectDirectory)\..\Directory.build.shared.explicit.props" Condition="Exists('$(MSBuildProjectDirectory)\..\Directory.build.shared.explicit.props')" />

@@ -1,11 +1,4 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="Project.cs" company="WildGums">
-//   Copyright (c) 2008 - 2019 WildGums. All rights reserved.
-// </copyright>
-// --------------------------------------------------------------------------------------------------------------------
-
-
-namespace Orc.DbToCsv
+﻿namespace Orc.DbToCsv
 {
     using System;
     using System.Collections.Generic;
@@ -19,27 +12,20 @@ namespace Orc.DbToCsv
     [ContentProperty(nameof(Properties))]
     public class Project
     {
-        #region Constants
         private static readonly ILog Log = LogManager.GetCurrentClassLogger();
-        #endregion
 
-        #region Fields
-        private ConnectionString _connectionString;
-        private Schema _schema;
-        private MaximumRowsInTable _maximumRowsInTable;
-        private OutputFolder _outputFolder;
-        private Provider _provider;
-        #endregion
+        private ConnectionString? _connectionString;
+        private Schema? _schema;
+        private MaximumRowsInTable? _maximumRowsInTable;
+        private OutputFolder? _outputFolder;
+        private Provider? _provider;
 
-        #region Constructors
         public Project()
         {
             Tables = new List<Table>();
             Properties = new List<ProjectProperty>();
         }
-        #endregion
 
-        #region Properties
         public Provider Provider
         {
             get { return _provider ?? (_provider = Properties.FindTypeOrCreateNew(() => new Provider())); }
@@ -67,9 +53,7 @@ namespace Orc.DbToCsv
 
         public List<Table> Tables { get; set; }
         public List<ProjectProperty> Properties { get; set; }
-        #endregion
 
-        #region Methods
         public void Validate()
         {
             if (string.IsNullOrEmpty(ConnectionString.Value))
@@ -86,18 +70,22 @@ namespace Orc.DbToCsv
             }
         }
 
-        public static Project Parse(string xaml)
+        public static Project? Parse(string xaml)
         {
             var result = (Project)XamlServices.Parse(xaml);
             return result;
         }
 
-        public static async Task<Project> LoadAsync(string path = "project.iprj")
+        public static async Task<Project?> LoadAsync(string path = "project.iprj")
         {
             try
             {
                 var xaml = await File.ReadAllTextAsync(path);
                 var result = Parse(xaml);
+                if (result is null)
+                {
+                    return result;
+                }
 
                 result.Validate();
                 Log.Info("Loaded project from '{0}'", Path.GetFullPath(path));
@@ -108,7 +96,7 @@ namespace Orc.DbToCsv
 
                 if (string.IsNullOrEmpty(result.OutputFolder.Value))
                 {
-                    result.OutputFolder.Value = Directory.GetParent(path).FullName;
+                    result.OutputFolder.Value = Directory.GetParent(path)?.FullName ?? string.Empty;
                 }
 
                 foreach (var table in result.Tables)
@@ -149,6 +137,5 @@ namespace Orc.DbToCsv
             var ndx = tableName.LastIndexOf('.');
             return tableName.Substring(ndx + 1).Replace("[", string.Empty).Replace("]", string.Empty);
         }
-        #endregion
     }
 }

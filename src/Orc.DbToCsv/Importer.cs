@@ -1,11 +1,4 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="Importer.cs" company="WildGums">
-//   Copyright (c) 2008 - 2019 WildGums. All rights reserved.
-// </copyright>
-// --------------------------------------------------------------------------------------------------------------------
-
-
-namespace Orc.DbToCsv
+﻿namespace Orc.DbToCsv
 {
     using System;
     using System.Data.SqlClient;
@@ -19,15 +12,15 @@ namespace Orc.DbToCsv
 
     public static class Importer
     {
-        #region Fields
         private static readonly ILog Log = LogManager.GetCurrentClassLogger();
-        #endregion
 
-        #region Methods
         public static async Task ProcessProjectAsync(string projectFilePath, string outputFolderPath)
         {
             var project = await Project.LoadAsync(projectFilePath);
-            await ProcessProjectAsync(project);
+            if (project is not null)
+            {
+                await ProcessProjectAsync(project);
+            }
         }
 
         public static async Task ProcessProjectAsync(Project project)
@@ -58,7 +51,17 @@ namespace Orc.DbToCsv
         private static async Task ProcessTableAsync(DbToCsvExportDescription exportDescription, Project project)
         {
             var fullFileName = exportDescription.CsvFilePath;
+            if (string.IsNullOrWhiteSpace(fullFileName))
+            {
+                throw new InvalidOperationException("Cannot process empty csv file path");
+            }
+
             var outputFolderPath = Path.GetDirectoryName(fullFileName);
+            if (string.IsNullOrWhiteSpace(outputFolderPath))
+            {
+                throw new InvalidOperationException("Cannot process empty output folder path");
+            }
+
             if (!Directory.Exists(outputFolderPath))
             {
                 Directory.CreateDirectory(outputFolderPath);
@@ -66,6 +69,10 @@ namespace Orc.DbToCsv
 
             var records = 0;
             var source = exportDescription.Source;
+            if (source is null)
+            {
+                throw new InvalidOperationException("Cannot process null source");
+            }
 
             try
             {
@@ -136,6 +143,5 @@ namespace Orc.DbToCsv
                 Log.Error($"{source.Table} export failed because of exception: {ex.Message}");
             }
         }
-        #endregion
     }
 }

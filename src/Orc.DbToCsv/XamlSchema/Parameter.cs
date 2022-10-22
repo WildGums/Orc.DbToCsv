@@ -1,17 +1,13 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="Parameter.cs" company="WildGums">
-//   Copyright (c) 2008 - 2019 WildGums. All rights reserved.
-// </copyright>
-// --------------------------------------------------------------------------------------------------------------------
-
-
-namespace Orc.DbToCsv
+﻿namespace Orc.DbToCsv
 {
     public class Parameter
     {
-        #region Properties
+        public Parameter()
+        {
+            Name = string.Empty;
+        }
+
         public string Name { get; set; }
-        public string Value { get; set; }
-        #endregion
+        public string? Value { get; set; }
     }
 }

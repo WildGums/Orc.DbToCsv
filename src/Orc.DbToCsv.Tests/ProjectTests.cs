@@ -1,11 +1,4 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="DummyFacts.cs" company="WildGums">
-//   Copyright (c) 2008 - 2014 WildGums. All rights reserved.
-// </copyright>
-// --------------------------------------------------------------------------------------------------------------------
-
-
-namespace Orc.DbToCsv.Tests
+﻿namespace Orc.DbToCsv.Tests
 {
     using NUnit.Framework;
 
@@ -34,7 +27,7 @@ namespace Orc.DbToCsv.Tests
             Assert.AreEqual(2, project.Tables.Count);
             Assert.AreEqual("MyTable1", project.Tables[0].Name);
             Assert.AreEqual("Table.csv", project.Tables[0].Csv);
-            Assert.AreEqual(null, project.Tables[0].Output);
+            Assert.AreEqual(string.Empty, project.Tables[0].Output);
             Assert.AreEqual("MyTable1", project.Tables[1].Name);
             Assert.AreEqual("Table1.csv", project.Tables[1].Csv);
             Assert.AreEqual("C:\\Temp\\Xa", project.Tables[1].Output);
@@ -59,7 +52,7 @@ namespace Orc.DbToCsv.Tests
             Assert.AreEqual(2, project.Tables.Count);
             Assert.AreEqual("MyTable1", project.Tables[0].Name);
             Assert.AreEqual("Table.csv", project.Tables[0].Csv);
-            Assert.AreEqual(null, project.Tables[0].Output);
+            Assert.AreEqual(string.Empty, project.Tables[0].Output);
             Assert.AreEqual("MyTable1", project.Tables[1].Name);
             Assert.AreEqual("Table1.csv", project.Tables[1].Csv);
             Assert.AreEqual("C:\\Temp\\Xa", project.Tables[1].Output);
@@ -83,7 +76,7 @@ namespace Orc.DbToCsv.Tests
             Assert.AreEqual(500, project.MaximumRowsInTable.Value);
             Assert.AreEqual(2, project.Tables.Count);
             Assert.AreEqual("MyTable1", project.Tables[0].Name);
-            Assert.AreEqual(null, project.Tables[0].Output);
+            Assert.AreEqual(string.Empty, project.Tables[0].Output);
             Assert.AreEqual("MyTable2", project.Tables[1].Name);
         }
         #endregion

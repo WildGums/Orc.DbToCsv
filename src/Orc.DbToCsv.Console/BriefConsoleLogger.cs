@@ -1,11 +1,4 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="BriefConsoleLogger.cs" company="WildGums">
-//   Copyright (c) 2008 - 2016 WildGums. All rights reserved.
-// </copyright>
-// --------------------------------------------------------------------------------------------------------------------
-
-
-namespace Orc.DbToCsv
+﻿namespace Orc.DbToCsv
 {
     using System;
     using Catel.Logging;
@@ -13,7 +6,7 @@ namespace Orc.DbToCsv
     public class BriefConsoleLogger : LogListenerBase
     {
         #region Methods
-        protected override void Write(ILog log, string message, LogEvent logEvent, object extraData, LogData logData, DateTime time)
+        protected override void Write(ILog log, string message, LogEvent logEvent, object? extraData, LogData? logData, DateTime time)
         {
             if (string.Equals(log.Tag, "Orc.CommandLine.CommandLineParser"))
             {

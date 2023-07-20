@@ -121,7 +121,7 @@
 
                 Log.IndentLevel -= 2;
 
-                Log.Info("");
+                Log.Info(string.Empty);
 
                 return result;
             }

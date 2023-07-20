@@ -53,13 +53,13 @@
             var fullFileName = exportDescription.CsvFilePath;
             if (string.IsNullOrWhiteSpace(fullFileName))
             {
-                throw new InvalidOperationException("Cannot process empty csv file path");
+                throw Log.ErrorAndCreateException<InvalidOperationException>("Cannot process empty csv file path");
             }
 
             var outputFolderPath = Path.GetDirectoryName(fullFileName);
             if (string.IsNullOrWhiteSpace(outputFolderPath))
             {
-                throw new InvalidOperationException("Cannot process empty output folder path");
+                throw Log.ErrorAndCreateException<InvalidOperationException>("Cannot process empty output folder path");
             }
 
             if (!Directory.Exists(outputFolderPath))
@@ -71,7 +71,7 @@
             var source = exportDescription.Source;
             if (source is null)
             {
-                throw new InvalidOperationException("Cannot process null source");
+                throw Log.ErrorAndCreateException<InvalidOperationException>("Cannot process null source");
             }
 
             try

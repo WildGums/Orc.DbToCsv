@@ -1,4 +1,4 @@
-﻿[assembly: System.Runtime.Versioning.TargetFramework(".NETCoreApp,Version=v5.0", FrameworkDisplayName="")]
+﻿[assembly: System.Runtime.Versioning.TargetFramework(".NETCoreApp,Version=v8.0", FrameworkDisplayName=".NET 8.0")]
 [assembly: System.Windows.Markup.XmlnsDefinition("http://schemas.wildgums.com/orc/dbtocsv", "Orc.DbToCsv")]
 [assembly: System.Windows.Markup.XmlnsPrefix("http://schemas.wildgums.com/orc/dbtocsv", "orcdbtocsv")]
 public static class ModuleInitializer
@@ -14,9 +14,9 @@ namespace Orc.DbToCsv
     public class DbToCsvExportDescription
     {
         public DbToCsvExportDescription() { }
-        public string CsvFilePath { get; set; }
-        public Orc.DataAccess.DataSourceParameters Parameters { get; set; }
-        public Orc.DataAccess.Database.DatabaseSource Source { get; set; }
+        public string? CsvFilePath { get; set; }
+        public Orc.DataAccess.DataSourceParameters? Parameters { get; set; }
+        public Orc.DataAccess.Database.DatabaseSource? Source { get; set; }
     }
     public static class Importer
     {
@@ -41,7 +41,7 @@ namespace Orc.DbToCsv
     {
         public Parameter() { }
         public string Name { get; set; }
-        public string Value { get; set; }
+        public string? Value { get; set; }
     }
     [System.Windows.Markup.ContentProperty("Properties")]
     public class Project
@@ -55,8 +55,8 @@ namespace Orc.DbToCsv
         public Orc.DbToCsv.Schema Schema { get; }
         public System.Collections.Generic.List<Orc.DbToCsv.Table> Tables { get; set; }
         public void Validate() { }
-        public static System.Threading.Tasks.Task<Orc.DbToCsv.Project> LoadAsync(string path = "project.iprj") { }
-        public static Orc.DbToCsv.Project Parse(string xaml) { }
+        public static System.Threading.Tasks.Task<Orc.DbToCsv.Project?> LoadAsync(string path = "project.iprj") { }
+        public static Orc.DbToCsv.Project? Parse(string xaml) { }
     }
     public static class ProjectExtensions
     {
@@ -79,7 +79,7 @@ namespace Orc.DbToCsv
     public class StringProjectProperty : Orc.DbToCsv.ProjectProperty
     {
         public StringProjectProperty() { }
-        public string Value { get; set; }
+        public string? Value { get; set; }
     }
     public class Table
     {

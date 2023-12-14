@@ -1,11 +1,8 @@
 #l "generic-variables.cake"
 
-#addin "nuget:?package=MagicChunks&version=2.0.0.119"
-#addin "nuget:?package=Cake.FileHelpers&version=3.0.0"
-#addin "nuget:?package=Cake.DependencyCheck&version=1.2.0"
+//#addin "nuget:?package=Cake.DependencyCheck&version=1.2.0"
 
-#tool "nuget:?package=DependencyCheck.Runner.Tool&version=3.2.1&include=./**/dependency-check.sh&include=./**/dependency-check.bat"
-#tool "nuget:?package=JetBrains.ReSharper.CommandLineTools&version=2018.1.3"
+//#tool "nuget:?package=DependencyCheck.Runner.Tool&version=3.2.1&include=./**/dependency-check.sh&include=./**/dependency-check.bat"
 
 //-------------------------------------------------------------
 
@@ -40,8 +37,8 @@ private void CleanUpCode(bool failOnChanges)
     //     arguments.Add("--check");
     // }
 
-    // DotNetCoreTool(null, "format", string.Join(" ", arguments),
-    //     new DotNetCoreToolSettings
+    // DotNetTool(null, "format", string.Join(" ", arguments),
+    //     new DotNetToolSettings
     //     {
     //         WorkingDirectory = "./src/"
     //     });
@@ -91,30 +88,33 @@ Task("UpdateNuGet")
     .ContinueOnError()
     .Does<BuildContext>(buildContext => 
 {
-    Information("Making sure NuGet is using the latest version");
+    // DISABLED UNTIL NUGET GETS FIXED: https://github.com/NuGet/Home/issues/10853
 
-    if (buildContext.General.IsLocalBuild && buildContext.General.MaximizePerformance)
-    {
-        Information("Local build with maximized performance detected, skipping NuGet update check");
-        return;
-    }
+    // Information("Making sure NuGet is using the latest version");
 
-    var nuGetExecutable = buildContext.General.NuGet.Executable;
+    // if (buildContext.General.IsLocalBuild && buildContext.General.MaximizePerformance)
+    // {
+    //     Information("Local build with maximized performance detected, skipping NuGet update check");
+    //     return;
+    // }
 
-    var exitCode = StartProcess(nuGetExecutable, new ProcessSettings
-    {
-        Arguments = "update -self"
-    });
+    // var nuGetExecutable = buildContext.General.NuGet.Executable;
 
-    var newNuGetVersionInfo = System.Diagnostics.FileVersionInfo.GetVersionInfo(nuGetExecutable);
-    var newNuGetVersion = newNuGetVersionInfo.FileVersion;
+    // var exitCode = StartProcess(nuGetExecutable, new ProcessSettings
+    // {
+    //     Arguments = "update -self"
+    // });
 
-    Information("Updating NuGet.exe exited with '{0}', version is '{1}'", exitCode, newNuGetVersion);
+    // var newNuGetVersionInfo = System.Diagnostics.FileVersionInfo.GetVersionInfo(nuGetExecutable);
+    // var newNuGetVersion = newNuGetVersionInfo.FileVersion;
+
+    // Information("Updating NuGet.exe exited with '{0}', version is '{1}'", exitCode, newNuGetVersion);
 });
 
 //-------------------------------------------------------------
 
 Task("RestorePackages")
+    .IsDependentOn("Prepare")
     .IsDependentOn("UpdateNuGet")
     .ContinueOnError()
     .Does<BuildContext>(buildContext =>
@@ -125,14 +125,33 @@ Task("RestorePackages")
         return;
     }
 
-    var csharpProjects = GetFiles("./**/*.csproj");
+    //var csharpProjects = GetFiles("./**/*.csproj");
     // var cProjects = GetFiles("./**/*.vcxproj");
     var solutions = GetFiles("./**/*.sln");
-    
+    var csharpProjects = new List<FilePath>();
+
+    foreach (var project in buildContext.AllProjects)
+    {
+        // Once a project is in AllProjects, it should always be restored
+        
+        var projectFileName = GetProjectFileName(buildContext, project);
+        if (projectFileName.EndsWith(".csproj"))
+        {
+            Information("Adding '{0}' as C# specific project to restore", project);
+
+            csharpProjects.Add(projectFileName);
+
+            // Inject source link *before* package restore
+            InjectSourceLinkInProjectFile(buildContext, project, projectFileName);
+        }
+    }
+
     var allFiles = new List<FilePath>();
-    allFiles.AddRange(solutions);
-    //allFiles.AddRange(csharpProjects);
+    //allFiles.AddRange(solutions);
+    allFiles.AddRange(csharpProjects);
     // //allFiles.AddRange(cProjects);
+
+	Information($"Found '{allFiles.Count}' projects to restore");
 
     foreach (var file in allFiles)
     {
@@ -163,6 +182,7 @@ Task("RestorePackages")
 
 Task("Clean")
     //.IsDependentOn("RestorePackages")
+    .IsDependentOn("Prepare")
     .ContinueOnError()
     .Does<BuildContext>(buildContext => 
 {
@@ -272,53 +292,6 @@ Task("CodeSign")
 
     foreach (var projectToCodeSign in projectsToCodeSign)
     {
-        var codeSignWildCard = buildContext.General.CodeSign.WildCard;
-        if (string.IsNullOrWhiteSpace(codeSignWildCard))
-        {
-            // Empty, we need to override with project name for valid default value
-            codeSignWildCard = projectToCodeSign;
-        }
-
-        var outputDirectory = string.Format("{0}/{1}", buildContext.General.OutputRootDirectory, projectToCodeSign);
-
-        var projectFilesToSign = new List<FilePath>();
-
-        var exeSignFilesSearchPattern = string.Format("{0}/**/*{1}*.exe", outputDirectory, codeSignWildCard);
-        Information(exeSignFilesSearchPattern);
-        projectFilesToSign.AddRange(GetFiles(exeSignFilesSearchPattern));
-
-        var dllSignFilesSearchPattern = string.Format("{0}/**/*{1}*.dll", outputDirectory, codeSignWildCard);
-        Information(dllSignFilesSearchPattern);
-        projectFilesToSign.AddRange(GetFiles(dllSignFilesSearchPattern));
-
-        Information("Found '{0}' files to code sign for '{1}'", projectFilesToSign.Count, projectToCodeSign);
-
-        filesToSign.AddRange(projectFilesToSign);
+        SignProjectFiles(buildContext, projectToCodeSign);
     }
-
-    var signToolCommand = string.Format("sign /a /t {0} /n {1}", buildContext.General.CodeSign.TimeStampUri, certificateSubjectName);
-
-    SignFiles(buildContext, signToolCommand, filesToSign);
-
-    // var signToolSignSettings = new SignToolSignSettings 
-    // {
-    //     AppendSignature = false,
-    //     TimeStampUri = new Uri(buildContext.General.CodeSign.TimeStampUri),
-    //     CertSubjectName = certificateSubjectName
-    // };
-
-    // Sign(filesToSign, signToolSignSettings);
-
-    // Note parallel doesn't seem to be faster in an example repository:
-    // 1 thread:   1m 30s
-    // 4 threads:  1m 30s
-    // 10 threads: 1m 30s
-    // Parallel.ForEach(filesToSign, new ParallelOptions 
-    //     { 
-    //         MaxDegreeOfParallelism = 10 
-    //     },
-    //     fileToSign => 
-    //     { 
-    //         Sign(fileToSign, signToolSignSettings);
-    //     });
 });

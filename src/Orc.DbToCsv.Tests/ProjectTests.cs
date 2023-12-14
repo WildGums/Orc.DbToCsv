@@ -1,18 +1,10 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="DummyFacts.cs" company="WildGums">
-//   Copyright (c) 2008 - 2014 WildGums. All rights reserved.
-// </copyright>
-// --------------------------------------------------------------------------------------------------------------------
-
-
-namespace Orc.DbToCsv.Tests
+﻿namespace Orc.DbToCsv.Tests
 {
     using NUnit.Framework;
 
     [TestFixture]
     public class ProjectTests
     {
-        #region Methods
         [TestCase]
         public void GeneralTest()
         {
@@ -28,16 +20,16 @@ namespace Orc.DbToCsv.Tests
 </Project>".Replace('\'', '\"');
 
             var project = Project.Parse(xaml);
-            Assert.AreEqual("Data Source=.\\SQLExpress;Initial Catalog=RanttSaaS;Integrated Security=True;Pooling=False", project.ConnectionString.Value);
-            Assert.AreEqual(500, project.MaximumRowsInTable.Value);
-            Assert.AreEqual("C:\\Temp\\CustomPath", project.OutputFolder.Value);
-            Assert.AreEqual(2, project.Tables.Count);
-            Assert.AreEqual("MyTable1", project.Tables[0].Name);
-            Assert.AreEqual("Table.csv", project.Tables[0].Csv);
-            Assert.AreEqual(null, project.Tables[0].Output);
-            Assert.AreEqual("MyTable1", project.Tables[1].Name);
-            Assert.AreEqual("Table1.csv", project.Tables[1].Csv);
-            Assert.AreEqual("C:\\Temp\\Xa", project.Tables[1].Output);
+            Assert.That(project.ConnectionString.Value, Is.EqualTo("Data Source=.\\SQLExpress;Initial Catalog=RanttSaaS;Integrated Security=True;Pooling=False"));
+            Assert.That(project.MaximumRowsInTable.Value, Is.EqualTo(500));
+            Assert.That(project.OutputFolder.Value, Is.EqualTo("C:\\Temp\\CustomPath"));
+            Assert.That(project.Tables.Count, Is.EqualTo(2));
+            Assert.That(project.Tables[0].Name, Is.EqualTo("MyTable1"));
+            Assert.That(project.Tables[0].Csv, Is.EqualTo("Table.csv"));
+            Assert.That(project.Tables[0].Output, Is.EqualTo(string.Empty));
+            Assert.That(project.Tables[1].Name, Is.EqualTo("MyTable1"));
+            Assert.That(project.Tables[1].Csv, Is.EqualTo("Table1.csv"));
+            Assert.That(project.Tables[1].Output, Is.EqualTo("C:\\Temp\\Xa"));
         }
 
         [TestCase]
@@ -54,15 +46,15 @@ namespace Orc.DbToCsv.Tests
 </Project>".Replace('\'', '\"');
 
             var project = Project.Parse(xaml);
-            Assert.AreEqual("Data Source=.\\SQLExpress;Initial Catalog=RanttSaaS;Integrated Security=True;Pooling=False", project.ConnectionString.Value);
-            Assert.AreEqual(500, project.MaximumRowsInTable.Value);
-            Assert.AreEqual(2, project.Tables.Count);
-            Assert.AreEqual("MyTable1", project.Tables[0].Name);
-            Assert.AreEqual("Table.csv", project.Tables[0].Csv);
-            Assert.AreEqual(null, project.Tables[0].Output);
-            Assert.AreEqual("MyTable1", project.Tables[1].Name);
-            Assert.AreEqual("Table1.csv", project.Tables[1].Csv);
-            Assert.AreEqual("C:\\Temp\\Xa", project.Tables[1].Output);
+            Assert.That(project.ConnectionString.Value, Is.EqualTo("Data Source=.\\SQLExpress;Initial Catalog=RanttSaaS;Integrated Security=True;Pooling=False"));
+            Assert.That(project.MaximumRowsInTable.Value, Is.EqualTo(500));
+            Assert.That(project.Tables.Count, Is.EqualTo(2));
+            Assert.That(project.Tables[0].Name, Is.EqualTo("MyTable1"));
+            Assert.That(project.Tables[0].Csv, Is.EqualTo("Table.csv"));
+            Assert.That(project.Tables[0].Output, Is.EqualTo(string.Empty));
+            Assert.That(project.Tables[1].Name, Is.EqualTo("MyTable1"));
+            Assert.That(project.Tables[1].Csv, Is.EqualTo("Table1.csv"));
+            Assert.That(project.Tables[1].Output, Is.EqualTo("C:\\Temp\\Xa"));
         }
 
         [TestCase]
@@ -79,13 +71,12 @@ namespace Orc.DbToCsv.Tests
 </Project>".Replace('\'', '\"');
 
             var project = Project.Parse(xaml);
-            Assert.AreEqual("Data Source=.\\SQLExpress;Initial Catalog=RanttSaaS;Integrated Security=True;Pooling=False", project.ConnectionString.Value);
-            Assert.AreEqual(500, project.MaximumRowsInTable.Value);
-            Assert.AreEqual(2, project.Tables.Count);
-            Assert.AreEqual("MyTable1", project.Tables[0].Name);
-            Assert.AreEqual(null, project.Tables[0].Output);
-            Assert.AreEqual("MyTable2", project.Tables[1].Name);
+            Assert.That(project.ConnectionString.Value, Is.EqualTo("Data Source=.\\SQLExpress;Initial Catalog=RanttSaaS;Integrated Security=True;Pooling=False"));
+            Assert.That(project.MaximumRowsInTable.Value, Is.EqualTo(500));
+            Assert.That(project.Tables.Count, Is.EqualTo(2));
+            Assert.That(project.Tables[0].Name, Is.EqualTo("MyTable1"));
+            Assert.That(project.Tables[0].Output, Is.EqualTo(string.Empty));
+            Assert.That(project.Tables[1].Name, Is.EqualTo("MyTable2"));
         }
-        #endregion
     }
 }

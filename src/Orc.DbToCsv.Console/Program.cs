@@ -1,11 +1,4 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="Program.cs" company="WildGums">
-//   Copyright (c) 2008 - 2015 WildGums. All rights reserved.
-// </copyright>
-// --------------------------------------------------------------------------------------------------------------------
-
-
-namespace Orc.DbToCsv
+﻿namespace Orc.DbToCsv
 {
     using System;
     using System.IO;
@@ -25,29 +18,25 @@ namespace Orc.DbToCsv
         {
             InitializeLogManager();
 
-            var sqLiteProviderInfo = new DbProviderInfo
-            {
-                Name = "SQLite Data Provider",
-                InvariantName = "System.Data.SQLite",
-                Description = ".NET Framework Data Provider for SQLite",
-                AssemblyQualifiedName = "System.Data.SQLite.SQLiteFactory, System.Data.SQLite, Version=1.0.110.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139"
-            };
+            var sqLiteProviderInfo = new DbProviderInfo("SQLite Data Provider",
+                "System.Data.SQLite",
+                ".NET Framework Data Provider for SQLite",
+                "System.Data.SQLite.SQLiteFactory, System.Data.SQLite, Version=1.0.110.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139");
+
             DbProvider.RegisterProvider(sqLiteProviderInfo);
 
-            var oracleProviderInfo = new DbProviderInfo
-            {
-                Name = "ODP.NET, Managed Driver",
-                InvariantName = "Oracle.ManagedDataAccess.Client",
-                Description = "Oracle Data Provider for .NET, Managed Driver",
-                AssemblyQualifiedName = "Oracle.ManagedDataAccess.Client.OracleClientFactory, Oracle.ManagedDataAccess, Version=4.121.2.0, Culture=neutral, PublicKeyToken=89b483f429c47342"
-            };
+            var oracleProviderInfo = new DbProviderInfo("ODP.NET, Managed Driver",
+                "Oracle.ManagedDataAccess.Client",
+                "Oracle Data Provider for .NET, Managed Driver",
+                "Oracle.ManagedDataAccess.Client.OracleClientFactory, Oracle.ManagedDataAccess, Version=4.121.2.0, Culture=neutral, PublicKeyToken=89b483f429c47342");
+
             DbProvider.RegisterProvider(oracleProviderInfo);
 
             var commandLine = Environment.GetCommandLineArgs();
             var options = new Options();
             
             var serviceLocator = ServiceLocator.Default;
-            var commandLineParser = serviceLocator.ResolveType<ICommandLineParser>();
+            var commandLineParser = serviceLocator.ResolveRequiredType<ICommandLineParser>();
             var validationContext = commandLineParser.Parse(commandLine, options);
             if (validationContext.HasErrors)
             {
@@ -57,7 +46,7 @@ namespace Orc.DbToCsv
 
             if (options.IsHelp)
             {
-                var helpWriterService = serviceLocator.ResolveType<IHelpWriterService>();
+                var helpWriterService = serviceLocator.ResolveRequiredType<IHelpWriterService>();
                 foreach (var helpContent in helpWriterService.GetHelp(options))
                 {
                     Console.WriteLine(helpContent);
@@ -70,7 +59,7 @@ namespace Orc.DbToCsv
                 ? Project.LoadAsync(options.Project).GetAwaiter().GetResult()
                 : TryGetProjectAutomaticallyAsync().GetAwaiter().GetResult();
 
-            if (project == null)
+            if (project is null)
             {
                 Log.Warning("Unable to locate the project to process.");
                 Environment.Exit(1);
@@ -83,7 +72,7 @@ namespace Orc.DbToCsv
             project.ExportAsync().GetAwaiter().GetResult();
         }
 
-        private static async Task<Project> TryGetProjectAutomaticallyAsync()
+        private static async Task<Project?> TryGetProjectAutomaticallyAsync()
         {
             var directoryInfo = new DirectoryInfo(Directory.GetCurrentDirectory());
             var candidates = directoryInfo.GetFiles("*.iprj");

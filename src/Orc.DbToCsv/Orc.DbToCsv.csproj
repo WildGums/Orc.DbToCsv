@@ -28,7 +28,7 @@
     <PackageReference Include="Orc.Csv" Version="5.0.0" />
     <PackageReference Include="Orc.DataAccess" Version="5.0.0" />
     <PackageReference Include="Orc.ProjectManagement" Version="5.0.0" />
-    <PackageReference Include="System.Data.SqlClient" Version="4.8.5" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.6" />
   </ItemGroup>
 
   <Import Project="$(MSBuildProjectDirectory)\..\Directory.build.nullable.props" Condition="Exists('$(MSBuildProjectDirectory)\..\Directory.build.nullable.props')" />

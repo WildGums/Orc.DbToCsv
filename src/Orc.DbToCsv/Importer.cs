@@ -1,7 +1,6 @@
 ﻿namespace Orc.DbToCsv
 {
     using System;
-    using System.Data.SqlClient;
     using System.Globalization;
     using System.IO;
     using System.Linq;
@@ -9,6 +8,7 @@
     using Catel.Logging;
     using CsvHelper;
     using DataAccess.Database;
+    using Microsoft.Data.SqlClient;
 
     public static class Importer
     {

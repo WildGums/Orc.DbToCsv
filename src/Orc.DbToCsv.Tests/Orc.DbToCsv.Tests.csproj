@@ -1,4 +1,4 @@
-﻿<Project Sdk="MSBuild.Sdk.Extras">
+<Project Sdk="MSBuild.Sdk.Extras">
   <PropertyGroup>
     <TargetFrameworks>net8.0-windows</TargetFrameworks>
     <AssemblyName>Orc.DbToCsv.Tests</AssemblyName>
@@ -25,7 +25,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="PublicApiGenerator" Version="11.4.1" PrivateAssets="all" />
+    <PackageReference Include="PublicApiGenerator" Version="11.4.5" PrivateAssets="all" />
     <PackageReference Include="Verify.NUnit" Version="28.9.0" />
   </ItemGroup>
 

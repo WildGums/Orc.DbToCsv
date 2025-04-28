@@ -1,0 +1,50 @@
+<Project>
+  <!-- 
+    This file applies to projects when it gets imported explicitly using the line below:
+
+    <Import Project="$(MSBuildProjectDirectory)\..\Directory.Build.shared.wgapps.props" Condition="Exists('$(MSBuildProjectDirectory)\..\Directory.Build.shared.wgapps.props')" />
+  -->
+  
+  <PropertyGroup>
+    <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);IncludeProjectReferenceDlls</TargetsForTfmSpecificBuildOutput>
+    <PackageContainer>true</PackageContainer>
+  </PropertyGroup>
+
+  <!-- 
+	  Add a ref folder to the package which only exposes the library so that the referenced class library doesn't get exposed. 
+  -->
+  <ItemGroup>
+    <None Include="$(TargetPath)" PackagePath="ref/$(TargetFramework)" Pack="true" Condition="'$(TargetFramework)' != ''" />
+  </ItemGroup>
+  
+  <Target Name="IncludeProjectReferenceDlls" DependsOnTargets="BuildOnlySettings;ResolveReferences">
+    <ItemGroup>
+      <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths-&gt;WithMetadataValue('ReferenceSourceTarget', 'ProjectReference')-&gt;WithMetadataValue('PrivateAssets', 'All'))" />
+    </ItemGroup>
+  </Target>
+
+  <!-- 
+    Embed runtime required files
+  -->
+
+  <PropertyGroup>
+    <!-- Yes, self-contained for a dll -->
+    <SelfContained>true</SelfContained>
+    <IncludeAllContentForSelfExtract>false</IncludeAllContentForSelfExtract>
+    <ExtrasIncludeDefaultProjectBuildOutputInPackTarget>IncludeDefaultProjectBuildOutputInPack</ExtrasIncludeDefaultProjectBuildOutputInPackTarget>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProductManagerFiles Include="$(OutputPath)\$(TargetFrameworks)\**\*.deps.json" />
+  </ItemGroup>
+  
+  <Target Name="IncludeDefaultProjectBuildOutputInPack"
+          DependsOnTargets="_GetTargetFrameworksOutput">
+    <Message Text="$(TargetFrameworks)" Importance="high"/>
+    
+    <ItemGroup>
+      <None Include="@(ProductManagerFiles)" Pack="true" PackagePath="\" />
+    </ItemGroup>
+  </Target>
+
+</Project>

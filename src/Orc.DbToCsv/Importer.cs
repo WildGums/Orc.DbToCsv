@@ -76,12 +76,12 @@
 
             try
             {
-                if (File.Exists(fullFileName))
-                {
-                    File.Delete(fullFileName);
-                }
+                // Create a temporary file for writing data
+                var tempFileName = Path.Combine(
+                    outputFolderPath,
+                    $"{Path.GetFileNameWithoutExtension(fullFileName)}_temp_{Guid.NewGuid():N}{Path.GetExtension(fullFileName)}");
 
-                await using var streamWriter = new StreamWriter(new FileStream(fullFileName, FileMode.OpenOrCreate));
+                await using var streamWriter = new StreamWriter(new FileStream(tempFileName, FileMode.Create));
                 await using var csvWriter = new CsvWriter(streamWriter, CultureInfo.CurrentCulture);
                 using var dataReader = new SqlTableReader(source.ToString(), 0, project.MaximumRowsInTable.Value, exportDescription.Parameters);
                 while (true)
@@ -136,11 +136,43 @@
                     }
                 }
 
+                // Only replace the original file if we successfully read from the database
+                if (File.Exists(fullFileName))
+                {
+                    // Create a backup of the original file just in case
+                    var backupFileName = Path.Combine(
+                        outputFolderPath,
+                        $"{Path.GetFileNameWithoutExtension(fullFileName)}_backup_{DateTime.Now:yyyyMMddHHmmss}{Path.GetExtension(fullFileName)}");
+                    
+                    File.Copy(fullFileName, backupFileName, true);
+                    File.Delete(fullFileName);
+                }
+
+                // Move the temp file to the final destination
+                File.Move(tempFileName, fullFileName);
+                
                 Log.Info($"{records} records of '{source.Schema}' '{source.Table}' table successfully exported to {fullFileName}.");
             }
             catch (Exception ex)
             {
                 Log.Error($"{source.Table} export failed because of exception: {ex.Message}");
+                
+                // Clean up any temporary file if it exists
+                var tempFileName = Path.Combine(
+                    outputFolderPath,
+                    $"{Path.GetFileNameWithoutExtension(fullFileName)}_temp_{Guid.NewGuid():N}{Path.GetExtension(fullFileName)}");
+                
+                if (File.Exists(tempFileName))
+                {
+                    try
+                    {
+                        File.Delete(tempFileName);
+                    }
+                    catch (Exception deleteEx)
+                    {
+                        Log.Error($"Failed to delete temporary file: {deleteEx.Message}");
+                    }
+                }
             }
         }
     }

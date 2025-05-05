@@ -32,7 +32,13 @@
                     ProviderName = (string.IsNullOrWhiteSpace(table.Provider) ? project.Provider.Value : table.Provider) ?? string.Empty
                 };
 
-                databaseSource.SetProperty(nameof(DatabaseSource.TableType), table.TableType);
+                var tableType = table.TableType;
+                if (string.IsNullOrEmpty(tableType))
+                {
+                    tableType = nameof(TableType.Table);
+                }
+
+                databaseSource.SetProperty(nameof(DatabaseSource.TableType), tableType);
 
                 var outputFolderPath = (string.IsNullOrEmpty(table.Output) ? project.OutputFolder.Value : table.Output) ?? string.Empty;
                 var destinationFile = Path.Combine(outputFolderPath, table.Csv);

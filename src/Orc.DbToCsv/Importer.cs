@@ -25,10 +25,12 @@
         public static async Task ProcessProjectAsync(string projectFilePath, string outputFolderPath)
         {
             var project = await Project.LoadAsync(projectFilePath);
-            if (project is not null)
+            if (project is null)
             {
-                await ProcessProjectAsync(project);
+                throw Log.ErrorAndCreateException<InvalidOperationException>($"Failed to load project from path: {projectFilePath}");
             }
+            
+            await ProcessProjectAsync(project);
         }
 
         /// <summary>
@@ -37,6 +39,11 @@
         /// <param name="project">The project to process.</param>
         public static async Task ProcessProjectAsync(Project project)
         {
+            if (project is null)
+            {
+                throw Log.ErrorAndCreateException<ArgumentNullException>(nameof(project), "Project cannot be null");
+            }
+
             Log.Info("Project processing started ...");
 
             try
@@ -53,10 +60,12 @@
             catch (SqlException ex)
             {
                 Log.Error(ex.Message);
+                throw; // Rethrow to ensure error is propagated to caller
             }
             catch (Exception ex)
             {
                 Log.Error(ex);
+                throw; // Rethrow to ensure error is propagated to caller
             }
         }
 
@@ -95,11 +104,8 @@
                 // Clean up the temporary file we were writing to
                 CleanupTempFile(tempFileName);
                 
-                // Rethrow if this is a critical exception that needs to be handled upstream
-                if (ex is InvalidOperationException || ex is SqlException)
-                {
-                    throw;
-                }
+                // Rethrow all exceptions to ensure proper error propagation
+                throw Log.ErrorAndCreateException<InvalidOperationException>($"Failed to process table '{source.Table}'. See inner exception for details.", ex);
             }
         }
 
@@ -216,21 +222,29 @@
         /// <summary>
         /// Creates a backup of the original file (if it exists) and replaces it with the temp file.
         /// </summary>
+        /// <exception cref="IOException">Thrown when file operations fail</exception>
         private static void ReplaceOriginalWithTemp(string originalFilePath, string tempFilePath, string outputFolderPath)
         {
-            if (File.Exists(originalFilePath))
+            try
             {
-                // Create a backup of the original file
-                var backupFileName = Path.Combine(
-                    outputFolderPath,
-                    $"{Path.GetFileNameWithoutExtension(originalFilePath)}_backup_{DateTime.Now:yyyyMMddHHmmss}{Path.GetExtension(originalFilePath)}");
-                
-                File.Copy(originalFilePath, backupFileName, true);
-                File.Delete(originalFilePath);
-            }
+                if (File.Exists(originalFilePath))
+                {
+                    // Create a backup of the original file
+                    var backupFileName = Path.Combine(
+                        outputFolderPath,
+                        $"{Path.GetFileNameWithoutExtension(originalFilePath)}_backup_{DateTime.Now:yyyyMMddHHmmss}{Path.GetExtension(originalFilePath)}");
+                    
+                    File.Copy(originalFilePath, backupFileName, true);
+                    File.Delete(originalFilePath);
+                }
 
-            // Move the temp file to the final destination
-            File.Move(tempFilePath, originalFilePath);
+                // Move the temp file to the final destination
+                File.Move(tempFilePath, originalFilePath);
+            }
+            catch (Exception ex)
+            {
+                throw Log.ErrorAndCreateException<IOException>($"Failed to replace original file with temporary file. Original: {originalFilePath}, Temp: {tempFilePath}", ex);
+            }
         }
 
         /// <summary>

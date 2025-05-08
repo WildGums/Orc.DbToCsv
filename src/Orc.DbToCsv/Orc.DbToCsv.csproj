@@ -27,7 +27,7 @@
     <PackageReference Include="ModuleInit.Fody" Version="2.1.1" PrivateAssets="all" />
     <PackageReference Include="Obsolete.Fody" Version="5.3.1" PrivateAssets="all" />
     <PackageReference Include="Orc.Csv" Version="5.0.0" />
-    <PackageReference Include="Orc.DataAccess" Version="5.0.3" />
+    <PackageReference Include="Orc.DataAccess" Version="5.1.0" />
     <PackageReference Include="Orc.ProjectManagement" Version="5.1.2" />
   </ItemGroup>
 

@@ -19,6 +19,9 @@
         private MaximumRowsInTable? _maximumRowsInTable;
         private OutputFolder? _outputFolder;
         private Provider? _provider;
+        private BackupFileCount? _backupFileCount;
+        private BackupLocation? _backupLocation;
+        private BackupFormat? _backupFormat;
 
         public Project()
         {
@@ -49,6 +52,21 @@
         public OutputFolder OutputFolder
         {
             get { return _outputFolder ?? (_outputFolder = Properties.FindTypeOrCreateNew(() => new OutputFolder())); }
+        }
+
+        public BackupFileCount BackupFileCount
+        {
+            get { return _backupFileCount ?? (_backupFileCount = Properties.FindTypeOrCreateNew(() => new BackupFileCount())); }
+        }
+
+        public BackupLocation BackupLocation
+        {
+            get { return _backupLocation ?? (_backupLocation = Properties.FindTypeOrCreateNew(() => new BackupLocation())); }
+        }
+
+        public BackupFormat BackupFormat
+        {
+            get { return _backupFormat ?? (_backupFormat = Properties.FindTypeOrCreateNew(() => new BackupFormat())); }
         }
 
         public List<Table> Tables { get; set; }
@@ -91,6 +109,12 @@
                 Log.Info("Loaded project from '{0}'", Path.GetFullPath(path));
                 Log.Info("Connection string: '{0}'", result.ConnectionString.Value);
                 Log.Info("Maximum rows in table: '{0}'", result.MaximumRowsInTable.Value);
+                Log.Info("Backup file count: '{0}'", result.BackupFileCount.Value);
+                if (!string.IsNullOrEmpty(result.BackupLocation.Value))
+                {
+                    Log.Info("Backup location: '{0}'", result.BackupLocation.Value);
+                }
+                Log.Info("Backup format: '{0}'", result.BackupFormat.Value);
                 Log.Info("Tables to convert '{0}':", result.Tables.Count);
                 Log.IndentLevel += 2;
 

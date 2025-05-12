@@ -1,0 +1,22 @@
+<Project xmlns="http://schemas.wildgums.com/orc/dbtocsv">
+  <ConnectionString>Data Source=.\SQLExpress;Initial Catalog=SampleDB;Integrated Security=True;Pooling=False</ConnectionString>
+  <MaximumRowsInTable>1000</MaximumRowsInTable>
+  <OutputFolder>C:\Temp\Exports</OutputFolder>
+  
+  <!-- Backup Configuration -->
+  
+  <!-- Keep 3 most recent backups for each table -->
+  <BackupFileCount>3</BackupFileCount>
+  
+  <!-- Store backups in a dedicated 'Backups' folder (relative to output folder) -->
+  <BackupLocation>Backups</BackupLocation>
+  
+  <!-- Custom backup filename format -->
+  <BackupFormat>{filename}_backup_{timestamp}{extension}</BackupFormat>
+  
+  <Project.Tables>
+    <Table Name="dbo.Customers" Csv="Customers.csv"/>
+    <Table Name="dbo.Orders" Csv="Orders.csv"/>
+    <Table Name="dbo.Products" Csv="Products.csv"/>
+  </Project.Tables>
+</Project>

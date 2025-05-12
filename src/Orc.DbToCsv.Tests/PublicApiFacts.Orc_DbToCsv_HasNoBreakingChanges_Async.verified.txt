@@ -7,6 +7,21 @@ public static class ModuleInitializer
 }
 namespace Orc.DbToCsv
 {
+    [System.Windows.Markup.ContentProperty("Value")]
+    public class BackupFileCount : Orc.DbToCsv.Int32ProjectProperty
+    {
+        public BackupFileCount() { }
+    }
+    [System.Windows.Markup.ContentProperty("Value")]
+    public class BackupFormat : Orc.DbToCsv.StringProjectProperty
+    {
+        public BackupFormat() { }
+    }
+    [System.Windows.Markup.ContentProperty("Value")]
+    public class BackupLocation : Orc.DbToCsv.StringProjectProperty
+    {
+        public BackupLocation() { }
+    }
     public class ConnectionString : Orc.DbToCsv.StringProjectProperty
     {
         public ConnectionString() { }
@@ -47,6 +62,9 @@ namespace Orc.DbToCsv
     public class Project
     {
         public Project() { }
+        public Orc.DbToCsv.BackupFileCount BackupFileCount { get; }
+        public Orc.DbToCsv.BackupFormat BackupFormat { get; }
+        public Orc.DbToCsv.BackupLocation BackupLocation { get; }
         public Orc.DbToCsv.ConnectionString ConnectionString { get; }
         public Orc.DbToCsv.MaximumRowsInTable MaximumRowsInTable { get; }
         public Orc.DbToCsv.OutputFolder OutputFolder { get; }

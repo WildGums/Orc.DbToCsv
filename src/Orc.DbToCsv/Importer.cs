@@ -93,7 +93,7 @@
                     exportDescription.Parameters ?? new DataAccess.DataSourceParameters());
                 
                 // Only replace the original file if database export was successful
-                ReplaceOriginalWithTemp(fullFileName, tempFileName, outputFolderPath);
+                ReplaceOriginalWithTemp(fullFileName, tempFileName, outputFolderPath, project);
                 
                 Log.Info($"{records} records of '{source.Schema}' '{source.Table}' table successfully exported to {fullFileName}.");
             }
@@ -220,30 +220,82 @@
         }
 
         /// <summary>
-        /// Creates a backup of the original file (if it exists) and replaces it with the temp file.
+        /// Creates a backup of the original file (if configured) and replaces it with the temp file.
         /// </summary>
         /// <exception cref="IOException">Thrown when file operations fail</exception>
-        private static void ReplaceOriginalWithTemp(string originalFilePath, string tempFilePath, string outputFolderPath)
+        private static void ReplaceOriginalWithTemp(string originalFilePath, string tempFilePath, string outputFolderPath, Project project)
         {
+            string? backupFilePath = null;
+            bool originalFileExisted = File.Exists(originalFilePath);
+            
             try
             {
-                if (File.Exists(originalFilePath))
+                if (originalFileExisted)
                 {
-                    // Create a backup of the original file
-                    var backupFileName = Path.Combine(
-                        outputFolderPath,
-                        $"{Path.GetFileNameWithoutExtension(originalFilePath)}_backup_{DateTime.Now:yyyyMMddHHmmss}{Path.GetExtension(originalFilePath)}");
+                    // Create a backup according to project settings, and store the backup path
+                    backupFilePath = BackupManager.CreateBackup(originalFilePath, project);
                     
-                    File.Copy(originalFilePath, backupFileName, true);
+                    // Delete the original file after backup is created
                     File.Delete(originalFilePath);
                 }
 
-                // Move the temp file to the final destination
-                File.Move(tempFilePath, originalFilePath);
+                try
+                {
+                    // Move the temp file to the final destination
+                    File.Move(tempFilePath, originalFilePath);
+                    
+                    // Log successful file replacement
+                    Log.Debug($"Successfully replaced original file with temporary file. Path: {originalFilePath}");
+                }
+                catch (Exception moveEx)
+                {
+                    // Attempt to restore the original file if we have a backup
+                    if (originalFileExisted && !string.IsNullOrEmpty(backupFilePath) && File.Exists(backupFilePath))
+                    {
+                        try
+                        {
+                            // Copy the backup back to the original location
+                            File.Copy(backupFilePath, originalFilePath, true);
+                            Log.Warning($"Restored original file from backup after import failure: {originalFilePath}");
+                        }
+                        catch (Exception restoreEx)
+                        {
+                            Log.Error($"Failed to restore original file from backup: {restoreEx.Message}");
+                        }
+                    }
+                    
+                    // Clean up the temporary file
+                    CleanupTempFile(tempFilePath);
+                    
+                    throw Log.ErrorAndCreateException<IOException>(
+                        $"Failed to move temporary file to destination. Original file has been restored. Temp: {tempFilePath}, Destination: {originalFilePath}",
+                        moveEx);
+                }
             }
             catch (Exception ex)
             {
-                throw Log.ErrorAndCreateException<IOException>($"Failed to replace original file with temporary file. Original: {originalFilePath}, Temp: {tempFilePath}", ex);
+                // If the exception occurred after backup was created but before the original was deleted,
+                // or in any unexpected case, try to restore from backup if it's available
+                if (originalFileExisted && !File.Exists(originalFilePath) &&
+                    !string.IsNullOrEmpty(backupFilePath) && File.Exists(backupFilePath))
+                {
+                    try
+                    {
+                        File.Copy(backupFilePath, originalFilePath, true);
+                        Log.Warning($"Restored original file from backup after exception: {originalFilePath}");
+                    }
+                    catch (Exception restoreEx)
+                    {
+                        Log.Error($"Failed to restore original file from backup: {restoreEx.Message}");
+                    }
+                }
+                
+                // Always clean up the temporary file if it exists
+                CleanupTempFile(tempFilePath);
+                
+                throw Log.ErrorAndCreateException<IOException>(
+                    $"Failed to replace original file with temporary file. Original: {originalFilePath}, Temp: {tempFilePath}",
+                    ex);
             }
         }
 

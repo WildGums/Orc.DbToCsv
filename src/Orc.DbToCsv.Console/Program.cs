@@ -1,6 +1,7 @@
 ﻿namespace Orc.DbToCsv
 {
     using System;
+    using System.Data.Common;
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
@@ -8,6 +9,7 @@
     using Catel.Logging;
     using CommandLine;
     using DataAccess.Database;
+    using Microsoft.Data.SqlClient;
 
     internal class Program
     {
@@ -31,12 +33,13 @@
 
             DbProvider.RegisterProvider(oracleProviderInfo);
 
-            var commandLine = Environment.GetCommandLineArgs();
+            DbProviderFactories.RegisterFactory("Microsoft.Data.SqlClient", SqlClientFactory.Instance);
+            
             var options = new Options();
             
             var serviceLocator = ServiceLocator.Default;
             var commandLineParser = serviceLocator.ResolveRequiredType<ICommandLineParser>();
-            var validationContext = commandLineParser.Parse(commandLine, options);
+            var validationContext = commandLineParser.Parse(args, options);
             if (validationContext.HasErrors)
             {
                 Console.WriteLine(validationContext.GetErrors().First().Message);

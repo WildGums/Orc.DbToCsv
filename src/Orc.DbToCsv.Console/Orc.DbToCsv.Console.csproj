@@ -37,6 +37,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="DetailData.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="ImportData.iprj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Sample.iprj">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

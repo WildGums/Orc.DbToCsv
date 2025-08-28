@@ -1,6 +1,6 @@
 @echo off
 echo ===============================================
-echo CSV Data Import Tool
+echo CSV Data Import Tool - APPEND MODE
 echo ===============================================
 echo.
 echo This batch file will import DetailData.csv and ERPData.csv into your database.
@@ -10,18 +10,18 @@ echo Files to import:
 echo - DetailData.csv (structural steel manufacturing details)
 echo - ERPData.csv (project management and workflow information)
 echo.
-echo Tables will be TRUNCATED before importing (existing data will be cleared).
+echo APPEND MODE: Data will be added to existing tables (no truncate).
 echo.
 pause
 echo.
-echo Starting CSV import...
+echo Starting CSV import (append mode)...
 echo.
-Orc.DbToCsv.Console.exe "ImportData.iprj" -i -t
+Orc.DbToCsv.Console.exe "ImportData.iprj" -i true
 echo.
 if %errorlevel% neq 0 (
     echo ERROR: Import failed!
 ) else (
-    echo SUCCESS: Data imported successfully!
+    echo SUCCESS: Data appended successfully!
 )
 echo.
 pause

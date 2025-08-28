@@ -9,7 +9,9 @@ All import files are located in the `Data/` directory:
 - **`DetailData.csv`** - Structural steel manufacturing details (31 columns, ~70 rows)
 - **`ERPData.csv`** - Project management and workflow information (19 columns, ~8 rows)
 - **`ImportData.iprj`** - Project configuration file for the import
-- **`ImportData.bat`** - Batch script to run the import
+- **`ImportData.bat`** - Batch script to run import with truncate (replace mode)
+- **`ImportData_Append.bat`** - Batch script to run import without truncate (append mode)
+- **`Orc.DbToCsv.Console.exe`** - Published console application
 - **`CreateTables.sql`** - SQL script to create the required database tables
 - **`IMPORT_INSTRUCTIONS.md`** - This instruction file
 
@@ -50,12 +52,14 @@ All import files are located in the `Data/` directory:
 ### 3. Run the Import
 
 1. Navigate to the `Data/` directory
-2. Double-click `ImportData.bat` to start the import process
-2. The script will:
-   - Build the project
-   - Import both CSV files
-   - Truncate existing data before importing (clears tables first)
+2. Choose your import mode:
+   - **`ImportData.bat`** - Truncates tables first (clears existing data)
+   - **`ImportData_Append.bat`** - Appends to existing data (no truncate)
+3. Double-click the chosen batch file
+4. The script will:
+   - Import both CSV files using the published .exe
    - Show progress and results
+   - No build required (uses pre-compiled executable)
 
 ## What Gets Imported
 
@@ -93,20 +97,23 @@ All import files are located in the `Data/` directory:
 
 ### Manual Import Commands:
 
-If the batch file doesn't work, you can run the commands manually:
+If the batch file doesn't work, you can run the commands manually from the Data directory:
 
 ```bash
 # Navigate to Data directory first
 cd Data
 
-# Build the project
-dotnet build ..\src\Orc.DbToCsv.sln --configuration Release
-
 # Import without truncate (append mode)
-dotnet run --project ..\src\Orc.DbToCsv.Console\Orc.DbToCsv.Console.csproj --framework net8.0-windows -- --project "ImportData.iprj" --import
+Orc.DbToCsv.Console.exe "ImportData.iprj" -i
 
 # Import with truncate (replace mode - recommended)
-dotnet run --project ..\src\Orc.DbToCsv.Console\Orc.DbToCsv.Console.csproj --framework net8.0-windows -- --project "ImportData.iprj" --import --truncate
+Orc.DbToCsv.Console.exe "ImportData.iprj" -i -t
+
+# Export data back to CSV (reverse operation)
+Orc.DbToCsv.Console.exe "ImportData.iprj"
+
+# Show help (if available)
+Orc.DbToCsv.Console.exe -?
 ```
 
 ## Data Verification

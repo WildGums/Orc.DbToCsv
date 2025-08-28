@@ -1,4 +1,4 @@
-namespace Orc.DbToCsv
+﻿namespace Orc.DbToCsv
 {
     using System;
     using System.Collections.Generic;
@@ -127,7 +127,7 @@ namespace Orc.DbToCsv
             Log.Info($"Table {tableName} truncated successfully");
         }
 
-        private static async Task ImportCsvDataAsync(DbConnection connection, string csvFilePath, DatabaseSource target)
+        private static void ImportCsvDataAsync(DbConnection connection, string csvFilePath, DatabaseSource target)
         {
             var config = new CsvConfiguration(CultureInfo.InvariantCulture)
             {

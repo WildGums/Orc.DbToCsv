@@ -1,0 +1,9 @@
+ScopeId,Phase,Stage,SalesOrder,OnHold,AssignedTo,Customer,DeliveryAddress,Workflow,PromisedDate,RequestedDate,Deadline,Label,TotalWeightKg,SoValue,EstimatedFabricationTime,EstimatedComponents,EstimatedAssemblies,Title
+3,Allocate for Production,Waiting,J156009,0,FALSE,Clarendon Homes (NSW) Pty Limited,"[CASH SALE] Lot 10, 6 Kawana Close",Primed Structural,NULL,NULL,7/01/2025,NULL,3568.016584,19127.18,376,25,29,Allocate for Production
+3,Delivery,Waiting,J156009,0,FALSE,Clarendon Homes (NSW) Pty Limited,"[CASH SALE] Lot 10, 6 Kawana Close",Primed Structural,NULL,NULL,7/01/2025,NULL,3568.016584,19127.18,376,25,29,Delivery
+3,Drafting & Plans,Ready,J156009,0,Gideon Yulip,Clarendon Homes (NSW) Pty Limited,"[CASH SALE] Lot 10, 6 Kawana Close",Primed Structural,NULL,NULL,7/02/2025,RAPTOR,3568.016584,19127.18,376,25,29,Drafting & Plans
+3,Fabrication of Material,Waiting,J156009,0,FALSE,Clarendon Homes (NSW) Pty Limited,"[CASH SALE] Lot 10, 6 Kawana Close",Primed Structural,NULL,NULL,7/01/2025,NULL,3568.016584,19127.18,376,25,29,Fabrication
+3,Processing of Materials,Waiting,J156009,0,FALSE,Clarendon Homes (NSW) Pty Limited,"[CASH SALE] Lot 10, 6 Kawana Close",Primed Structural,NULL,NULL,7/01/2025,NULL,3568.016584,19127.18,376,25,29,Processing of Materials
+3,Procurement,Waiting,J156009,0,FALSE,Clarendon Homes (NSW) Pty Limited,"[CASH SALE] Lot 10, 6 Kawana Close",Primed Structural,NULL,NULL,7/01/2025,NULL,3568.016584,19127.18,376,25,29,Procurement
+3,Programming,Waiting,J156009,0,FALSE,Clarendon Homes (NSW) Pty Limited,"[CASH SALE] Lot 10, 6 Kawana Close",Primed Structural,NULL,NULL,7/01/2025,NULL,3568.016584,19127.18,376,25,29,Programming
+3,QA,Waiting,J156009,0,FALSE,Clarendon Homes (NSW) Pty Limited,"[CASH SALE] Lot 10, 6 Kawana Close",Primed Structural,NULL,NULL,7/01/2025,NULL,3568.016584,19127.18,376,25,29,QA

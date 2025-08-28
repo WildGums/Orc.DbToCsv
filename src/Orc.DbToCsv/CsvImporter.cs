@@ -192,7 +192,10 @@
                     for (int i = 0; i < headers.Length; i++)
                     {
                         var value = csv.GetField(i);
-                        parameters[i].Value = string.IsNullOrWhiteSpace(value) ? DBNull.Value : value;
+                        // Convert NULL text, empty strings, and whitespace to DBNull
+                        parameters[i].Value = (string.IsNullOrWhiteSpace(value) || value.Equals("NULL", StringComparison.OrdinalIgnoreCase)) 
+                            ? DBNull.Value 
+                            : value;
                     }
 
                     await insertCommand.ExecuteNonQueryAsync();

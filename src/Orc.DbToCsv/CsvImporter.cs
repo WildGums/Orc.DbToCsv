@@ -127,7 +127,7 @@
             Log.Info($"Table {tableName} truncated successfully");
         }
 
-        private static void ImportCsvDataAsync(DbConnection connection, string csvFilePath, DatabaseSource target)
+        private static async Task ImportCsvDataAsync(DbConnection connection, string csvFilePath, DatabaseSource target)
         {
             var config = new CsvConfiguration(CultureInfo.InvariantCulture)
             {

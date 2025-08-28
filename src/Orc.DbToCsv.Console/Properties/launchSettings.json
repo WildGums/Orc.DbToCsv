@@ -1,8 +1,7 @@
 {
   "profiles": {
     "Orc.DbToCsv.Console": {
-      "commandName": "Project",
-      "commandLineArgs": "\"ImportData.iprj\" -i true"
+      "commandName": "Project"
     }
   }
 }

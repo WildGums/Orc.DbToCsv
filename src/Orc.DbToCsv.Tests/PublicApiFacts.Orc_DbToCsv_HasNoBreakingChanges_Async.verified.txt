@@ -11,6 +11,19 @@ namespace Orc.DbToCsv
     {
         public ConnectionString() { }
     }
+    public static class CsvImporter
+    {
+        public static System.Threading.Tasks.Task ProcessProjectAsync(Orc.DbToCsv.Project project) { }
+        public static System.Threading.Tasks.Task ProcessProjectAsync(string projectFilePath) { }
+    }
+    public class CsvToDbImportDescription
+    {
+        public CsvToDbImportDescription() { }
+        public string? CsvFilePath { get; set; }
+        public Orc.DataAccess.DataSourceParameters? Parameters { get; set; }
+        public Orc.DataAccess.Database.DatabaseSource? Target { get; set; }
+        public bool TruncateTable { get; set; }
+    }
     public class DbToCsvExportDescription
     {
         public DbToCsvExportDescription() { }
@@ -61,7 +74,9 @@ namespace Orc.DbToCsv
     public static class ProjectExtensions
     {
         public static System.Threading.Tasks.Task ExportAsync(this Orc.DbToCsv.Project project) { }
+        public static System.Collections.Generic.IList<Orc.DbToCsv.CsvToDbImportDescription> GetCsvToDbImportDescriptions(this Orc.DbToCsv.Project project) { }
         public static System.Collections.Generic.IList<Orc.DbToCsv.DbToCsvExportDescription> GetDbToCsvExportDescriptions(this Orc.DbToCsv.Project project) { }
+        public static System.Threading.Tasks.Task ImportAsync(this Orc.DbToCsv.Project project) { }
     }
     public class ProjectProperty
     {
@@ -92,5 +107,6 @@ namespace Orc.DbToCsv
         public string Provider { get; set; }
         public string Schema { get; set; }
         public string TableType { get; set; }
+        public bool TruncateTable { get; set; }
     }
 }

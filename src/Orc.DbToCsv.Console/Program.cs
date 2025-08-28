@@ -13,7 +13,6 @@
     {
         private static readonly ILog Log = LogManager.GetCurrentClassLogger();
 
-        #region Methods
         private static void Main(string[] args)
         {
             InitializeLogManager();
@@ -69,7 +68,27 @@
                 options.OutputFolder = project.OutputFolder.Value;
             }
 
-            project.ExportAsync().GetAwaiter().GetResult();
+            // Apply truncate option to all tables if specified
+            if (options is { TruncateTables: true, ImportMode: true })
+            {
+                foreach (var table in project.Tables)
+                {
+                    table.TruncateTable = true;
+                }
+                Log.Info("Truncate option enabled for all tables");
+            }
+
+            // Choose operation based on mode
+            if (options.ImportMode)
+            {
+                Log.Info("Running in import mode: CSV → Database");
+                project.ImportAsync().GetAwaiter().GetResult();
+            }
+            else
+            {
+                Log.Info("Running in export mode: Database → CSV");
+                project.ExportAsync().GetAwaiter().GetResult();
+            }
         }
 
         private static async Task<Project?> TryGetProjectAutomaticallyAsync()
@@ -86,7 +105,7 @@
                 }
                 catch
                 {
-                    continue;
+                    // ignored
                 }
             }
 
@@ -97,7 +116,5 @@
             LogManager.IgnoreCatelLogging = true;
             LogManager.AddListener(new BriefConsoleLogger());
         }
-
-        #endregion
     }
 }

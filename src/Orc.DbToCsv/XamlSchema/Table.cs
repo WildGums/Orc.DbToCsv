@@ -22,6 +22,7 @@
         public string Output { get; set; }
         public string ConnectionString { get; set; }
         public string Provider { get; set; } = "System.Data.SqlClient";
+        public bool TruncateTable { get; set; } = false;
         public List<Parameter> Parameters { get; set; }
     }
 }

@@ -17,6 +17,13 @@
             return Importer.ProcessProjectAsync(project);
         }
 
+        public static Task ImportAsync(this Project project)
+        {
+            ArgumentNullException.ThrowIfNull(project);
+
+            return CsvImporter.ProcessProjectAsync(project);
+        }
+
         public static IList<DbToCsvExportDescription> GetDbToCsvExportDescriptions(this Project project)
         {
             ArgumentNullException.ThrowIfNull(project);
@@ -53,6 +60,45 @@
             }
 
             return dbToCsvExportDescriptions;
+        }
+
+        public static IList<CsvToDbImportDescription> GetCsvToDbImportDescriptions(this Project project)
+        {
+            ArgumentNullException.ThrowIfNull(project);
+
+            var csvToDbImportDescriptions = new List<CsvToDbImportDescription>();
+            foreach (var table in project.Tables)
+            {
+                var databaseTarget = new DatabaseSource
+                {
+                    Schema = (string.IsNullOrWhiteSpace(table.Schema) ? project.Schema.Value : table.Schema) ?? string.Empty,
+                    Table = table.Name,
+                    ConnectionString = (string.IsNullOrWhiteSpace(table.ConnectionString) ? project.ConnectionString.Value : table.ConnectionString) ?? string.Empty,
+                    ProviderName = (string.IsNullOrWhiteSpace(table.Provider) ? project.Provider.Value : table.Provider) ?? string.Empty
+                };
+
+                databaseTarget.SetProperty(nameof(DatabaseSource.TableType), table.TableType);
+
+                var outputFolderPath = (string.IsNullOrEmpty(table.Output) ? project.OutputFolder.Value : table.Output) ?? string.Empty;
+                var sourceFile = Path.Combine(outputFolderPath, table.Csv);
+
+                csvToDbImportDescriptions.Add(new CsvToDbImportDescription
+                {
+                    CsvFilePath = sourceFile,
+                    Target = databaseTarget,
+                    TruncateTable = table.TruncateTable,
+                    Parameters = new DataSourceParameters
+                    {
+                        Parameters = table.Parameters.Select(x => new DataSourceParameter
+                        {
+                            Name = x.Name ?? throw new InvalidOperationException("Cannot handle null parameter"),
+                            Value = x.Value
+                        }).ToList()
+                    },
+                });
+            }
+
+            return csvToDbImportDescriptions;
         }
     }
 }

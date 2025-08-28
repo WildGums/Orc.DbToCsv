@@ -1,0 +1,35 @@
+﻿<Project xmlns="http://wildgums/2015">
+  <ConnectionString>Data Source=.\SQLExpress;Initial Catalog=TestDatabase;Integrated Security=True;Pooling=False</ConnectionString>
+  <MaximumRowsInTable>0</MaximumRowsInTable>
+  <OutputFolder>C:\temp\csv</OutputFolder>
+  <Provider>System.Data.SqlClient</Provider>
+  
+  <Project.Tables>
+  
+    <!-- Sample table import with truncate enabled -->
+    <Table Name="Customers"
+           TableType="Table"
+           Csv="customers.csv"
+           Output="C:\temp\csv\"
+           TruncateTable="true"
+           Schema="dbo"/>
+           
+    <!-- Sample table import without truncate (append mode) -->
+    <Table Name="Orders"
+           TableType="Table"
+           Csv="orders.csv"
+           Output="C:\temp\csv\"
+           TruncateTable="false"
+           Schema="dbo"/>
+           
+    <!-- Sample with different connection string -->
+    <Table Name="Products"
+           TableType="Table"
+           Csv="products.csv"
+           Output="C:\temp\csv\"
+           TruncateTable="true"
+           Schema="dbo"
+           ConnectionString="Data Source=.\SQLExpress;Initial Catalog=ProductDB;Integrated Security=True;Pooling=False"/>
+  
+  </Project.Tables>
+</Project>

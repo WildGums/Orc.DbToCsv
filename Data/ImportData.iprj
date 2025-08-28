@@ -1,0 +1,33 @@
+﻿<Project xmlns="http://wildgums/2015">
+  <!-- TODO: Replace this connection string with your actual database connection string -->
+  <ConnectionString>Data Source=YOUR_SERVER;Initial Catalog=YOUR_DATABASE;Integrated Security=True;Pooling=False</ConnectionString>
+  <MaximumRowsInTable>0</MaximumRowsInTable>
+  <OutputFolder>.</OutputFolder>
+  <Provider>System.Data.SqlClient</Provider>
+  
+  <Project.Tables>
+  
+    <!-- DetailData Table Import -->
+    <Table Name="DetailData"
+           TableType="Table"
+           Csv="DetailData.csv"
+           Output=".\"
+           TruncateTable="true"
+           Schema="dbo">
+      <!-- DetailData contains manufacturing details for structural steel components -->
+      <!-- Columns: Assembly,AssyKg,AssyLength,AssyQty,BlackPregal,Cope,CutLength,Description,FabRqd,Finish,HasHoles,KgPerProfile,KgTotal,Mitre,ParentPart,Part,PartType,ProcessNote,Profile,QtyPerAssy,QtyTotal,Revision,SalesOrder,ScopeId,SideCleat,Splay,StdPart,Stock,SurfaceArea,Welding,WSBs -->
+    </Table>
+           
+    <!-- ERPData Table Import -->
+    <Table Name="ERPData"
+           TableType="Table"
+           Csv="ERPData.csv"
+           Output=".\"
+           TruncateTable="true"
+           Schema="dbo">
+      <!-- ERPData contains project management and workflow information -->
+      <!-- Columns: ScopeId,Phase,Stage,SalesOrder,OnHold,AssignedTo,Customer,DeliveryAddress,Workflow,PromisedDate,RequestedDate,Deadline,Label,TotalWeightKg,SoValue,EstimatedFabricationTime,EstimatedComponents,EstimatedAssemblies,Title -->
+    </Table>
+  
+  </Project.Tables>
+</Project>

@@ -3,6 +3,7 @@
 [assembly: System.Windows.Markup.XmlnsPrefix("http://schemas.wildgums.com/orc/dbtocsv", "orcdbtocsv")]
 public static class ModuleInitializer
 {
+    [System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize() { }
 }
 namespace Orc.DbToCsv
